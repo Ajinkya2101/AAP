@@ -1,0 +1,62 @@
+{
+ "sha256": "cf027e609d4200b65a67af38fba8d2113253a1120c43ac4b36733011fb59b037",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Moore and Sons LLC",
+  "vendor_address": "0344 Jones Fort Suite 936, East Aaronmouth, NY 15544",
+  "vendor_tax_id": "20-9427765",
+  "vendor_email": "ar@moore-and-sons.example",
+  "vendor_phone": "(611) 239-5486",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-41791",
+  "invoice_date": "09/13/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "60 days net",
+  "currency": "$",
+  "subtotal": "$10,147.90",
+  "tax_label": "Sales tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$900.63",
+  "freight_amount": null,
+  "total": "$11,048.53",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "PR Agency Retainer On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$10,147.90",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30066,
+  "vendor_site_id": 7058,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "11048.53",
+  "subtotal": "10147.90",
+  "tax_amount": "900.63",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

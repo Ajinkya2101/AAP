@@ -1,0 +1,62 @@
+{
+ "sha256": "ac2c3b579bc624611c019db3354bb245d4680bbe27a9485de9b32395c9adbcd9",
+ "generator": "tools.invoicegen",
+ "layout": "rechnung",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Tailspin Precision GmbH",
+  "vendor_address": "Heilbronner Str. 150, 70191 Stuttgart, Germany",
+  "vendor_tax_id": "DE287445193",
+  "vendor_email": "rechnung@tailspin-precision.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "TSP-2026-0917",
+  "invoice_date": "17.09.2026",
+  "due_date": null,
+  "po_number": "4500162",
+  "payment_terms": "45 Tage netto",
+  "currency": "EUR",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "3.400,00 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "TSP-4410 Praezisionssensor",
+    "item_code": null,
+    "quantity": "40",
+    "uom": null,
+    "unit_price": "85,00 €",
+    "amount": "3.400,00 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": "S8",
+  "vendor_id": 30308,
+  "vendor_site_id": 7285,
+  "org_id": 204,
+  "po_number": "4500162",
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "3400.00",
+  "subtotal": "3400.00",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "notes": "EUR invoice to the US OU; reverse charge (no tax line)."
+ }
+}

@@ -1,0 +1,14 @@
+-- Mock Oracle EBS: owner schemas (plan 3.1).
+-- Placeholders expanded by aap.ebs_mock.ddl_loader in the other files:
+--   WHO placeholder -> the five EBS WHO columns
+--   DFF placeholder -> ATTRIBUTE_CATEGORY, ATTRIBUTE1..ATTRIBUTE15
+CREATE SCHEMA IF NOT EXISTS fnd;   -- APPLSYS
+CREATE SCHEMA IF NOT EXISTS hr;
+CREATE SCHEMA IF NOT EXISTS gl;
+CREATE SCHEMA IF NOT EXISTS hz;    -- AR (TCA)
+CREATE SCHEMA IF NOT EXISTS iby;
+CREATE SCHEMA IF NOT EXISTS zx;
+CREATE SCHEMA IF NOT EXISTS ap;
+CREATE SCHEMA IF NOT EXISTS po;
+CREATE SCHEMA IF NOT EXISTS inv;
+CREATE SCHEMA IF NOT EXISTS apps;

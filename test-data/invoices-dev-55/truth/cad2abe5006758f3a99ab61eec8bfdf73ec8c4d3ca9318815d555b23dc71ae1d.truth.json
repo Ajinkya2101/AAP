@@ -1,0 +1,73 @@
+{
+ "sha256": "cad2abe5006758f3a99ab61eec8bfdf73ec8c4d3ca9318815d555b23dc71ae1d",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Andrews-Haney",
+  "vendor_address": "90974 Catherine Knoll Apt. 394, Andrewfurt, GA 89336",
+  "vendor_tax_id": "30-2847769",
+  "vendor_email": "billing@andrews-haney.example",
+  "vendor_phone": "(322) 569-2389",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-43299",
+  "invoice_date": "September 16, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "$",
+  "subtotal": "$1,227.48",
+  "tax_label": "Sales tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$88.99",
+  "freight_amount": null,
+  "total": "$1,316.47",
+  "bank_account": "368350617156",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "500 Mbps Dedicated Internet On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$1,193.10",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Unlimited Mobile Plan Reserved",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$34.38",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30081,
+  "vendor_site_id": 7075,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "1316.47",
+  "subtotal": "1227.48",
+  "tax_amount": "88.99",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

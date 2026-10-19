@@ -1,0 +1,83 @@
+{
+ "sha256": "1340d5c01c110e4b1f0bfc11764e9b08e5934fd6fb3909b030b57c51adb3d451",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Pearson Moon and White LLC",
+  "vendor_address": "5655 Mia Isle, Waltersfort, MA 54456",
+  "vendor_tax_id": "95-3019210",
+  "vendor_email": "invoices@pearson-moon-and-white.example",
+  "vendor_phone": "(302) 276-9955",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "82076",
+  "invoice_date": "09/17/2026",
+  "due_date": null,
+  "po_number": "4501056",
+  "payment_terms": null,
+  "currency": "$",
+  "subtotal": "$9,853.04",
+  "tax_label": "Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$874.46",
+  "freight_amount": null,
+  "total": "$10,727.50",
+  "bank_account": "793565594698",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Microsoft 365 Annual Subscription On-Demand",
+    "item_code": null,
+    "quantity": "6",
+    "uom": "lic",
+    "unit_price": "235.25",
+    "amount": "$1,411.50",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Microsoft 365 Annual Subscription Premium",
+    "item_code": null,
+    "quantity": "6",
+    "uom": "License",
+    "unit_price": "$371.99",
+    "amount": "$2,231.94",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Premier Support Support Renewal Tier 2",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "6,209.60",
+    "amount": "$6,209.60",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30073,
+  "vendor_site_id": 7061,
+  "org_id": 204,
+  "po_number": "4501056",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "10727.50",
+  "subtotal": "9853.04",
+  "tax_amount": "874.46",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

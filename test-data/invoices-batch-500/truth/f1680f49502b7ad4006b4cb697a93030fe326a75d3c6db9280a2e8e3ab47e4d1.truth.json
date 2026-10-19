@@ -1,0 +1,64 @@
+{
+ "sha256": "f1680f49502b7ad4006b4cb697a93030fe326a75d3c6db9280a2e8e3ab47e4d1",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Trey Research Lab Supplies",
+  "vendor_address": "4225 Executive Sq, San Diego, CA 92037",
+  "vendor_tax_id": "33-1904452",
+  "vendor_email": "invoices@trey-research.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "TR-5502",
+  "invoice_date": "09/16/2026",
+  "due_date": null,
+  "po_number": "4500181",
+  "payment_terms": "Net 30",
+  "currency": "$",
+  "subtotal": "$1,280.00",
+  "tax_label": "Sales Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$92.80",
+  "freight_amount": null,
+  "total": "$1,372.80",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Rainin LTS 200uL Tips (960/pk)",
+    "item_code": null,
+    "quantity": "20",
+    "uom": null,
+    "unit_price": "$64.00",
+    "amount": "$1,280.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": "S12",
+  "vendor_id": 30314,
+  "vendor_site_id": 7289,
+  "org_id": 204,
+  "po_number": "4500181",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "1372.80",
+  "subtotal": "1280.00",
+  "tax_amount": "92.80",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [
+   "multiple_invoices"
+  ],
+  "notes": ""
+ }
+}

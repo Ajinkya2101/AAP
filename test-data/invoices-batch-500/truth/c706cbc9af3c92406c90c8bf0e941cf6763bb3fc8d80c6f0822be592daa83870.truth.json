@@ -1,0 +1,72 @@
+{
+ "sha256": "c706cbc9af3c92406c90c8bf0e941cf6763bb3fc8d80c6f0822be592daa83870",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Li-Thompson",
+  "vendor_address": "17043 Kylie Canyon, Pollardfort, MN 41866",
+  "vendor_tax_id": "91-6213281",
+  "vendor_email": "accounts@li-thompson.example",
+  "vendor_phone": "(405) 456-3223",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "20207",
+  "invoice_date": "September 13, 2026",
+  "due_date": null,
+  "po_number": "4501094",
+  "payment_terms": "45 days",
+  "currency": "$",
+  "subtotal": "$8,953.20",
+  "tax_label": "Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$537.19",
+  "freight_amount": null,
+  "total": "$9,490.39",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "CommScope 5318 Cat6 Cable Box Pro",
+    "item_code": null,
+    "quantity": "40",
+    "uom": null,
+    "unit_price": "$175.86",
+    "amount": "$7,034.40",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Uplift V2 6960 Standing Desk Small",
+    "item_code": null,
+    "quantity": "4",
+    "uom": null,
+    "unit_price": "$479.70",
+    "amount": "$1,918.80",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30148,
+  "vendor_site_id": 7127,
+  "org_id": 204,
+  "po_number": "4501094",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "9490.39",
+  "subtotal": "8953.20",
+  "tax_amount": "537.19",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

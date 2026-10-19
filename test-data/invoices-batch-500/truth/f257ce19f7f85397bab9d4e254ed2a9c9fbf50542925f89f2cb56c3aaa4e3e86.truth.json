@@ -1,0 +1,83 @@
+{
+ "sha256": "f257ce19f7f85397bab9d4e254ed2a9c9fbf50542925f89f2cb56c3aaa4e3e86",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Taylor-White",
+  "vendor_address": "108 Tanya Terrace Apt. 267, Wrightland, OR 63593",
+  "vendor_tax_id": "73-2206947",
+  "vendor_email": "accounts@taylor-white.example",
+  "vendor_phone": "(713) 947-7131",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-69167",
+  "invoice_date": "2026-09-19",
+  "due_date": null,
+  "po_number": "4500800",
+  "payment_terms": "2% / 10 days, net 30",
+  "currency": "$",
+  "subtotal": "$1,594.74",
+  "tax_label": "Sales Tax 8.25%",
+  "tax_rate": "8.25%",
+  "tax_amount": "$131.57",
+  "freight_amount": null,
+  "total": "$1,726.31",
+  "bank_account": "821212020359",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Sigma-Aldrich 5333 Reagent Compact",
+    "item_code": null,
+    "quantity": "7",
+    "uom": null,
+    "unit_price": "$52.11",
+    "amount": "$364.77",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "DWK Duran 7323 Beaker Set Eco",
+    "item_code": null,
+    "quantity": "16",
+    "uom": null,
+    "unit_price": "$71.50",
+    "amount": "$1,144.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Pyrex 1000 Beaker Set 6pc",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "SET",
+    "unit_price": "85.97",
+    "amount": "$85.97",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30011,
+  "vendor_site_id": 7010,
+  "org_id": 204,
+  "po_number": "4500800",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "1726.31",
+  "subtotal": "1594.74",
+  "tax_amount": "131.57",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

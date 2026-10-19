@@ -1,0 +1,72 @@
+{
+ "sha256": "e649e48e40901219cb6afa449ca30c8e4e84481943bd3cbbcf4acc7724a478e7",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Johal Soman and Doctor Ltd",
+  "vendor_address": "74/77\nSur Road, Mumbai - 332204, West Bengal, India",
+  "vendor_tax_id": null,
+  "vendor_email": "ar@johal-soman-and-doctor.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "JSA/26-27/42937",
+  "invoice_date": "09/09/2026",
+  "due_date": null,
+  "po_number": "4500539",
+  "payment_terms": "2% / 10 days, net 30",
+  "currency": "Rs.",
+  "subtotal": "Rs. 18,402.92",
+  "tax_label": "IGST 12%",
+  "tax_rate": "12%",
+  "tax_amount": "Rs. 2,208.35",
+  "freight_amount": null,
+  "total": "Rs. 20,611.27",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Logitech 6716 Keyboard/Mouse Combo Heavy Duty",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "6,653.69",
+    "amount": "Rs. 13,307.38",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Dell 7526 Keyboard/Mouse Combo Standard",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "Rs. 5,095.54",
+    "amount": "Rs. 5,095.54",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30094,
+  "vendor_site_id": 7084,
+  "org_id": 458,
+  "po_number": "4500539",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-09",
+  "invoice_amount": "20611.27",
+  "subtotal": "18402.92",
+  "tax_amount": "2208.35",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

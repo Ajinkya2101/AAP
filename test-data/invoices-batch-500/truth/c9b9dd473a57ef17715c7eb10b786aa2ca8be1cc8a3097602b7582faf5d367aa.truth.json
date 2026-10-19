@@ -1,0 +1,72 @@
+{
+ "sha256": "c9b9dd473a57ef17715c7eb10b786aa2ca8be1cc8a3097602b7582faf5d367aa",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Hancock Inc Inc",
+  "vendor_address": "7468 Moore Hill Apt. 098, South Aaron, MA 08490",
+  "vendor_tax_id": "27-4258608",
+  "vendor_email": "accounts@hancock-inc.example",
+  "vendor_phone": "(851) 905-7032",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "HII/26-27/45363",
+  "invoice_date": "09/09/2026",
+  "due_date": null,
+  "po_number": "4500874",
+  "payment_terms": "30 days end of month",
+  "currency": "$",
+  "subtotal": "$11,790.98",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "$11,790.98",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Cisco Catalyst 7569 Switch Premium",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "$3,802.58",
+    "amount": "$3,802.58",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Dell P-Series 1219 Monitor Eco",
+    "item_code": null,
+    "quantity": "40",
+    "uom": null,
+    "unit_price": "199.71",
+    "amount": "$7,988.40",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30014,
+  "vendor_site_id": 7011,
+  "org_id": 204,
+  "po_number": "4500874",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-09",
+  "invoice_amount": "11790.98",
+  "subtotal": "11790.98",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

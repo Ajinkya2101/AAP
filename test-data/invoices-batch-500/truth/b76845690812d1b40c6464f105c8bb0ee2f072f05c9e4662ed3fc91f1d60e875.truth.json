@@ -1,0 +1,73 @@
+{
+ "sha256": "b76845690812d1b40c6464f105c8bb0ee2f072f05c9e4662ed3fc91f1d60e875",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Gandhi LLC Ltd",
+  "vendor_address": "H.No. 891\nBhat, Kolkata - 649927, Bihar, India",
+  "vendor_tax_id": "19WMXCG3275A2ZZ",
+  "vendor_email": "accounts@gandhi-llc.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "GLL-INV-89347",
+  "invoice_date": "24 Sep 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 15",
+  "currency": "INR",
+  "subtotal": "7,696.10",
+  "tax_label": "GST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "1,385.30",
+  "freight_amount": null,
+  "total": "9,081.40",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Unlimited Mobile Plan US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "4,417.73",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Business Data Mobile Plan Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "3,278.37",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30025,
+  "vendor_site_id": 7018,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-24",
+  "invoice_amount": "9081.40",
+  "subtotal": "7696.10",
+  "tax_amount": "1385.30",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

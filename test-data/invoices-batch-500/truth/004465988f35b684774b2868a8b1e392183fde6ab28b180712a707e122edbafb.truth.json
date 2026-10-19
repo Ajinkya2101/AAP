@@ -1,0 +1,73 @@
+{
+ "sha256": "004465988f35b684774b2868a8b1e392183fde6ab28b180712a707e122edbafb",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Fox Ochoa and Adams Inc",
+  "vendor_address": "334 Desiree Walks Apt. 166, Millerfurt, TX 49937",
+  "vendor_tax_id": "23-9505552",
+  "vendor_email": "billing@fox-ochoa-and-adams.example",
+  "vendor_phone": "(511) 635-5237",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "74448",
+  "invoice_date": "12-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payable immediately",
+  "currency": "$",
+  "subtotal": "$4,708.96",
+  "tax_label": "Sales Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$376.72",
+  "freight_amount": null,
+  "total": "$5,085.68",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Zoom Business Subscription Premium",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$1,556.13",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Enterprise Support Support Renewal Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$3,152.83",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30238,
+  "vendor_site_id": 7217,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-12",
+  "invoice_amount": "5085.68",
+  "subtotal": "4708.96",
+  "tax_amount": "376.72",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

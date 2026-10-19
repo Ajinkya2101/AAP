@@ -1,0 +1,83 @@
+{
+ "sha256": "1f2bcf6ecdd2abe4da83ffbb4ab6cc1032eb33af1cc000706771ecf7d1f3af61",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Hancock Inc Inc",
+  "vendor_address": "7468 Moore Hill Apt. 098, South Aaron, MA 08490",
+  "vendor_tax_id": "27-4258608",
+  "vendor_email": "accounts@hancock-inc.example",
+  "vendor_phone": "(851) 905-7032",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "HII/26-27/76197",
+  "invoice_date": "2026-09-13",
+  "due_date": "10/13/2026",
+  "po_number": "4500225",
+  "payment_terms": null,
+  "currency": "$",
+  "subtotal": "$14,909.30",
+  "tax_label": "Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$1,323.20",
+  "freight_amount": null,
+  "total": "$16,232.50",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Dell P-Series 1219 Monitor Eco",
+    "item_code": null,
+    "quantity": "15",
+    "uom": "unit",
+    "unit_price": "$192.58",
+    "amount": "$2,888.70",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "LG UltraFine 9295 Monitor Standard",
+    "item_code": null,
+    "quantity": "20",
+    "uom": "ea",
+    "unit_price": "238.69",
+    "amount": "$4,773.80",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Cisco Catalyst 7569 Switch Premium",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "3,623.40",
+    "amount": "$7,246.80",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30014,
+  "vendor_site_id": 7011,
+  "org_id": 204,
+  "po_number": "4500225",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "16232.50",
+  "subtotal": "14909.30",
+  "tax_amount": "1323.20",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

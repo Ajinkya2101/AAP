@@ -1,0 +1,26 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import vendor_block, party_block, meta_rows, lines_table, totals_table, payment_block %}
+{% block style %}
+  .band { background: {{ accent or '#1f4e79' }}; color: #fff; padding: 12px 14px; }
+  .band .vendor-name b { font-size: 14pt; }
+  .band td { color: #fff; }
+  .title { font-size: 26pt; font-weight: bold; color: {{ accent or '#1f4e79' }}; margin: 10px 0; }
+  .lines th { background: #eef2f7; text-align: left; }
+  .lines td { border-bottom: 0.5px solid #dde3ea; }
+  .totals { width: 40%; margin-left: 60%; margin-top: 10px; }
+  .grand td { background: {{ accent or '#1f4e79' }}; color: #fff; }
+{% endblock %}
+{% block body %}
+<div class="band"><table><tr>
+  <td style="width:60%">{{ vendor_block(inv.vendor, labels) }}</td>
+  <td><table>{{ meta_rows(inv, labels) }}</table></td>
+</tr></table></div>
+<div class="title">{{ labels.title }}</div>
+<table><tr>
+  <td style="width:50%">{{ party_block(labels.bill_to, inv.bill_to) }}</td>
+  <td>{% if inv.ship_to %}{{ party_block(labels.ship_to, inv.ship_to) }}{% endif %}</td>
+</tr></table><br>
+{{ lines_table(inv, labels) }}
+{{ totals_table(inv, labels) }}
+<br>{{ payment_block(inv, labels) }}
+{% endblock %}

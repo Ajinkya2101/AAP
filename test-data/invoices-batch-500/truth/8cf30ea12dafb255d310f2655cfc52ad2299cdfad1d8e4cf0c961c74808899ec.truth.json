@@ -1,0 +1,73 @@
+{
+ "sha256": "8cf30ea12dafb255d310f2655cfc52ad2299cdfad1d8e4cf0c961c74808899ec",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Jani Savant and Sarkar Pvt Ltd",
+  "vendor_address": "H.No. 827\nGokhale Nagar, Chennai - 145419, Tripura, India",
+  "vendor_tax_id": "29QMZCJ8944B3ZM",
+  "vendor_email": "accounts@jani-savant-and-sarkar-pvt.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "JSA32537",
+  "invoice_date": "26-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payable immediately",
+  "currency": "₹",
+  "subtotal": "₹259,156.71",
+  "tax_label": "GST 5%",
+  "tax_rate": "5%",
+  "tax_amount": "₹12,957.84",
+  "freight_amount": null,
+  "total": "₹272,114.55",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Elastic Compute Compute Tier 1",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "₹227,651.23",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Backup Vault Backup US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "₹31,505.48",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30202,
+  "vendor_site_id": 7189,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-26",
+  "invoice_amount": "272114.55",
+  "subtotal": "259156.71",
+  "tax_amount": "12957.84",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

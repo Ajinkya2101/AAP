@@ -1,0 +1,72 @@
+{
+ "sha256": "5ce3fbbbbfca02a587e610221320c4e9f05f6b680174be41cead206f919d65a5",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Cruz PLC Inc",
+  "vendor_address": "184 Rodriguez Mews, Riceside, GA 21231",
+  "vendor_tax_id": "22-6181620",
+  "vendor_email": "ar@cruz.example",
+  "vendor_phone": "(711) 503-4309",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "CPI/26-27/22616",
+  "invoice_date": "Sep 09, 2026",
+  "due_date": null,
+  "po_number": "4500619",
+  "payment_terms": "Net 60",
+  "currency": "$",
+  "subtotal": "$76,403.22",
+  "tax_label": "Sales Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$6,112.26",
+  "freight_amount": "$152.00",
+  "total": "$82,667.48",
+  "bank_account": "661245172234",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Penetration Test Security Assessment Premium",
+    "item_code": null,
+    "quantity": "6",
+    "uom": "ea",
+    "unit_price": "11,668.37",
+    "amount": "$70,010.22",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "On-site Imaging & Setup US East",
+    "item_code": null,
+    "quantity": "12",
+    "uom": "Nos",
+    "unit_price": "$532.75",
+    "amount": "$6,393.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30004,
+  "vendor_site_id": 7003,
+  "org_id": 204,
+  "po_number": "4500619",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-09",
+  "invoice_amount": "82667.48",
+  "subtotal": "76403.22",
+  "tax_amount": "6112.26",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

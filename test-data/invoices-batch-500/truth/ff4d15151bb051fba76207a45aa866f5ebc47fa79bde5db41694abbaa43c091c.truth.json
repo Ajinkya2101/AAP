@@ -1,0 +1,73 @@
+{
+ "sha256": "ff4d15151bb051fba76207a45aa866f5ebc47fa79bde5db41694abbaa43c091c",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Bush-Vaughn Inc",
+  "vendor_address": "1986 Cardenas Trail Apt. 404, Stewartstad, TX 94104",
+  "vendor_tax_id": "05-4091294",
+  "vendor_email": "billing@bush-vaughn.example",
+  "vendor_phone": "(932) 465-5217",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "BI/26-27/43992",
+  "invoice_date": "09/18/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payment within 7 days",
+  "currency": "$",
+  "subtotal": "$23,067.27",
+  "tax_label": "Tax 8.25%",
+  "tax_rate": "8.25%",
+  "tax_amount": "$1,903.05",
+  "freight_amount": null,
+  "total": "$24,970.32",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Commercial Electric Service EU (Ireland)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$8,571.33",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Commercial Electric Service Premium",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$14,495.94",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30179,
+  "vendor_site_id": 7162,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-18",
+  "invoice_amount": "24970.32",
+  "subtotal": "23067.27",
+  "tax_amount": "1903.05",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

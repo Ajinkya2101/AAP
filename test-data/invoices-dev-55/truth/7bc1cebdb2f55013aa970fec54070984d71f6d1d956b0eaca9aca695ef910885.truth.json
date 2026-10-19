@@ -1,0 +1,72 @@
+{
+ "sha256": "7bc1cebdb2f55013aa970fec54070984d71f6d1d956b0eaca9aca695ef910885",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Riehl Scheel GmbH",
+  "vendor_address": "Krzysztof-Hesse-Straße 327, 77744 Rothenburg ob der Tauber, Germany",
+  "vendor_tax_id": "DE735241039",
+  "vendor_email": "billing@riehl-scheel.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "RSG28889",
+  "invoice_date": "25.09.2026",
+  "due_date": "2026-10-25",
+  "po_number": "4500799",
+  "payment_terms": "Payment within 7 days",
+  "currency": "€",
+  "subtotal": "1.364,74 €",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "1.364,74 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Smead 4775 File Folders Standard",
+    "item_code": null,
+    "quantity": "50",
+    "uom": null,
+    "unit_price": "26,99",
+    "amount": "1.349,50 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Bi-fold 8243 Printed Brochure Standard",
+    "item_code": null,
+    "quantity": "12",
+    "uom": null,
+    "unit_price": "1,27 €",
+    "amount": "15,24 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30252,
+  "vendor_site_id": 7233,
+  "org_id": 204,
+  "po_number": "4500799",
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-25",
+  "invoice_amount": "1364.74",
+  "subtotal": "1364.74",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

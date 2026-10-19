@@ -1,0 +1,30 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import party_block, lines_table, totals_table, payment_block %}
+{% block style %}
+  .t { text-align: center; font-size: 14pt; font-weight: bold; border: 1px solid #000; padding: 4px; }
+  .grid td { border: 1px solid #000; }
+  .lines th, .lines td { border: 1px solid #000; }
+  .totals td { border: 1px solid #000; }
+  .totals { width: 45%; margin-left: 55%; }
+{% endblock %}
+{% block body %}
+<div class="t">{{ labels.title }}</div>
+<table class="grid"><tr>
+  <td style="width:50%"><b>{{ inv.vendor.name }}</b>
+    {% for l in inv.vendor.address_lines %}<div>{{ l }}</div>{% endfor %}
+    {% if inv.vendor.tax_id %}<div>GSTIN: {{ inv.vendor.tax_id }}</div>{% endif %}
+    {% if inv.vendor.email %}<div>{{ inv.vendor.email }}</div>{% endif %}</td>
+  <td>
+    <div>{{ labels.number }}: <b>{{ inv.invoice_number }}</b></div>
+    <div>{{ labels.date }}: {{ inv.invoice_date }}</div>
+    {% if inv.po_number %}<div>{{ labels.po }}: {{ inv.po_number }}</div>{% endif %}
+    {% if inv.payment_terms %}<div>{{ labels.terms }}: {{ inv.payment_terms }}</div>{% endif %}
+    {% if inv.currency_label %}<div>{{ labels.currency }}: {{ inv.currency_label }}</div>{% endif %}
+  </td></tr>
+  <tr><td colspan="2">{{ party_block(labels.bill_to, inv.bill_to) }}</td></tr>
+</table><br>
+{{ lines_table(inv, labels) }}
+{{ totals_table(inv, labels) }}
+<br>{{ payment_block(inv, labels) }}
+<p class="small">Certified that the particulars given above are true and correct.</p>
+{% endblock %}

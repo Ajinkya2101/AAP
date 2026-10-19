@@ -1,0 +1,83 @@
+{
+ "sha256": "3c1d87c088c01666793d246bd07b3a689fc8db1182ecfb8c037c42e79a40c459",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Higgins Group Corp",
+  "vendor_address": "9868 Merritt Summit Suite 743, Andersonmouth, NY 84080",
+  "vendor_tax_id": "50-9768884",
+  "vendor_email": "invoices@higgins-group-corp.example",
+  "vendor_phone": "(507) 420-3198",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "HGC-INV-50454",
+  "invoice_date": "Sep 26, 2026",
+  "due_date": null,
+  "po_number": "4500628",
+  "payment_terms": "2/10 Net 30",
+  "currency": "USD",
+  "subtotal": "21,439.02",
+  "tax_label": "Sales Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "1,902.71",
+  "freight_amount": null,
+  "total": "23,341.73",
+  "bank_account": "285562918076",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Bosch 7314 Tool Basic",
+    "item_code": null,
+    "quantity": "6",
+    "uom": "EA",
+    "unit_price": "30.73",
+    "amount": "184.38",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Dell PowerEdge 9213 Rack Server Basic",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "6,238.40",
+    "amount": "18,715.20",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "DeWalt 3257 Cordless Drill Pro",
+    "item_code": null,
+    "quantity": "8",
+    "uom": null,
+    "unit_price": "317.43",
+    "amount": "2,539.44",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30045,
+  "vendor_site_id": 7041,
+  "org_id": 204,
+  "po_number": "4500628",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-26",
+  "invoice_amount": "23341.73",
+  "subtotal": "21439.02",
+  "tax_amount": "1902.71",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

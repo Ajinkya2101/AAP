@@ -1,0 +1,73 @@
+{
+ "sha256": "a48c07276ee3bbba2a3a9020f69467fece9ecd56fdc2ce9aaa4502288810ebe2",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Harrison-Hudson",
+  "vendor_address": "Flat 35j\nFrederick Parks, Jennaton PR6M 6RR, Ireland",
+  "vendor_tax_id": "IE79162022",
+  "vendor_email": "ar@harrison-hudson.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "H/26-27/63979",
+  "invoice_date": "19 September 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "60 days net",
+  "currency": "€",
+  "subtotal": "€10,326.77",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "€10,326.77",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": "IE98LVIM61766204719609",
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Business Hours Guard Services On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "€6,723.24",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "24x7 Guard Services Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "€3,603.53",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30154,
+  "vendor_site_id": 7134,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "10326.77",
+  "subtotal": "10326.77",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "sha256": "7e00efb5832a6e6e1d11e6e6da5447d7ad98213bbdfe4d93920412f15be9b9f1",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Alvarez Joseph and West",
+  "vendor_address": "9578 Coleman Summit, North Kellyfurt, AZ 72641",
+  "vendor_tax_id": "77-1594402",
+  "vendor_email": "invoices@alvarez-joseph-and-west.example",
+  "vendor_phone": "(672) 536-5888",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-77337",
+  "invoice_date": "September 18, 2026",
+  "due_date": "18-Oct-2026",
+  "po_number": "4500216",
+  "payment_terms": null,
+  "currency": "USD",
+  "subtotal": "20,638.40",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "1,651.07",
+  "freight_amount": "226.00",
+  "total": "22,515.47",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Corporate Legal Services Quarterly",
+    "item_code": null,
+    "quantity": "8",
+    "uom": null,
+    "unit_price": "1,229.20",
+    "amount": "9,833.60",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Corporate Legal Services Basic",
+    "item_code": null,
+    "quantity": "40",
+    "uom": null,
+    "unit_price": "270.12",
+    "amount": "10,804.80",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30056,
+  "vendor_site_id": 7053,
+  "org_id": 204,
+  "po_number": "4500216",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-18",
+  "invoice_amount": "22515.47",
+  "subtotal": "20638.40",
+  "tax_amount": "1651.07",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

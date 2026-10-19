@@ -1,0 +1,60 @@
+{% macro vendor_block(v, labels) -%}
+  <div class="vendor-name"><b>{{ v.name }}</b></div>
+  {% for l in v.address_lines %}<div>{{ l }}</div>{% endfor %}
+  {% if v.phone %}<div>{{ labels.phone }}: {{ v.phone }}</div>{% endif %}
+  {% if v.email %}<div>{{ v.email }}</div>{% endif %}
+  {% if v.tax_id %}<div>{{ labels.tax_id }}: {{ v.tax_id }}</div>{% endif %}
+{%- endmacro %}
+
+{% macro party_block(title, lines) -%}
+  <div class="muted small">{{ title }}</div>
+  {% for l in lines %}<div>{{ l }}</div>{% endfor %}
+{%- endmacro %}
+
+{% macro meta_rows(inv, labels) -%}
+  <tr><td class="muted">{{ labels.number }}</td><td><b>{{ inv.invoice_number }}</b></td></tr>
+  <tr><td class="muted">{{ labels.date }}</td><td>{{ inv.invoice_date }}</td></tr>
+  {% if inv.due_date %}<tr><td class="muted">{{ labels.due }}</td><td>{{ inv.due_date }}</td></tr>{% endif %}
+  {% if inv.po_number %}<tr><td class="muted">{{ labels.po }}</td><td>{{ inv.po_number }}</td></tr>{% endif %}
+  {% if inv.payment_terms %}<tr><td class="muted">{{ labels.terms }}</td><td>{{ inv.payment_terms }}</td></tr>{% endif %}
+  {% if inv.currency_label %}<tr><td class="muted">{{ labels.currency }}</td><td>{{ inv.currency_label }}</td></tr>{% endif %}
+{%- endmacro %}
+
+{% macro lines_table(inv, labels, cls='') -%}
+  <table class="lines {{ cls }}">
+    <thead><tr>
+      <th>{{ labels.no }}</th><th>{{ labels.desc }}</th>
+      {% if inv.has_qty %}<th class="num">{{ labels.qty }}</th>{% endif %}
+      {% if inv.has_uom %}<th>{{ labels.uom }}</th>{% endif %}
+      {% if inv.has_qty %}<th class="num">{{ labels.price }}</th>{% endif %}
+      <th class="num">{{ labels.amount }}</th>
+    </tr></thead>
+    <tbody>
+    {% for ln in inv.lines %}
+      <tr>
+        <td>{{ loop.index }}</td><td>{{ ln.description }}</td>
+        {% if inv.has_qty %}<td class="num">{{ ln.quantity or '' }}</td>{% endif %}
+        {% if inv.has_uom %}<td>{{ ln.uom or '' }}</td>{% endif %}
+        {% if inv.has_qty %}<td class="num">{{ ln.unit_price or '' }}</td>{% endif %}
+        <td class="num">{{ ln.amount }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{%- endmacro %}
+
+{% macro totals_table(inv, labels) -%}
+  <table class="totals">
+    {% if inv.subtotal %}<tr><td>{{ labels.subtotal }}</td><td class="num">{{ inv.subtotal }}</td></tr>{% endif %}
+    {% if inv.freight_amount %}<tr><td>{{ labels.freight }}</td><td class="num">{{ inv.freight_amount }}</td></tr>{% endif %}
+    {% if inv.tax_amount %}<tr><td>{{ inv.tax_label or labels.tax }}</td><td class="num">{{ inv.tax_amount }}</td></tr>{% endif %}
+    <tr class="grand"><td><b>{{ labels.total }}</b></td><td class="num"><b>{{ inv.total }}</b></td></tr>
+  </table>
+{%- endmacro %}
+
+{% macro payment_block(inv, labels) -%}
+  {% if inv.bank_lines %}
+    <div class="muted small">{{ labels.payment }}</div>
+    {% for l in inv.bank_lines %}<div>{{ l }}</div>{% endfor %}
+  {% endif %}
+{%- endmacro %}

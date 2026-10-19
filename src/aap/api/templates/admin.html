@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h1>Admin</h1>
+
+<h2>Reference data</h2>
+<div class="panel">
+  <p>Last sync: {{ refsync.finished_at.strftime('%Y-%m-%d %H:%M') if refsync and refsync.finished_at else 'never' }}
+    {% if refsync %}({{ refsync.status }}){% endif %} · GL history lines: {{ gl.total }} ({{ gl.embedded }} with embeddings,
+    {{ gl.review }} from review)</p>
+  <button hx-post="/ui/admin/refsync" hx-target="#sync-result">Sync from Oracle now</button> <span id="sync-result"></span>
+</div>
+
+<h2>Value-map proposals</h2>
+<table><thead><tr><th>Type</th><th>On the invoice</th><th>Oracle value</th><th>Supplier</th><th>From</th><th></th></tr></thead><tbody>
+  {% for p in proposals %}
+    <tr><td>{{ p.map_type }}</td><td>{{ p.source_value }}</td><td>{{ p.oracle_value }}</td>
+      <td>{{ p.vendor_id or 'any' }}</td>
+      <td>{% if p.document_id %}<a href="/ui/documents/{{ p.document_id }}">invoice</a>{% endif %}
+        <span class="muted">{{ p.proposed_by }}</span></td>
+      <td><form method="post" action="/ui/admin/proposals/{{ p.id }}">
+        <button name="action" value="approve">Approve</button>
+        <button name="action" value="reject">Reject</button></form></td></tr>
+  {% else %}<tr><td class="muted">None. A supplier or payment terms chosen by the model is listed here once a clerk approves the invoice.</td></tr>{% endfor %}
+</tbody></table>
+
+<h2>Job queue</h2>
+<table><thead><tr><th>Queue</th>{% for s in job_states %}<th class="num">{{ s }}</th>{% endfor %}</tr></thead><tbody>
+  {% for q, row in jobs.items() %}<tr><td>{{ q }}</td>{% for s in job_states %}<td class="num">{{ row.get(s, 0) }}</td>{% endfor %}</tr>
+  {% else %}<tr><td class="muted">No jobs.</td></tr>{% endfor %}
+</tbody></table>
+
+<h2>Failed documents</h2>
+<table><tbody>
+  {% for d in failed %}
+    <tr><td>{{ d.updated_at.strftime('%Y-%m-%d %H:%M') }}</td><td><a href="/ui/documents/{{ d.id }}">{{ d.filename or d.id }}</a></td>
+      <td class="error">{{ (d.error or '') | truncate(140) }}</td>
+      <td><form method="post" action="/ui/documents/{{ d.id }}/retry"><button>Retry</button></form></td></tr>
+  {% else %}<tr><td class="muted">None.</td></tr>{% endfor %}
+</tbody></table>
+
+<h2>Eval runs</h2>
+<table><thead><tr><th>When</th><th>Name</th><th>Backend</th><th class="num">Docs</th><th class="num">Header acc.</th>
+  <th class="num">Line F1</th><th>Gates</th></tr></thead><tbody>
+  {% for e in evals %}
+    {% set a = (e.metrics or {}).get('all', {}) %}
+    <tr><td>{{ e.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ e.name }}</td><td>{{ e.backend }} {{ e.model or '' }}</td>
+      <td class="num">{{ a.get('documents', '') }}</td>
+      <td class="num">{{ '%.1f%%' % (a.header_accuracy * 100) if a.get('header_accuracy') is not none else '' }}</td>
+      <td class="num">{{ '%.1f%%' % (a.line_f1 * 100) if a.get('line_f1') is not none else '' }}</td>
+      <td>{% for g, v in ((e.metrics or {}).get('gates') or {}).items() %}<span class="{{ 'pass' if v.pass else 'fail' }}">{{ g }}</span> {% endfor %}</td></tr>
+  {% else %}<tr><td class="muted">No eval runs (python -m aap.eval).</td></tr>{% endfor %}
+</tbody></table>
+{% endblock %}

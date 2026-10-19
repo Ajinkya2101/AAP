@@ -1,0 +1,73 @@
+{
+ "sha256": "f73435e2e8bf6823ccf000d57a8ef3cb6f5bff3663dac0fafd7a49bc852c1858",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Morris-Campbell",
+  "vendor_address": "001 Smith Walks Apt. 770, New Melissa, WA 56573",
+  "vendor_tax_id": "80-8067639",
+  "vendor_email": "ar@morris-campbell.example",
+  "vendor_phone": "(926) 769-6105",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-28958",
+  "invoice_date": "11-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "7 days net",
+  "currency": "$",
+  "subtotal": "$11,731.64",
+  "tax_label": "Sales Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$1,041.18",
+  "freight_amount": null,
+  "total": "$12,772.82",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Event Guard Services Reserved",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$5,067.55",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "24x7 Guard Services US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$6,664.09",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30291,
+  "vendor_site_id": 7269,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "12772.82",
+  "subtotal": "11731.64",
+  "tax_amount": "1041.18",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

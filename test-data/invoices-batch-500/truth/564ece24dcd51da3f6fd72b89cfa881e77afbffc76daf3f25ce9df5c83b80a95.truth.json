@@ -1,0 +1,83 @@
+{
+ "sha256": "564ece24dcd51da3f6fd72b89cfa881e77afbffc76daf3f25ce9df5c83b80a95",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Riley Inc LLC",
+  "vendor_address": "3534 Anderson Rue Suite 751, South Dianeshire, MN 01721",
+  "vendor_tax_id": "25-5266245",
+  "vendor_email": "accounts@riley-inc.example",
+  "vendor_phone": "(295) 859-7297",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "RIL50129",
+  "invoice_date": "Sep 16, 2026",
+  "due_date": "10/16/2026",
+  "po_number": "4500287",
+  "payment_terms": "Net 60",
+  "currency": "USD",
+  "subtotal": "$7,559.37",
+  "tax_label": "Sales Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$604.75",
+  "freight_amount": null,
+  "total": "$8,164.12",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Certification Training EU (Ireland)",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "$1,528.45",
+    "amount": "$4,585.35",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Parcel Freight Tier 2",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "$429.40",
+    "amount": "$1,288.20",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Instructor-led Training On-Demand",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "1,685.82",
+    "amount": "$1,685.82",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30017,
+  "vendor_site_id": 7013,
+  "org_id": 204,
+  "po_number": "4500287",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "8164.12",
+  "subtotal": "7559.37",
+  "tax_amount": "604.75",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

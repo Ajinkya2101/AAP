@@ -1,0 +1,83 @@
+{
+ "sha256": "aa25c05d79a999c3af2d0729946d184d5e2d2370ae62e0d56df3c254d7d4f2f9",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Robertson-Hays Corp",
+  "vendor_address": "0596 Fowler Turnpike Apt. 165, Jacksonmouth, AZ 67752",
+  "vendor_tax_id": "61-1099872",
+  "vendor_email": "ar@robertson-hays-corp.example",
+  "vendor_phone": "(694) 907-6428",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "RC27701",
+  "invoice_date": "23-Sep-2026",
+  "due_date": null,
+  "po_number": "4500854",
+  "payment_terms": "Net 7",
+  "currency": "$",
+  "subtotal": "$44,469.03",
+  "tax_label": "Sales Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$2,668.14",
+  "freight_amount": null,
+  "total": "$47,137.17",
+  "bank_account": "172164134905",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Campus Placement Fee Basic",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "6,999.46",
+    "amount": "$13,998.92",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Executive Search Placement Fee US East",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "$9,349.20",
+    "amount": "$18,698.40",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Campus Placement Fee Premium",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "pcs",
+    "unit_price": "$11,771.71",
+    "amount": "$11,771.71",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30152,
+  "vendor_site_id": 7132,
+  "org_id": 204,
+  "po_number": "4500854",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-23",
+  "invoice_amount": "47137.17",
+  "subtotal": "44469.03",
+  "tax_amount": "2668.14",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

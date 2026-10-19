@@ -1,0 +1,73 @@
+{
+ "sha256": "c3c1e669f4fa9f1097cbb6a4fade26bfd13ddb9ea893995b6ca229902ed0595b",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Krishnamurthy Thakkar and Viswanathan Ltd",
+  "vendor_address": "703\nPau Path, Kolkata - 322512, Bihar, India",
+  "vendor_tax_id": "33DXSCK7408G5ZT",
+  "vendor_email": "billing@krishnamurthy-thakkar-and-viswanathan.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "KTA-INV-32356",
+  "invoice_date": "18-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "30 days end of month",
+  "currency": "Rs.",
+  "subtotal": "Rs. 91,615.57",
+  "tax_label": "GST 5%",
+  "tax_rate": "5%",
+  "tax_amount": "Rs. 4,580.78",
+  "freight_amount": null,
+  "total": "Rs. 96,196.35",
+  "bank_account": "41088490307620",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Relational Database Managed Database Tier 1",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 51,663.01",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Object Storage Storage US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 39,952.56",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30205,
+  "vendor_site_id": 7191,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-18",
+  "invoice_amount": "96196.35",
+  "subtotal": "91615.57",
+  "tax_amount": "4580.78",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

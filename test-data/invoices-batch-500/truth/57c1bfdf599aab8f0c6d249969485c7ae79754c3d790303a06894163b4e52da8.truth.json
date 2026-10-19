@@ -1,0 +1,83 @@
+{
+ "sha256": "57c1bfdf599aab8f0c6d249969485c7ae79754c3d790303a06894163b4e52da8",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "James-Ferguson Inc",
+  "vendor_address": "1753 Edwards Cape Apt. 204, Kylestad, NC 73024",
+  "vendor_tax_id": "77-8376757",
+  "vendor_email": "accounts@james-ferguson.example",
+  "vendor_phone": "(587) 992-7316",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "JI/26-27/25338",
+  "invoice_date": "September 11, 2026",
+  "due_date": null,
+  "po_number": "4500747",
+  "payment_terms": "Net 30 EOM",
+  "currency": "$",
+  "subtotal": "$16,220.07",
+  "tax_label": "Sales Tax 8.25%",
+  "tax_rate": "8.25%",
+  "tax_amount": "$1,338.16",
+  "freight_amount": "$125.00",
+  "total": "$17,683.23",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Aruba CX 9531 Switch 14\"",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "EA",
+    "unit_price": "$2,556.80",
+    "amount": "$10,227.20",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "LG UltraFine 3856 Monitor Pro",
+    "item_code": null,
+    "quantity": "4",
+    "uom": null,
+    "unit_price": "388.73",
+    "amount": "$1,554.92",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Dell OptiPlex 3238 Desktop Standard",
+    "item_code": null,
+    "quantity": "5",
+    "uom": null,
+    "unit_price": "887.59",
+    "amount": "$4,437.95",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30214,
+  "vendor_site_id": 7200,
+  "org_id": 204,
+  "po_number": "4500747",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "17683.23",
+  "subtotal": "16220.07",
+  "tax_amount": "1338.16",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

@@ -1,0 +1,30 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import vendor_block, party_block, lines_table, totals_table, payment_block %}
+{% block style %}
+  .side { width: 30%; background: #f4f1ea; padding: 10px; }
+  .main { padding-left: 12px; }
+  .big { font-size: 22pt; color: #8a5a00; }
+  .lines th { text-align: left; border-bottom: 1px solid #8a5a00; }
+  .lines td { border-bottom: 0.5px dotted #bbb; }
+  .totals { width: 60%; margin-left: 40%; }
+{% endblock %}
+{% block body %}
+<table><tr>
+  <td class="side">
+    {{ vendor_block(inv.vendor, labels) }}<br>
+    <div class="muted small">{{ labels.number }}</div><div><b>{{ inv.invoice_number }}</b></div>
+    <div class="muted small">{{ labels.date }}</div><div>{{ inv.invoice_date }}</div>
+    {% if inv.due_date %}<div class="muted small">{{ labels.due }}</div><div>{{ inv.due_date }}</div>{% endif %}
+    {% if inv.po_number %}<div class="muted small">{{ labels.po }}</div><div>{{ inv.po_number }}</div>{% endif %}
+    {% if inv.payment_terms %}<div class="muted small">{{ labels.terms }}</div><div>{{ inv.payment_terms }}</div>{% endif %}
+    {% if inv.currency_label %}<div class="muted small">{{ labels.currency }}</div><div>{{ inv.currency_label }}</div>{% endif %}
+    <br>{{ payment_block(inv, labels) }}
+  </td>
+  <td class="main">
+    <div class="big">{{ labels.title }}</div><br>
+    {{ party_block(labels.bill_to, inv.bill_to) }}<br>
+    {{ lines_table(inv, labels) }}
+    {{ totals_table(inv, labels) }}
+  </td>
+</tr></table>
+{% endblock %}

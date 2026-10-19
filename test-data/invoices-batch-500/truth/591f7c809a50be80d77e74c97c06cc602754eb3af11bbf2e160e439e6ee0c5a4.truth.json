@@ -1,0 +1,73 @@
+{
+ "sha256": "591f7c809a50be80d77e74c97c06cc602754eb3af11bbf2e160e439e6ee0c5a4",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Nagy LLC LLP",
+  "vendor_address": "H.No. 16\nNarain Chowk, Hyderabad - 551700, Jharkhand, India",
+  "vendor_tax_id": "09VYNCN6206K4Z0",
+  "vendor_email": "billing@nagy-llc-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "NLL/26-27/50275",
+  "invoice_date": "11/09/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "Rs.",
+  "subtotal": "Rs. 91,822.82",
+  "tax_label": "IGST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "Rs. 16,528.11",
+  "freight_amount": null,
+  "total": "Rs. 108,350.93",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "International Mobile Plan Premium",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 6,631.17",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "1 Gbps Dedicated Internet US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 85,191.65",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30124,
+  "vendor_site_id": 7109,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "108350.93",
+  "subtotal": "91822.82",
+  "tax_amount": "16528.11",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

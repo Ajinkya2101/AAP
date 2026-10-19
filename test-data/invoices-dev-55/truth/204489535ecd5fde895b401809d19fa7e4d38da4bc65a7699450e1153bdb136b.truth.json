@@ -1,0 +1,72 @@
+{
+ "sha256": "204489535ecd5fde895b401809d19fa7e4d38da4bc65a7699450e1153bdb136b",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Harris-Walters Corp",
+  "vendor_address": "64005 Dana Greens, Williamview, WA 21679",
+  "vendor_tax_id": "93-2365149",
+  "vendor_email": "billing@harris-walters-corp.example",
+  "vendor_phone": "(822) 399-3345",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-45108",
+  "invoice_date": "2026-09-14",
+  "due_date": null,
+  "po_number": "4501064",
+  "payment_terms": "2/10 Net 30",
+  "currency": "$",
+  "subtotal": "$16,119.80",
+  "tax_label": "Sales tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$1,168.69",
+  "freight_amount": null,
+  "total": "$17,288.49",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Thermo Fisher 2271 Instrument 16\"",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "$7,799.29",
+    "amount": "$15,598.58",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "TSP-4410 Praezisionssensor",
+    "item_code": null,
+    "quantity": "6",
+    "uom": "Nos",
+    "unit_price": "$86.87",
+    "amount": "$521.22",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30026,
+  "vendor_site_id": 7019,
+  "org_id": 204,
+  "po_number": "4501064",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-14",
+  "invoice_amount": "17288.49",
+  "subtotal": "16119.80",
+  "tax_amount": "1168.69",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

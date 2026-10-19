@@ -1,0 +1,196 @@
+# AAP Module - dev stack (docs/IMPLEMENTATION-PLAN.md section 10).
+# Start with start_container.bat. Profiles: default (CPU/stub), gpu (vllm), gpu2 (vllm-text).
+name: aap
+
+x-app: &app
+  image: aap-app:dev
+  build:
+    context: .
+    dockerfile: docker/app.Dockerfile
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    LLM_BACKEND: ${LLM_BACKEND:-stub}
+  volumes:
+    - filestore:/data/filestore
+  restart: unless-stopped
+  networks: [default]
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    command:
+      - postgres
+      - -c
+      - shared_buffers=512MB
+      - -c
+      - work_mem=32MB
+      - -c
+      - max_connections=200
+    ports: ["127.0.0.1:5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres && psql -U postgres -tAc \"select 1 from pg_database where datname='aap'\" | grep -q 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    mem_limit: 1536m
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: ["python", "-m", "aap.db.migrate"]
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  ebs-cm:
+    # Mock EBS concurrent manager: runs APXIIMPT requests submitted through
+    # apps.fnd_request_submit_request. Part of the simulated external system.
+    <<: *app
+    command: ["python", "-m", "aap.ebs_mock.concurrent_manager"]
+    mem_limit: 300m
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  api:
+    <<: *app
+    command: >-
+      sh -c 'if [ "$${DEV_RELOAD:-0}" = "1" ];
+      then exec uvicorn aap.api.main:app --host 0.0.0.0 --port 8080 --reload --reload-dir /app/src;
+      else exec uvicorn aap.api.main:app --host 0.0.0.0 --port 8080; fi'
+    ports: ["127.0.0.1:8080:8080"]
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  worker:
+    <<: *app
+    command: ["python", "-m", "aap.worker"]
+    mem_limit: 3584m
+    volumes:
+      - filestore:/data/filestore
+      - models:/models:ro
+    networks: [default, llm]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  model-fetch:
+    <<: *app
+    profiles: ["gpu", "gpu2"]
+    command: ["python", "-m", "aap.llm.model_fetch"]
+    restart: "no"
+    volumes:
+      - models:/models
+      - hf-cache:/home/aap/.cache/huggingface
+
+  embed-fetch:
+    # One-shot: bge-m3 ONNX weights for GL similarity (CPU). Nothing waits for it: until the
+    # files exist the worker falls back to RapidFuzz and backfills embeddings afterwards.
+    <<: *app
+    command: ["python", "-m", "aap.llm.model_fetch", "--embed"]
+    restart: "no"
+    volumes:
+      - models:/models
+      - hf-cache:/home/aap/.cache/huggingface
+
+  vllm:
+    image: aap-vllm:dev
+    build:
+      context: docker
+      dockerfile: vllm.Dockerfile
+      args:
+        VLLM_BASE_IMAGE: ${VLLM_IMAGE:-vllm/vllm-openai:v0.10.1.1}
+    profiles: ["gpu"]
+    command:
+      - --model=/models/${EXTRACT_MODEL_DIR:-Qwen2.5-VL-7B-Instruct}
+      - --served-model-name=${EXTRACT_MODEL:-qwen2.5-vl-7b}
+      - --quantization=${VLLM_QUANTIZATION:-fp8}
+      - --gpu-memory-utilization=${VLLM_GPU_MEMORY_UTILIZATION:-0.85}
+      - --max-model-len=${VLLM_MAX_MODEL_LEN:-16384}
+      - --limit-mm-per-prompt={"image":${LLM_MAX_IMAGES_PER_REQUEST:-4}}
+      - --mm-processor-kwargs={"max_pixels":${VLLM_MAX_PIXELS:-1003520}}
+      - --host=0.0.0.0
+      - --port=8000
+    environment:
+      HF_HUB_OFFLINE: "1"
+      VLLM_NO_USAGE_STATS: "1"
+    volumes:
+      - models:/models:ro
+    shm_size: 8g
+    ipc: host
+    # Host port for dev debugging only (drop it for production, see plan 10).
+    ports: ["127.0.0.1:${VLLM_HOST_PORT:-8100}:8000"]
+    networks: [llm, default]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 80
+      start_period: 120s
+    depends_on:
+      model-fetch: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+  vllm-text:
+    image: aap-vllm:dev
+    build:
+      context: docker
+      dockerfile: vllm.Dockerfile
+      args:
+        VLLM_BASE_IMAGE: ${VLLM_IMAGE:-vllm/vllm-openai:v0.10.1.1}
+    profiles: ["gpu2"]
+    command:
+      - --model=/models/${CHOICE_MODEL_DIR:-Qwen3-8B}
+      - --served-model-name=${CHOICE_MODEL:-qwen3-8b}
+      - --quantization=${VLLM_TEXT_QUANTIZATION:-fp8}
+      - --gpu-memory-utilization=${VLLM_TEXT_GPU_MEMORY_UTILIZATION:-0.33}
+      - --max-model-len=${VLLM_TEXT_MAX_MODEL_LEN:-8192}
+      - --host=0.0.0.0
+      - --port=8000
+    environment:
+      HF_HUB_OFFLINE: "1"
+      VLLM_NO_USAGE_STATS: "1"
+    volumes:
+      - models:/models:ro
+    shm_size: 4g
+    ports: ["127.0.0.1:${VLLM_TEXT_HOST_PORT:-8101}:8000"]
+    networks: [llm, default]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      model-fetch: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+networks:
+  default: {}
+  llm:
+    internal: true
+
+volumes:
+  pgdata: {}
+  filestore: {}
+  models: {}
+  hf-cache: {}

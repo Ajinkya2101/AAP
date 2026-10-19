@@ -1,0 +1,83 @@
+{
+ "sha256": "6dad7c9c568eba7a79e146febc933983241a283880762ace47c6018d5ea8c87b",
+ "generator": "tools.invoicegen",
+ "layout": "minimal",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Riley Butler and Hernandez Inc",
+  "vendor_address": "8547 Murray Street, Jerryshire, GA 46661",
+  "vendor_tax_id": "15-4114839",
+  "vendor_email": "invoices@riley-butler-and-hernandez.example",
+  "vendor_phone": "(672) 283-5042",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "79893",
+  "invoice_date": "2026-09-16",
+  "due_date": null,
+  "po_number": "4500723",
+  "payment_terms": "2/10 Net 30",
+  "currency": "USD",
+  "subtotal": "12,775.42",
+  "tax_label": "Sales Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "926.22",
+  "freight_amount": null,
+  "total": "13,701.64",
+  "bank_account": "833138782905",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Scotch 6940 Packing Tape Large",
+    "item_code": null,
+    "quantity": "15",
+    "uom": null,
+    "unit_price": "26.57",
+    "amount": "398.55",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Panduit 6499 Cat6 Cable Box Heavy Duty",
+    "item_code": null,
+    "quantity": "25",
+    "uom": null,
+    "unit_price": "197.41",
+    "amount": "4,935.25",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Cisco Catalyst 7569 Switch Premium",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "3,720.81",
+    "amount": "7,441.62",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30223,
+  "vendor_site_id": 7206,
+  "org_id": 204,
+  "po_number": "4500723",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "13701.64",
+  "subtotal": "12775.42",
+  "tax_amount": "926.22",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

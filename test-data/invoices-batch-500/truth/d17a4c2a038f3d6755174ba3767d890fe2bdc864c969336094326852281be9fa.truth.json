@@ -1,0 +1,83 @@
+{
+ "sha256": "d17a4c2a038f3d6755174ba3767d890fe2bdc864c969336094326852281be9fa",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Metz",
+  "vendor_address": "Walterweg 59/30, 30998 Genthin, Germany",
+  "vendor_tax_id": null,
+  "vendor_email": "billing@metz.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "M-INV-25572",
+  "invoice_date": "08 September 2026",
+  "due_date": null,
+  "po_number": "4500950",
+  "payment_terms": "2/10 Net 30",
+  "currency": "EUR",
+  "subtotal": "18.079,48 €",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "18.079,48 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Nightly Janitorial Services Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": "6",
+    "uom": "Mo",
+    "unit_price": "2.823,96 €",
+    "amount": "16.943,76 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Canon 1227 Toner Basic",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "81,99 €",
+    "amount": "245,97 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Haldiram 4985 Snack Box 14\"",
+    "item_code": null,
+    "quantity": "25",
+    "uom": null,
+    "unit_price": "35,59",
+    "amount": "889,75 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30120,
+  "vendor_site_id": 7103,
+  "org_id": 204,
+  "po_number": "4500950",
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-08",
+  "invoice_amount": "18079.48",
+  "subtotal": "18079.48",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

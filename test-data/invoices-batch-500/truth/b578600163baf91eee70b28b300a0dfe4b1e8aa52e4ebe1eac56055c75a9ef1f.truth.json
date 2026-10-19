@@ -1,0 +1,72 @@
+{
+ "sha256": "b578600163baf91eee70b28b300a0dfe4b1e8aa52e4ebe1eac56055c75a9ef1f",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Mcintyre Rivas and Scott",
+  "vendor_address": "513 Johnson Points Suite 931, Emilyview, OR 83784",
+  "vendor_tax_id": "56-1048085",
+  "vendor_email": "ar@mcintyre-rivas-and-scott.example",
+  "vendor_phone": "(343) 501-8543",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "MRA90265",
+  "invoice_date": "Sep 11, 2026",
+  "due_date": null,
+  "po_number": "4500356",
+  "payment_terms": "60 days net",
+  "currency": "USD",
+  "subtotal": "$3,781.59",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$302.53",
+  "freight_amount": null,
+  "total": "$4,084.12",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Bi-fold 8243 Printed Brochure Standard",
+    "item_code": null,
+    "quantity": "25",
+    "uom": "pcs",
+    "unit_price": "$1.24",
+    "amount": "$31.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Cisco Catalyst 7569 Switch Premium",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "$3,750.59",
+    "amount": "$3,750.59",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30087,
+  "vendor_site_id": 7079,
+  "org_id": 204,
+  "po_number": "4500356",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "4084.12",
+  "subtotal": "3781.59",
+  "tax_amount": "302.53",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

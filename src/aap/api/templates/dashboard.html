@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+<div hx-get="/ui/partials/figures" hx-trigger="every 10s, documents-changed from:body, pipeline-moved from:body" hx-swap="innerHTML">
+  {% include "_figures.html" %}
+</div>
+
+<h2>Upload invoices</h2>
+{# Without JavaScript this is a plain form (every file in one request). With it, files go into the
+   queue below as soon as they are chosen or dropped, and more can be added while it runs. #}
+<form id="upload-form" class="upload" method="post" action="/ui/upload" enctype="multipart/form-data">
+  <label for="upload-files">Files</label>
+  <input id="upload-files" type="file" name="files" multiple required
+         accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.xlsx,.xls,.csv,.txt,.html,.htm,.eml,.msg">
+  <button class="primary">Upload</button>
+  <span class="muted">Choose several files or drop them here. PDF, image, spreadsheet, text or a saved email
+    (.eml, .msg), up to {{ max_upload_mb }} MB each.</span>
+</form>
+<div id="upload-queue" hidden>
+  <div class="bulk">
+    <span id="upload-summary" role="status" aria-live="polite"></span>
+    <button id="upload-clear" type="button">Clear finished</button>
+  </div>
+  <table>
+    <thead><tr><th>File</th><th class="num">Size</th><th>State</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<h2 id="records">Records</h2>
+<form class="search" method="get" action="/ui#records" role="search">
+  {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+  <label for="records-q">Find</label>
+  <input id="records-q" type="search" name="q" value="{{ q }}" placeholder="Invoice number, supplier or file name">
+  <button>Search</button>
+  {% if q %}<a href="{{ records_url(status) }}#records">Clear</a>{% endif %}
+  <span id="records-msg" role="status" aria-live="polite"></span>
+</form>
+{# The table refreshes after a delete; every 10 s and as uploads move through the pipeline it refreshes
+   only while nobody is working in it. #}
+<div id="records-list" hx-get="{{ records_url(status, q, page, '/ui/partials/documents') }}"
+     hx-trigger="every 10s [recordsIdle()], documents-changed from:body, pipeline-moved[recordsIdle()] from:body"
+     hx-swap="innerHTML">
+  {% include "_documents.html" %}
+</div>
+
+<h2>Breakdown</h2>
+<div hx-get="/ui/partials/stats" hx-trigger="every 60s, documents-changed from:body" hx-swap="innerHTML">
+  {% include "_stats.html" %}
+</div>
+
+<script>
+(function () {
+  const list = document.getElementById('records-list');
+  const msg = document.getElementById('records-msg');
+  const ticked = () => [...list.querySelectorAll('input[name=ids]:checked')];
+
+  // The 10 s refresh waits while records are ticked or the keyboard focus is in the table.
+  window.recordsIdle = () => !ticked().length && !list.contains(document.activeElement);
+
+  function say(text, error) {
+    msg.textContent = text;
+    msg.className = error ? 'error' : '';
+  }
+
+  function sync() {
+    const boxes = [...list.querySelectorAll('input[name=ids]')];
+    const n = ticked().length;
+    const all = document.getElementById('check-all');
+    const button = document.getElementById('delete-selected');
+    const count = document.getElementById('selected-count');
+    if (all) { all.checked = n > 0 && n === boxes.length; all.indeterminate = n > 0 && n < boxes.length; }
+    if (button) button.disabled = n === 0;
+    if (count) count.textContent = n ? n + ' selected on this page' : 'Tick records to delete several at once.';
+  }
+
+  list.addEventListener('change', (e) => {
+    if (e.target.id === 'check-all') {
+      list.querySelectorAll('input[name=ids]').forEach((b) => { b.checked = e.target.checked; });
+    }
+    sync();
+  });
+  list.addEventListener('htmx:afterSwap', sync);
+
+  function question(items) {
+    const posted = items.filter((i) => i.status === 'CREATED' || i.status === 'SUBMITTED').length;
+    let text = items.length === 1 ? 'Delete ' + items[0].name + '?' : 'Delete ' + items.length + ' records?';
+    text += ' The file, the extracted data and the history are removed and cannot be restored.';
+    if (posted && items.length === 1) {
+      text += '\n\nThis invoice is already in Oracle. It stays there; only the record here is removed.';
+    } else if (posted) {
+      text += '\n\n' + posted + ' of them ' + (posted === 1 ? 'is' : 'are') +
+              ' already in Oracle. Those invoices stay there; only the records here are removed.';
+    }
+    return text;
+  }
+
+  // One confirmation for a row's Delete and for Delete selected, worded from what is being deleted.
+  document.body.addEventListener('htmx:confirm', (e) => {
+    const el = e.detail.elt;
+    let items;
+    if (el.id === 'delete-selected') items = ticked().map((b) => b.dataset);
+    else if (el.hasAttribute('data-delete')) items = [el.dataset];
+    else return;
+    e.preventDefault();
+    if (items.length && window.confirm(question(items))) e.detail.issueRequest(true);
+  });
+
+  document.body.addEventListener('documents-changed', (e) => {
+    const n = e.detail && e.detail.deleted;
+    if (n === undefined) return;
+    say(n === 0 ? 'Those records were already deleted.' : 'Deleted ' + n + (n === 1 ? ' record.' : ' records.'));
+  });
+
+  function failed(e) {
+    const el = e.detail.elt;
+    if (el.id !== 'delete-selected' && !el.hasAttribute('data-delete')) return;
+    const status = e.detail.xhr && e.detail.xhr.status;
+    say('Delete did not finish' + (status ? ' (server error ' + status + ')' : ' (the server did not answer)') +
+        '. Reload the page to see what is left.', true);
+  }
+  document.body.addEventListener('htmx:responseError', failed);
+  document.body.addEventListener('htmx:sendError', failed);
+})();
+</script>
+<script>
+// Upload queue: files upload two at a time, one request each; a file that is in is then followed
+// through the pipeline until nothing more happens to it without a person.
+(function () {
+  const form = document.getElementById('upload-form');
+  const input = document.getElementById('upload-files');
+  const box = document.getElementById('upload-queue');
+  const rows = box.querySelector('tbody');
+  const summary = document.getElementById('upload-summary');
+  const MAX_BYTES = {{ max_upload_mb }} * 1024 * 1024;
+  const PARALLEL = 2, POLL_MS = 3000, POLL_IDS = 50;
+  const items = [];
+  let active = 0, timer = null;
+
+  form.querySelector('button').hidden = true;      // files start uploading when they are added
+  input.required = false;
+
+  const size = (n) => n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(0) + ' KB' : (n / 1048576).toFixed(1) + ' MB';
+  const finished = (it) => ['done', 'rejected', 'duplicate'].includes(it.state);
+  const link = (id, text) => Object.assign(document.createElement('a'), { href: '/ui/documents/' + id, textContent: text });
+
+  function add(files) {
+    for (const file of files) {
+      const it = { file, name: file.name, state: 'waiting', pct: 0, row: rows.insertRow() };
+      for (let i = 0; i < 4; i++) it.row.insertCell();
+      it.row.cells[1].className = 'num';
+      if (file.size > MAX_BYTES) { it.state = 'rejected'; it.message = 'file is larger than {{ max_upload_mb }} MB'; }
+      items.push(it);
+      draw(it);
+    }
+    box.hidden = items.length === 0;
+    pump();
+  }
+
+  function button(text, action) {
+    const b = Object.assign(document.createElement('button'), { type: 'button', textContent: text });
+    b.addEventListener('click', action);
+    return b;
+  }
+
+  function draw(it) {
+    const [name, bytes, state, action] = it.row.cells;
+    name.textContent = it.name;
+    bytes.textContent = size(it.file.size);
+    state.className = it.state === 'rejected' || it.state === 'error' ? 'fail' : it.state === 'duplicate' ? 'warning' : '';
+    state.replaceChildren();
+    action.replaceChildren();
+    if (it.state === 'waiting') {
+      state.textContent = 'Waiting';
+      action.append(button('Remove', () => { items.splice(items.indexOf(it), 1); it.row.remove(); tally(); }));
+    } else if (it.state === 'uploading') {
+      state.textContent = 'Uploading ' + it.pct + '%';
+    } else if (it.state === 'rejected') {
+      state.textContent = 'Not accepted: ' + it.message;
+    } else if (it.state === 'error') {
+      state.textContent = 'Upload failed: ' + it.message;
+      action.append(button('Retry', () => { it.state = 'waiting'; draw(it); pump(); }));
+    } else if (it.state === 'duplicate') {
+      state.append('Already uploaded (' + it.status + '): ', link(it.id, 'open the existing record'));
+    } else {                                          // tracking | done
+      const kids = it.children || [];
+      if (it.status === 'DELETED') {
+        state.textContent = 'Deleted';
+      } else if (kids.length) {                       // an email: its attachments are the invoices
+        state.append(kids.length === 1 ? '1 invoice: ' : kids.length + ' invoices: ');
+        kids.forEach((k, i) => state.append(i ? ', ' : '', link(k.id, k.filename || 'invoice'), ' ' + k.status));
+      } else {
+        state.textContent = it.status;
+        if (!it.email) action.append(link(it.id, 'Open'));
+      }
+    }
+    tally();
+  }
+
+  function tally() {
+    const n = (states) => items.filter((it) => states.includes(it.state)).length;
+    const parts = [];
+    const toSend = n(['waiting', 'uploading']), moving = n(['tracking']), failed = n(['error']), out = n(['rejected']);
+    if (toSend) parts.push(toSend + ' to upload');
+    if (moving) parts.push(moving + ' in the pipeline');
+    if (failed) parts.push(failed + ' failed');
+    if (out) parts.push(out + ' not accepted');
+    parts.push(n(['done', 'duplicate']) + ' of ' + items.length + ' finished');
+    summary.textContent = parts.join(' · ');
+    box.hidden = items.length === 0;
+    document.getElementById('upload-clear').disabled = !items.some(finished);
+    window.onbeforeunload = toSend ? () => true : null;   // files not sent yet would be lost
+  }
+
+  function pump() {
+    while (active < PARALLEL) {
+      const it = items.find((x) => x.state === 'waiting');
+      if (!it) break;
+      send(it);
+    }
+  }
+
+  function send(it) {
+    active++;
+    it.state = 'uploading';
+    it.pct = 0;
+    draw(it);
+    const data = new FormData();
+    data.append('file', it.file);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/ui/upload/file');
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable) { it.pct = Math.round(100 * e.loaded / e.total); draw(it); } };
+    const settle = (state, message) => {
+      it.state = state;
+      it.message = message;
+      active--;
+      draw(it);
+      pump();
+    };
+    xhr.onerror = () => settle('error', 'the server did not answer');
+    xhr.onload = () => {
+      let r = null;
+      try { r = JSON.parse(xhr.responseText); } catch (e) { /* not our answer */ }
+      if (xhr.status !== 200 || !r) return settle('error', 'server error ' + xhr.status);
+      if (r.error) return settle('rejected', r.error);
+      Object.assign(it, { id: r.id, status: r.status, email: r.email });
+      if (!r.created) return settle('duplicate');
+      settle('tracking');
+      htmx.trigger(document.body, 'pipeline-moved');
+      if (!timer) timer = setTimeout(poll, POLL_MS);
+    };
+    xhr.send(data);
+  }
+
+  async function poll() {
+    timer = null;
+    const tracked = items.filter((it) => it.state === 'tracking');
+    let changed = false;
+    for (let i = 0; i < tracked.length; i += POLL_IDS) {
+      const batch = tracked.slice(i, i + POLL_IDS);
+      let answer;
+      try {
+        const resp = await fetch('/ui/upload/status?' + batch.map((it) => 'ids=' + it.id).join('&'));
+        if (!resp.ok) continue;
+        answer = await resp.json();
+      } catch (e) { continue; }                       // server away for a moment: try again next round
+      const byId = new Map(answer.map((a) => [a.id, a]));
+      for (const it of batch) {
+        const a = byId.get(it.id);
+        if (!a) continue;
+        const before = it.status + JSON.stringify(it.children || []);
+        Object.assign(it, { status: a.status, children: a.children });
+        if (!a.moving) it.state = 'done';
+        if (before !== a.status + JSON.stringify(a.children) || !a.moving) { changed = true; draw(it); }
+      }
+    }
+    if (changed) htmx.trigger(document.body, 'pipeline-moved');
+    if (items.some((it) => it.state === 'tracking')) timer = setTimeout(poll, POLL_MS);
+  }
+
+  input.addEventListener('change', () => { add(input.files); input.value = ''; });
+  form.addEventListener('submit', (e) => e.preventDefault());
+  document.getElementById('upload-clear').addEventListener('click', () => {
+    for (const it of items.filter(finished)) { it.row.remove(); items.splice(items.indexOf(it), 1); }
+    tally();
+  });
+
+  // Drop files anywhere on the upload form.
+  ['dragenter', 'dragover'].forEach((type) => form.addEventListener(type, (e) => {
+    if (![...e.dataTransfer.types].includes('Files')) return;
+    e.preventDefault();
+    form.classList.add('drop');
+  }));
+  ['dragleave', 'drop'].forEach((type) => form.addEventListener(type, () => form.classList.remove('drop')));
+  form.addEventListener('drop', (e) => {
+    if (!e.dataTransfer.files.length) return;
+    e.preventDefault();
+    add(e.dataTransfer.files);
+  });
+})();
+</script>
+{% endblock %}

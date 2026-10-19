@@ -1,0 +1,72 @@
+{
+ "sha256": "46c4e62fa970f489a44e4145997ba1738fa6f1b89ccd43ce3887456dd50a2bc5",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Davis George and Nguyen LLC",
+  "vendor_address": "83982 Jackson Grove Suite 472, Smithchester, FL 08793",
+  "vendor_tax_id": "76-2350663",
+  "vendor_email": "invoices@davis-george-and-nguyen.example",
+  "vendor_phone": "(684) 900-2490",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "DGA/26-27/99255",
+  "invoice_date": "Sep 27, 2026",
+  "due_date": "2026-10-27",
+  "po_number": "4500336",
+  "payment_terms": "Net 30 EOM",
+  "currency": "USD",
+  "subtotal": "2,937.46",
+  "tax_label": "Sales Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "176.25",
+  "freight_amount": null,
+  "total": "3,113.71",
+  "bank_account": "608262588661",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "LTL Freight Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "330.93",
+    "amount": "661.86",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Parcel Freight Premium",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "ea",
+    "unit_price": "568.90",
+    "amount": "2,275.60",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30249,
+  "vendor_site_id": 7231,
+  "org_id": 204,
+  "po_number": "4500336",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-27",
+  "invoice_amount": "3113.71",
+  "subtotal": "2937.46",
+  "tax_amount": "176.25",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "sha256": "17d63da8016691626c07f280af5019038485802843a378dab861a199201969e9",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Bakshi Chokshi and Chakrabarti Pvt Ltd",
+  "vendor_address": "398, Kunda Nagar, Hyderabad - 636475, Goa, India",
+  "vendor_tax_id": "33TMGCB6703G4ZP",
+  "vendor_email": "billing@bakshi-chokshi-and-chakrabarti-pvt.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "BCA/26-27/74724",
+  "invoice_date": "16.09.2026",
+  "due_date": null,
+  "po_number": "4500679",
+  "payment_terms": "Payment due within 30 days",
+  "currency": "INR",
+  "subtotal": "1,599,827.84",
+  "tax_label": "IGST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "287,969.01",
+  "freight_amount": null,
+  "total": "1,887,796.85",
+  "bank_account": "57856203576512",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Operations Consulting Quarterly",
+    "item_code": null,
+    "quantity": "24",
+    "uom": null,
+    "unit_price": "56,768.50",
+    "amount": "1,362,444.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Operations Consulting Reserved",
+    "item_code": null,
+    "quantity": "16",
+    "uom": "Hours",
+    "unit_price": "14,836.49",
+    "amount": "237,383.84",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30109,
+  "vendor_site_id": 7096,
+  "org_id": 458,
+  "po_number": "4500679",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "1887796.85",
+  "subtotal": "1599827.84",
+  "tax_amount": "287969.01",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

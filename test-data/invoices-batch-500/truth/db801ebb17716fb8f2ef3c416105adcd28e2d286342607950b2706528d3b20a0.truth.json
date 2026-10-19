@@ -1,0 +1,72 @@
+{
+ "sha256": "db801ebb17716fb8f2ef3c416105adcd28e2d286342607950b2706528d3b20a0",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Riley Inc LLC",
+  "vendor_address": "3534 Anderson Rue Suite 751, South Dianeshire, MN 01721",
+  "vendor_tax_id": "25-5266245",
+  "vendor_email": "accounts@riley-inc.example",
+  "vendor_phone": "(295) 859-7297",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "RIL61153",
+  "invoice_date": "19-Sep-2026",
+  "due_date": "19-Oct-2026",
+  "po_number": "4500657",
+  "payment_terms": "Net 60",
+  "currency": "USD",
+  "subtotal": "$2,609.13",
+  "tax_label": "Sales tax 8.25%",
+  "tax_rate": "8.25%",
+  "tax_amount": "$215.25",
+  "freight_amount": null,
+  "total": "$2,824.38",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Parcel Freight Tier 2",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "ea",
+    "unit_price": "460.10",
+    "amount": "$1,380.30",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Express Freight Quarterly",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "ea",
+    "unit_price": "1,228.83",
+    "amount": "$1,228.83",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30017,
+  "vendor_site_id": 7013,
+  "org_id": 204,
+  "po_number": "4500657",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "2824.38",
+  "subtotal": "2609.13",
+  "tax_amount": "215.25",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

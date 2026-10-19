@@ -1,0 +1,18 @@
+# LF in the repo and the working tree (the app runs in Linux containers).
+* text=auto eol=lf
+
+# cmd.exe needs CRLF for labels and goto.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Byte-exact: the test-data manifests hold sha256 hashes of these files.
+*.pdf binary
+*.eml -text
+*.msg binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tif binary
+*.tiff binary
+*.zip binary
+*.onnx binary

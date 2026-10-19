@@ -1,0 +1,1631 @@
+{
+ "seed": 7,
+ "count": 40,
+ "generated_on": "2026-09-28",
+ "items": [
+  {
+   "kind": "pdf",
+   "file": "pdf/S1_NW-INV-20457.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S1_NW-INV-20457.pdf",
+     "sha256": "bd2b04751b231b8350750bf06acdb21b4161ca80f16b95a4e01178ef617910eb",
+     "pages": 1,
+     "layout": "modern",
+     "scanned": false,
+     "expected": {
+      "scenario": "S1",
+      "vendor_id": 30418,
+      "vendor_site_id": 7276,
+      "org_id": 204,
+      "po_number": "4500123",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-12",
+      "invoice_amount": "14904.00",
+      "subtotal": "13800.00",
+      "tax_amount": "1104.00",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "Qty mismatch on line 1 (billed 10, received 8): an agent-phase finding; validation passes."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S2_INV-US-2026-8841327.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S2_INV-US-2026-8841327.pdf",
+     "sha256": "8a5a81d0c1af0eb2be391e636498eaab7bd7528b3c5cd9267f2e7b816989fee7",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": false,
+     "expected": {
+      "scenario": "S2",
+      "vendor_id": 30300,
+      "vendor_site_id": 7279,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-01",
+      "invoice_amount": "2752.25",
+      "subtotal": "2752.25",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "Non-PO vendor (PO_REQUIRED=N); GL choice is an agent-phase decision."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S3_NW-INV-20511.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S3_NW-INV-20511.pdf",
+     "sha256": "e2c49b9ceb3d46b9a8a3397d8eb3bffddf9992f7054f36f287b7f1b9b0f395d3",
+     "pages": 1,
+     "layout": "classic",
+     "scanned": false,
+     "expected": {
+      "scenario": "S3",
+      "vendor_id": 30418,
+      "vendor_site_id": 7276,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-20",
+      "invoice_amount": "3600.00",
+      "subtotal": "3600.00",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [
+       "V-PO"
+      ],
+      "expect_flags": [],
+      "notes": "No PO number from a PO_REQUIRED vendor; two open POs fit."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S4_CT-88412.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S4_CT-88412.pdf",
+     "sha256": "1c76670c34b6509d42ed1417cbcbdf7f44e8b4f61c448da2cf1d2863686e6dd3",
+     "pages": 1,
+     "layout": "service",
+     "scanned": false,
+     "expected": {
+      "scenario": "S4",
+      "vendor_id": 30303,
+      "vendor_site_id": 7280,
+      "org_id": 204,
+      "po_number": "4500130",
+      "currency_code": "USD",
+      "invoice_date": "2026-08-06",
+      "invoice_amount": "1030.32",
+      "subtotal": "972.00",
+      "tax_amount": "58.32",
+      "expect_fail": [
+       "C10"
+      ],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "Resend of an invoice already in AP_INVOICES_ALL."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S5_FAB-77120.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S5_FAB-77120.pdf",
+     "sha256": "57fdc654f3f165bed30f16c61498f9305eab7e96dfd807308948ae635e58704e",
+     "pages": 1,
+     "layout": "letterhead",
+     "scanned": false,
+     "expected": {
+      "scenario": "S5",
+      "vendor_id": 30305,
+      "vendor_site_id": 7281,
+      "org_id": 204,
+      "po_number": "4500145",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-14",
+      "invoice_amount": "2675.94",
+      "subtotal": "2472.00",
+      "tax_amount": "203.94",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "Unit price 156.00 vs PO 150.00 (+4%, tolerance 2%): agent-phase finding."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S6_LW-3391.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S6_LW-3391.pdf",
+     "sha256": "fcae5b9ee1965e8879964bbe2d4370c474d6c7bbc51975c456b47fbf7903928f",
+     "pages": 1,
+     "layout": "classic",
+     "scanned": false,
+     "expected": {
+      "scenario": "S6",
+      "vendor_id": 30306,
+      "vendor_site_id": 7282,
+      "org_id": 204,
+      "po_number": "4500156",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-11",
+      "invoice_amount": "5148.00",
+      "subtotal": "4800.00",
+      "tax_amount": "348.00",
+      "expect_fail": [
+       "C11"
+      ],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "Bank account differs from IBY_EXT_BANK_ACCOUNTS: fraud flag."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S7_ADT-2026-0901.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S7_ADT-2026-0901.pdf",
+     "sha256": "a03aa6babb4dbfdc72a02ca23c219876a440898beb935290b8e2f68522f4fe9f",
+     "pages": 1,
+     "layout": "classic",
+     "scanned": false,
+     "expected": {
+      "scenario": "S7",
+      "vendor_id": 30307,
+      "vendor_site_id": 7284,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-01",
+      "invoice_amount": "3200.00",
+      "subtotal": "3200.00",
+      "tax_amount": "0",
+      "expect_fail": [
+       "C8"
+      ],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "Printed site (PHOENIX) is inactive since 2026-03-31."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S8_TSP-2026-0917.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S8_TSP-2026-0917.pdf",
+     "sha256": "ac2c3b579bc624611c019db3354bb245d4680bbe27a9485de9b32395c9adbcd9",
+     "pages": 1,
+     "layout": "rechnung",
+     "scanned": false,
+     "expected": {
+      "scenario": "S8",
+      "vendor_id": 30308,
+      "vendor_site_id": 7285,
+      "org_id": 204,
+      "po_number": "4500162",
+      "currency_code": "EUR",
+      "invoice_date": "2026-09-17",
+      "invoice_amount": "3400.00",
+      "subtotal": "3400.00",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "EUR invoice to the US OU; reverse charge (no tax line)."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S9_WW-0412.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S9_WW-0412.pdf",
+     "sha256": "f1996b5bf6378f12a89b292bc141229417ce9ff09810c2ee27a7d3d4397cc5a7",
+     "pages": 1,
+     "layout": "modern",
+     "scanned": false,
+     "expected": {
+      "scenario": "S9",
+      "vendor_id": 30311,
+      "vendor_site_id": 7286,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": null,
+      "invoice_amount": "4800.00",
+      "subtotal": "4800.00",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [
+       "C9"
+      ],
+      "expect_flags": [
+       "two_date_formats"
+      ],
+      "notes": "Day/month order cannot be decided; no country hint on the invoice."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S10_PLE-10233.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S10_PLE-10233.pdf",
+     "sha256": "c788a84174fa71ee43cc5d57a25f311ef18e69e626a1b5b3f531808fbc59c5d4",
+     "pages": 1,
+     "layout": "boxed",
+     "scanned": false,
+     "expected": {
+      "scenario": "S10",
+      "vendor_id": 30312,
+      "vendor_site_id": 7287,
+      "org_id": 204,
+      "po_number": "4500171",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-10",
+      "invoice_amount": "2703.00",
+      "subtotal": "2550.00",
+      "tax_amount": "153.00",
+      "expect_fail": [
+       "V-PO"
+      ],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "PO is CLOSED FOR INVOICE."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S11_COHO-5520.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S11_COHO-5520.pdf",
+     "sha256": "c9406e2dc437175ce11122cc2ad76ae80989e91227dfc54285a214ec6e1f54e4",
+     "pages": 1,
+     "layout": "letterhead",
+     "scanned": false,
+     "expected": {
+      "scenario": "S11",
+      "vendor_id": 30313,
+      "vendor_site_id": 7288,
+      "org_id": 204,
+      "po_number": "4500176",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-15",
+      "invoice_amount": "5450.00",
+      "subtotal": "5000.00",
+      "tax_amount": "450.00",
+      "expect_fail": [
+       "C4"
+      ],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "Tax 450.00 but 5,000.00 x 8% = 400.00."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/S13_LPS-88317.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/S13_LPS-88317.pdf",
+     "sha256": "1ac8171f1f3a50f175a76155b94f58ebc8da64ebe3748a80730d9bc07adae62d",
+     "pages": 1,
+     "layout": "classic",
+     "scanned": true,
+     "expected": {
+      "scenario": "S13",
+      "vendor_id": 30315,
+      "vendor_site_id": 7290,
+      "org_id": 204,
+      "po_number": "4500184",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-12",
+      "invoice_amount": "2286.38",
+      "subtotal": "2100.00",
+      "tax_amount": "186.38",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "notes": "Image-only PDF (route image_only)."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0002_30087_MRA56621.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0002_30087_MRA56621.pdf",
+     "sha256": "f15858919f2d9b33b15198ecfefa35a2d7e573ee50013ad7e6abce43f9813788",
+     "pages": 1,
+     "layout": "sidebar",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30087,
+      "vendor_site_id": 7080,
+      "org_id": 204,
+      "po_number": "4500300",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-22",
+      "invoice_amount": "3769.84",
+      "subtotal": "3515.00",
+      "tax_amount": "254.84",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0003_30246_INV-2026-68619.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0003_30246_INV-2026-68619.pdf",
+     "sha256": "7011e4c96d80167c42ab0fcbe0451f812fbd3b24851671988ada4f2f3e5725ca",
+     "pages": 1,
+     "layout": "service",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30246,
+      "vendor_site_id": 7227,
+      "org_id": 204,
+      "po_number": "4500490",
+      "currency_code": "GBP",
+      "invoice_date": "2026-09-16",
+      "invoice_amount": "8791.19",
+      "subtotal": "8791.19",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0004_30142_HCA36125.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0004_30142_HCA36125.pdf",
+     "sha256": "1326f7dff489c4a76ee4626c8d519fee472bf5b4fed98797919772dc4e4fb088",
+     "pages": 1,
+     "layout": "sidebar",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30142,
+      "vendor_site_id": 7121,
+      "org_id": 204,
+      "po_number": "4500772",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-15",
+      "invoice_amount": "2657.04",
+      "subtotal": "2454.54",
+      "tax_amount": "202.50",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0005_30283_79020.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0005_30283_79020.pdf",
+     "sha256": "982e4599444b0a0b0f20c5b7f0107ae1586cb50cb0a8a72714208039b9483680",
+     "pages": 1,
+     "layout": "compact",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30283,
+      "vendor_site_id": 7259,
+      "org_id": 204,
+      "po_number": "4500217",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-24",
+      "invoice_amount": "13692.92",
+      "subtotal": "13692.92",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0006_30272_NI27139.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0006_30272_NI27139.pdf",
+     "sha256": "eafc94e7b85a8037fbe1b7514b5ee46f2bde1c3fb609b4b5f4e5888020fb8eb0",
+     "pages": 1,
+     "layout": "sidebar",
+     "scanned": true,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30272,
+      "vendor_site_id": 7251,
+      "org_id": 204,
+      "po_number": "4500681",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-11",
+      "invoice_amount": "102081.46",
+      "subtotal": "96303.26",
+      "tax_amount": "5778.20",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0007_30129_HCA-26-27-89447.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0007_30129_HCA-26-27-89447.pdf",
+     "sha256": "af37720e4bab7929d4ce651c9a6905f78b4fd7ddfe6de029b50bede13a0e2be6",
+     "pages": 1,
+     "layout": "classic",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30129,
+      "vendor_site_id": 7112,
+      "org_id": 204,
+      "po_number": "4500622",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-11",
+      "invoice_amount": "665616.71",
+      "subtotal": "611358.63",
+      "tax_amount": "54258.08",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0008_30228_38781.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0008_30228_38781.pdf",
+     "sha256": "89fa8ebf7c6571fec94463ed9d40c99faa72e444cc4cbb6b386b79e8fcad3c7e",
+     "pages": 1,
+     "layout": "minimal",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30228,
+      "vendor_site_id": 7210,
+      "org_id": 204,
+      "po_number": "4500605",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-13",
+      "invoice_amount": "34593.61",
+      "subtotal": "32255.11",
+      "tax_amount": "2338.50",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0010_30008_84789.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0010_30008_84789.pdf",
+     "sha256": "820b15083d3a4df80453ae9629ec12f2254487668b318196bd811e6ffbe4c812",
+     "pages": 1,
+     "layout": "minimal",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30008,
+      "vendor_site_id": 7009,
+      "org_id": 204,
+      "po_number": "4500322",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-11",
+      "invoice_amount": "77370.67",
+      "subtotal": "77370.67",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0012_30206_INV-2026-96050.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0012_30206_INV-2026-96050.pdf",
+     "sha256": "a58c259ebab59cf2a238a38b2911296c2c7b96e1a0e5058d6d9101e466df989a",
+     "pages": 1,
+     "layout": "letterhead",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30206,
+      "vendor_site_id": 7192,
+      "org_id": 204,
+      "po_number": "4500960",
+      "currency_code": "EUR",
+      "invoice_date": "2026-09-14",
+      "invoice_amount": "70819.13",
+      "subtotal": "70819.13",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0013_30056_INV-2026-15929.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0013_30056_INV-2026-15929.pdf",
+     "sha256": "c9a3e6f7cf0c6895e2d81dc06a7a036ba96507f1b7f8e239ebb1218f98f6f634",
+     "pages": 1,
+     "layout": "compact",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30056,
+      "vendor_site_id": 7053,
+      "org_id": 204,
+      "po_number": "4500936",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-18",
+      "invoice_amount": "501981.52",
+      "subtotal": "501981.52",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0015_30160_PL-INV-76262.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0015_30160_PL-INV-76262.pdf",
+     "sha256": "3ac8f8624af17304a5ca5caa5313f7d86973e746c2c93427cd777172e127baa6",
+     "pages": 1,
+     "layout": "boxed",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30160,
+      "vendor_site_id": 7139,
+      "org_id": 204,
+      "po_number": "4501084",
+      "currency_code": "GBP",
+      "invoice_date": "2026-09-14",
+      "invoice_amount": "32112.10",
+      "subtotal": "32112.10",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0017_30136_INV-2026-74742.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0017_30136_INV-2026-74742.pdf",
+     "sha256": "6e6c5eb19a3ece485e66eeb32602a84c7bcd1c131b61b4e1ad5c9b47f2992728",
+     "pages": 1,
+     "layout": "service",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30136,
+      "vendor_site_id": 7118,
+      "org_id": 204,
+      "po_number": "4501090",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-13",
+      "invoice_amount": "2589.41",
+      "subtotal": "2589.41",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0018_30008_38533.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0018_30008_38533.pdf",
+     "sha256": "7f2ca8039f6e0abfc2fca47e82b79134e82a842565a292301bad5415354accba",
+     "pages": 1,
+     "layout": "sidebar",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30008,
+      "vendor_site_id": 7009,
+      "org_id": 204,
+      "po_number": "4501011",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-24",
+      "invoice_amount": "109285.23",
+      "subtotal": "100376.79",
+      "tax_amount": "8908.44",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0019_30087_MRA19779.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0019_30087_MRA19779.pdf",
+     "sha256": "02cb29fbf911a7fc5123d3039fb60a79c4802c53034351a6ecdab03275482c2d",
+     "pages": 1,
+     "layout": "minimal",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30087,
+      "vendor_site_id": 7079,
+      "org_id": 204,
+      "po_number": "4500356",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-21",
+      "invoice_amount": "4117.21",
+      "subtotal": "3781.59",
+      "tax_amount": "335.62",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0020_30120_M-INV-47988.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0020_30120_M-INV-47988.pdf",
+     "sha256": "551069cebbc0ee6b103a6716a75449ed625529528cebdc3c0996a780910477b6",
+     "pages": 1,
+     "layout": "rechnung",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30120,
+      "vendor_site_id": 7103,
+      "org_id": 204,
+      "po_number": "4500988",
+      "currency_code": "EUR",
+      "invoice_date": "2026-09-27",
+      "invoice_amount": "2037.28",
+      "subtotal": "2037.28",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0021_30224_TPL-26-27-92692.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0021_30224_TPL-26-27-92692.pdf",
+     "sha256": "387ea57778db1ad147ece22573b3833c1cd049719036e32d043989e3f60a05bc",
+     "pages": 1,
+     "layout": "minimal",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30224,
+      "vendor_site_id": 7207,
+      "org_id": 204,
+      "po_number": "4500610",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-27",
+      "invoice_amount": "159493.79",
+      "subtotal": "150465.84",
+      "tax_amount": "9027.95",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0022_30166_INV-2026-63242.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0022_30166_INV-2026-63242.pdf",
+     "sha256": "bf20db595d43ab850974cb02b2302efe4caa0fb407188f8abc7c61ea711a78f9",
+     "pages": 1,
+     "layout": "compact",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30166,
+      "vendor_site_id": 7145,
+      "org_id": 204,
+      "po_number": "4501017",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-19",
+      "invoice_amount": "84015.55",
+      "subtotal": "78336.18",
+      "tax_amount": "5679.37",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0023_30062_BWA12632.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0023_30062_BWA12632.pdf",
+     "sha256": "6dbee2ce0b3a715a2cda861d0082184a3e79ef1e04572bb6b90cd8ea844c4ca6",
+     "pages": 1,
+     "layout": "service",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30062,
+      "vendor_site_id": 7056,
+      "org_id": 204,
+      "po_number": "4500710",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-21",
+      "invoice_amount": "19366.14",
+      "subtotal": "17890.20",
+      "tax_amount": "1475.94",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0024_30228_26678.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0024_30228_26678.pdf",
+     "sha256": "2729c2246ddb245d4d8fb47da27c3d7596b35d01d411096abf4501663dea7e3b",
+     "pages": 1,
+     "layout": "letterhead",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30228,
+      "vendor_site_id": 7210,
+      "org_id": 204,
+      "po_number": "4500247",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-27",
+      "invoice_amount": "18285.68",
+      "subtotal": "18285.68",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0025_30235_ATA-INV-21141.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0025_30235_ATA-INV-21141.pdf",
+     "sha256": "6dc787cd71f35b89a509d78ddaf436feb72936d28ae1de39490d1580e84a2063",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30235,
+      "vendor_site_id": 7214,
+      "org_id": 458,
+      "po_number": null,
+      "currency_code": "INR",
+      "invoice_date": "2026-09-13",
+      "invoice_amount": "283089.06",
+      "subtotal": "239905.98",
+      "tax_amount": "43183.08",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0026_30139_CPL-26-27-80448.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0026_30139_CPL-26-27-80448.pdf",
+     "sha256": "bc5bb63778c48e47b830c589da91f5f22637032c7792f28e169874a18e568743",
+     "pages": 1,
+     "layout": "boxed",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30139,
+      "vendor_site_id": 7119,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-27",
+      "invoice_amount": "1291.50",
+      "subtotal": "1204.20",
+      "tax_amount": "87.30",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0027_30287_L20628.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0027_30287_L20628.pdf",
+     "sha256": "ff0f2c26e9ccb075c10561a66cc870af9c80b441d1630fac9b6a696ff99004be",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30287,
+      "vendor_site_id": 7262,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "EUR",
+      "invoice_date": "2026-09-14",
+      "invoice_amount": "5594.11",
+      "subtotal": "5594.11",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0028_30035_SNA-INV-18838.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0028_30035_SNA-INV-18838.pdf",
+     "sha256": "23f91e0ca6ff4e39cc96bb6e0f7a5a939f77d30b5b77795dac629b0e601451d2",
+     "pages": 1,
+     "layout": "sidebar",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30035,
+      "vendor_site_id": 7028,
+      "org_id": 458,
+      "po_number": null,
+      "currency_code": "INR",
+      "invoice_date": "2026-09-11",
+      "invoice_amount": "424593.01",
+      "subtotal": "379100.90",
+      "tax_amount": "45492.11",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0029_30124_NLL-26-27-37911.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0029_30124_NLL-26-27-37911.pdf",
+     "sha256": "553a380cf6a1ef70dd9d8ea0d1c65d6179aa529b396c902b9ba4b9a01b61d518",
+     "pages": 1,
+     "layout": "gst",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30124,
+      "vendor_site_id": 7109,
+      "org_id": 458,
+      "po_number": null,
+      "currency_code": "INR",
+      "invoice_date": "2026-09-26",
+      "invoice_amount": "273993.35",
+      "subtotal": "260946.05",
+      "tax_amount": "13047.30",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0030_30111_INV-2026-14180.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0030_30111_INV-2026-14180.pdf",
+     "sha256": "ec21ece73a6a5df5555489a87b061f316aef17f3a04536e69341f023b433d4ea",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30111,
+      "vendor_site_id": 7097,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-13",
+      "invoice_amount": "523.16",
+      "subtotal": "483.29",
+      "tax_amount": "39.87",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0031_30066_INV-2026-21502.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0031_30066_INV-2026-21502.pdf",
+     "sha256": "4307da22446d1d34e3a7924af0fa5f3ea5eb73f5340b0a0c50da1ff3e9cbadc9",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30066,
+      "vendor_site_id": 7058,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-14",
+      "invoice_amount": "20007.36",
+      "subtotal": "18654.88",
+      "tax_amount": "1352.48",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0032_30238_54442.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0032_30238_54442.pdf",
+     "sha256": "1818709b91c3558018d75ef54b43e9b560d9ade98fba4778961efbe9c1e87342",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": true,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30238,
+      "vendor_site_id": 7217,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-08",
+      "invoice_amount": "7094.76",
+      "subtotal": "6569.22",
+      "tax_amount": "525.54",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0033_30049_W-26-27-74680.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0033_30049_W-26-27-74680.pdf",
+     "sha256": "bfa79ffb73683d09fc1a4fc4a03a4c127d5cfc4e887eacab0cd48a32a890abc2",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30049,
+      "vendor_site_id": 7046,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-14",
+      "invoice_amount": "52.80",
+      "subtotal": "49.23",
+      "tax_amount": "3.57",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0034_30173_52697.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0034_30173_52697.pdf",
+     "sha256": "9d10b995c2389351ff1b6d30518ee41681d3395ae639ae6cf7b22fa1f45a129d",
+     "pages": 1,
+     "layout": "modern",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30173,
+      "vendor_site_id": 7154,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-10",
+      "invoice_amount": "79268.86",
+      "subtotal": "73397.09",
+      "tax_amount": "5871.77",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0035_30081_INV-2026-43299.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0035_30081_INV-2026-43299.pdf",
+     "sha256": "cad2abe5006758f3a99ab61eec8bfdf73ec8c4d3ca9318815d555b23dc71ae1d",
+     "pages": 1,
+     "layout": "service",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30081,
+      "vendor_site_id": 7075,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-16",
+      "invoice_amount": "1316.47",
+      "subtotal": "1227.48",
+      "tax_amount": "88.99",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0036_30298_10588.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0036_30298_10588.pdf",
+     "sha256": "94bd8139bcd80d1320721d83a829f90847aaf4ea62f0f1dce901e4908f1d12af",
+     "pages": 1,
+     "layout": "gst",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30298,
+      "vendor_site_id": 7274,
+      "org_id": 458,
+      "po_number": null,
+      "currency_code": "INR",
+      "invoice_date": "2026-09-24",
+      "invoice_amount": "2098056.60",
+      "subtotal": "1998149.14",
+      "tax_amount": "99907.46",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0037_30154_H-26-27-44071.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0037_30154_H-26-27-44071.pdf",
+     "sha256": "2f1a0df5bf196b2c57726d8bfda2b1b5ea5831a9afe08f28b349e54189f66c9f",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30154,
+      "vendor_site_id": 7134,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "EUR",
+      "invoice_date": "2026-09-08",
+      "invoice_amount": "18341.95",
+      "subtotal": "18341.95",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0038_30176_INV-2026-49533.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0038_30176_INV-2026-49533.pdf",
+     "sha256": "6f5f37b87a32894ef2ee0feef8dd121a16bfb9209e13212cd84359b9f696b81b",
+     "pages": 2,
+     "layout": "cloud",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30176,
+      "vendor_site_id": 7156,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-21",
+      "invoice_amount": "538039.39",
+      "subtotal": "497034.08",
+      "tax_amount": "41005.31",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": true
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0039_30108_62395.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0039_30108_62395.pdf",
+     "sha256": "97eebb4f3f1aa37ff528ea83674f31a1033ecd9f96f871c2770fd218dbd5e6a3",
+     "pages": 1,
+     "layout": "letterhead",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30108,
+      "vendor_site_id": 7092,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-26",
+      "invoice_amount": "69406.74",
+      "subtotal": "64714.91",
+      "tax_amount": "4691.83",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "pdf",
+   "file": "pdf/R0040_30116_INV-2026-82096.pdf",
+   "documents": [
+    {
+     "pdf": "pdf/R0040_30116_INV-2026-82096.pdf",
+     "sha256": "c8585666aa4d8f2d32a25a938f744efcd57f0aef737cc71f35811f6e12e3fbeb",
+     "pages": 1,
+     "layout": "cloud",
+     "scanned": true,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30116,
+      "vendor_site_id": 7101,
+      "org_id": 204,
+      "po_number": null,
+      "currency_code": "USD",
+      "invoice_date": "2026-09-13",
+      "invoice_amount": "2881.08",
+      "subtotal": "2667.67",
+      "tax_amount": "213.41",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [],
+      "long_invoice": false
+     }
+    }
+   ]
+  },
+  {
+   "kind": "eml",
+   "file": "eml/S12.eml",
+   "sender": "invoices@trey-research.example",
+   "documents": [
+    {
+     "pdf": "pdf/S12_TR-5501.pdf",
+     "sha256": "e28a0ab50e95d4bd830d179f26719bc8687378eefda7b9b6787fe7672e253466",
+     "pages": 1,
+     "layout": "modern",
+     "scanned": false,
+     "expected": {
+      "scenario": "S12",
+      "vendor_id": 30314,
+      "vendor_site_id": 7289,
+      "org_id": 204,
+      "po_number": "4500181",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-16",
+      "invoice_amount": "772.20",
+      "subtotal": "720.00",
+      "tax_amount": "52.20",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [
+       "multiple_invoices"
+      ],
+      "notes": ""
+     }
+    },
+    {
+     "pdf": "pdf/S12_TR-5502.pdf",
+     "sha256": "2bb673d6d2a5fd683ec5921cd8832818528e55149c3ec6824e65228317267106",
+     "pages": 1,
+     "layout": "modern",
+     "scanned": false,
+     "expected": {
+      "scenario": "S12",
+      "vendor_id": 30314,
+      "vendor_site_id": 7289,
+      "org_id": 204,
+      "po_number": "4500181",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-16",
+      "invoice_amount": "1372.80",
+      "subtotal": "1280.00",
+      "tax_amount": "92.80",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": [
+       "multiple_invoices"
+      ],
+      "notes": ""
+     }
+    }
+   ]
+  },
+  {
+   "kind": "eml",
+   "file": "eml/S15_NW-INV-20533.eml",
+   "sender": "accounts@northwind-billing.example",
+   "documents": [
+    {
+     "pdf": "pdf/S15_NW-INV-20533.pdf",
+     "sha256": "37eb40295965353b82c35b3ec0b0a1929bd30120d90789d2f148f6f22dd4b436",
+     "pages": 1,
+     "layout": "service",
+     "scanned": false,
+     "expected": {
+      "scenario": "S15",
+      "vendor_id": 30418,
+      "vendor_site_id": 7276,
+      "org_id": 204,
+      "po_number": "4500188",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-22",
+      "invoice_amount": "972.00",
+      "subtotal": "900.00",
+      "tax_amount": "72.00",
+      "expect_fail": [
+       "C11"
+      ],
+      "expect_warn": [],
+      "expect_flags": [
+       "unknown_sender"
+      ],
+      "notes": "Look-alike sender domain and a different bank account."
+     }
+    }
+   ]
+  },
+  {
+   "kind": "eml",
+   "file": "eml/R0001_30252_RSG28889.eml",
+   "sender": "billing@riehl-scheel.example",
+   "documents": [
+    {
+     "pdf": "pdf/R0001_30252_RSG28889.pdf",
+     "sha256": "7bc1cebdb2f55013aa970fec54070984d71f6d1d956b0eaca9aca695ef910885",
+     "pages": 1,
+     "layout": "sidebar",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30252,
+      "vendor_site_id": 7233,
+      "org_id": 204,
+      "po_number": "4500799",
+      "currency_code": "EUR",
+      "invoice_date": "2026-09-25",
+      "invoice_amount": "1364.74",
+      "subtotal": "1364.74",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "eml",
+   "file": "eml/R0009_30142_HCA91779.eml",
+   "sender": "invoices@herrera-chen-and-andrews-corp.example",
+   "documents": [
+    {
+     "pdf": "pdf/R0009_30142_HCA91779.pdf",
+     "sha256": "0927897543122be39f25f337494b1e3812d3570e264105b71f1b4fb538d04a06",
+     "pages": 1,
+     "layout": "boxed",
+     "scanned": true,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30142,
+      "vendor_site_id": 7120,
+      "org_id": 204,
+      "po_number": "4500544",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-11",
+      "invoice_amount": "177.84",
+      "subtotal": "167.77",
+      "tax_amount": "10.07",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "eml",
+   "file": "eml/R0011_30026_INV-2026-45108.eml",
+   "sender": "billing@harris-walters-corp.example",
+   "documents": [
+    {
+     "pdf": "pdf/R0011_30026_INV-2026-45108.pdf",
+     "sha256": "204489535ecd5fde895b401809d19fa7e4d38da4bc65a7699450e1153bdb136b",
+     "pages": 1,
+     "layout": "modern",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30026,
+      "vendor_site_id": 7019,
+      "org_id": 204,
+      "po_number": "4501064",
+      "currency_code": "USD",
+      "invoice_date": "2026-09-14",
+      "invoice_amount": "17288.49",
+      "subtotal": "16119.80",
+      "tax_amount": "1168.69",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "eml",
+   "file": "eml/R0014_30206_INV-2026-12948.eml",
+   "sender": "billing@w-hner.example",
+   "documents": [
+    {
+     "pdf": "pdf/R0014_30206_INV-2026-12948.pdf",
+     "sha256": "60e5a67a512d532816e9e775b1e3f52d7df616b85fa3ff0ba04eed0858e44cf8",
+     "pages": 1,
+     "layout": "sidebar",
+     "scanned": true,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30206,
+      "vendor_site_id": 7192,
+      "org_id": 204,
+      "po_number": "4500592",
+      "currency_code": "EUR",
+      "invoice_date": "2026-09-15",
+      "invoice_amount": "597530.84",
+      "subtotal": "597530.84",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "eml",
+   "file": "eml/R0016_30098_74132.eml",
+   "sender": "accounts@hoffmann.example",
+   "documents": [
+    {
+     "pdf": "pdf/R0016_30098_74132.pdf",
+     "sha256": "f63d7b247e73af9de0262ef4c9d61a6edfd85c08b1f63614f0b7a0de8f4cde2c",
+     "pages": 1,
+     "layout": "rechnung",
+     "scanned": false,
+     "expected": {
+      "scenario": null,
+      "vendor_id": 30098,
+      "vendor_site_id": 7087,
+      "org_id": 204,
+      "po_number": "4500700",
+      "currency_code": "EUR",
+      "invoice_date": "2026-09-20",
+      "invoice_amount": "41484.64",
+      "subtotal": "41484.64",
+      "tax_amount": "0",
+      "expect_fail": [],
+      "expect_warn": [],
+      "expect_flags": []
+     }
+    }
+   ]
+  },
+  {
+   "kind": "eml",
+   "file": "eml/S14_auto_reply.eml",
+   "sender": "billing@northwind.example",
+   "documents": [],
+   "expected": {
+    "scenario": "S14",
+    "status": "NOT_INVOICE"
+   }
+  }
+ ],
+ "stats": {
+  "pdf_files": 55,
+  "items": 55,
+  "scanned": 6,
+  "layouts": [
+   "boxed",
+   "classic",
+   "cloud",
+   "compact",
+   "gst",
+   "letterhead",
+   "minimal",
+   "modern",
+   "rechnung",
+   "service",
+   "sidebar"
+  ]
+ }
+}

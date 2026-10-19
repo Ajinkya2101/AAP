@@ -1,0 +1,72 @@
+{
+ "sha256": "62b24d5fe007d04f9525112df1fc9bc9e1a0d4d96e9df5a4c30dff3eab5ac490",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Chokshi-Trivedi Ltd",
+  "vendor_address": "74/66\nBail Nagar, Pune - 281994, Rajasthan, India",
+  "vendor_tax_id": "24PVMCC5918B4Z6",
+  "vendor_email": "ar@chokshi-trivedi.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "INV-2026-94380",
+  "invoice_date": "11 Sep 2026",
+  "due_date": "11/10/2026",
+  "po_number": "4500671",
+  "payment_terms": "Net 30 days from date of invoice",
+  "currency": "INR",
+  "subtotal": "₹68,648.54",
+  "tax_label": "GST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "₹12,356.74",
+  "freight_amount": "₹167.00",
+  "total": "₹81,172.28",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "HP Office 5146 Copy Paper Pro",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "4,389.76",
+    "amount": "₹13,169.28",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Steelcase 1134 Lateral File Standard",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "27,739.63",
+    "amount": "₹55,479.26",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30231,
+  "vendor_site_id": 7211,
+  "org_id": 458,
+  "po_number": "4500671",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "81172.28",
+  "subtotal": "68648.54",
+  "tax_amount": "12356.74",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

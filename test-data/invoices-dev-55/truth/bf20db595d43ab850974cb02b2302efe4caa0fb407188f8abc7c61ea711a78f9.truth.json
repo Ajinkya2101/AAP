@@ -1,0 +1,72 @@
+{
+ "sha256": "bf20db595d43ab850974cb02b2302efe4caa0fb407188f8abc7c61ea711a78f9",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Anderson Henson and Jones Corp",
+  "vendor_address": "9125 Shannon Springs Suite 289, Keyfort, CA 24351",
+  "vendor_tax_id": null,
+  "vendor_email": "accounts@anderson-henson-and-jones-corp.example",
+  "vendor_phone": "(627) 812-2320",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-63242",
+  "invoice_date": "Sep 19, 2026",
+  "due_date": "October 19, 2026",
+  "po_number": "4501017",
+  "payment_terms": "Payment due within 30 days",
+  "currency": "USD",
+  "subtotal": "$78,336.18",
+  "tax_label": "Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$5,679.37",
+  "freight_amount": null,
+  "total": "$84,015.55",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Pure Storage FlashArray 2163 Storage Array Compact",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "Each",
+    "unit_price": "14,883.00",
+    "amount": "$44,649.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "HPE ProLiant 6365 Rack Server Pro",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "unit",
+    "unit_price": "$11,229.06",
+    "amount": "$33,687.18",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30166,
+  "vendor_site_id": 7145,
+  "org_id": 204,
+  "po_number": "4501017",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "84015.55",
+  "subtotal": "78336.18",
+  "tax_amount": "5679.37",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

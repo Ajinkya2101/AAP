@@ -1,0 +1,72 @@
+{
+ "sha256": "53efe910fb8ccfaaf03cf4e8e388228a18fc27f5ff32d244c67b1437b06f5c45",
+ "generator": "tools.invoicegen",
+ "layout": "minimal",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Miller Lucas and Williams Inc",
+  "vendor_address": "5466 Shelton Center, Ritterhaven, CA 83192",
+  "vendor_tax_id": "23-7758043",
+  "vendor_email": "invoices@miller-lucas-and-williams.example",
+  "vendor_phone": "(682) 297-7800",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "MLA73093",
+  "invoice_date": "Sep 21, 2026",
+  "due_date": null,
+  "po_number": "4500682",
+  "payment_terms": "Net 30 days from date of invoice",
+  "currency": "$",
+  "subtotal": "$35,755.13",
+  "tax_label": "Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$3,173.27",
+  "freight_amount": null,
+  "total": "$38,928.40",
+  "bank_account": "935126767888",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Thermo Fisher 6638 Instrument Standard",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "$6,765.25",
+    "amount": "$13,530.50",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Thermo Fisher 2271 Instrument 16\"",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "Each",
+    "unit_price": "$7,408.21",
+    "amount": "$22,224.63",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30127,
+  "vendor_site_id": 7110,
+  "org_id": 204,
+  "po_number": "4500682",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-21",
+  "invoice_amount": "38928.40",
+  "subtotal": "35755.13",
+  "tax_amount": "3173.27",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

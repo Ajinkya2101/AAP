@@ -1,0 +1,19 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+/data/
+/out/
+
+# Local machine config (docker/wslconfig.example is the tracked template)
+docker/.wslconfig
+.impeccable/hook.cache.json
+.claude/settings.local.json

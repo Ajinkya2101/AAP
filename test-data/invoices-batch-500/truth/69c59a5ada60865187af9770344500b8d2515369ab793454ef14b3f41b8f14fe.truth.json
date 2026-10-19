@@ -1,0 +1,73 @@
+{
+ "sha256": "69c59a5ada60865187af9770344500b8d2515369ab793454ef14b3f41b8f14fe",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Moore and Sons LLC",
+  "vendor_address": "0344 Jones Fort Suite 936, East Aaronmouth, NY 15544",
+  "vendor_tax_id": "20-9427765",
+  "vendor_email": "ar@moore-and-sons.example",
+  "vendor_phone": "(611) 239-5486",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-41605",
+  "invoice_date": "Sep 19, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "60 days net",
+  "currency": "$",
+  "subtotal": "$19,864.89",
+  "tax_label": "Sales tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$1,763.01",
+  "freight_amount": null,
+  "total": "$21,627.90",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "PR Agency Retainer On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$10,496.24",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Digital Agency Retainer Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$9,368.65",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30066,
+  "vendor_site_id": 7058,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "21627.90",
+  "subtotal": "19864.89",
+  "tax_amount": "1763.01",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

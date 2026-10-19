@@ -1,0 +1,73 @@
+{
+ "sha256": "09e508c18b27718a334e7e0e12ab7b936a1065a2c40e6d6100e1f2417ac5abe7",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Jimenez-Davis Corp",
+  "vendor_address": "500 Simpson Ville, Wagnerbury, OR 86256",
+  "vendor_tax_id": "59-6040091",
+  "vendor_email": "ar@jimenez-davis-corp.example",
+  "vendor_phone": "(592) 593-8274",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "84145",
+  "invoice_date": "09/10/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payment due within 30 days",
+  "currency": "$",
+  "subtotal": "$13,852.46",
+  "tax_label": "Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$1,004.30",
+  "freight_amount": null,
+  "total": "$14,856.76",
+  "bank_account": "983493002126",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "24x7 Guard Services US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$5,019.66",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Business Hours Guard Services Tier 2",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$8,832.80",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30173,
+  "vendor_site_id": 7154,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-10",
+  "invoice_amount": "14856.76",
+  "subtotal": "13852.46",
+  "tax_amount": "1004.30",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

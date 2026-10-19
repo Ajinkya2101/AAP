@@ -1,0 +1,83 @@
+{
+ "sha256": "fac7489a3e16056ac5893c1b4c66a7bfe246590e6107effe0be02ca12e6405ea",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Davis George and Nguyen LLC",
+  "vendor_address": "83982 Jackson Grove Suite 472, Smithchester, FL 08793",
+  "vendor_tax_id": "76-2350663",
+  "vendor_email": "invoices@davis-george-and-nguyen.example",
+  "vendor_phone": "(684) 900-2490",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "DGA/26-27/91480",
+  "invoice_date": "Sep 17, 2026",
+  "due_date": null,
+  "po_number": "4500603",
+  "payment_terms": "Net 30 EOM",
+  "currency": "USD",
+  "subtotal": "$9,753.84",
+  "tax_label": "Sales Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$780.31",
+  "freight_amount": null,
+  "total": "$10,534.15",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "LTL Freight Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": "12",
+    "uom": "ea",
+    "unit_price": "338.98",
+    "amount": "$4,067.76",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Parcel Freight Premium",
+    "item_code": null,
+    "quantity": "6",
+    "uom": null,
+    "unit_price": "$598.27",
+    "amount": "$3,589.62",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Express Freight Standard",
+    "item_code": null,
+    "quantity": "6",
+    "uom": null,
+    "unit_price": "349.41",
+    "amount": "$2,096.46",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30249,
+  "vendor_site_id": 7231,
+  "org_id": 204,
+  "po_number": "4500603",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "10534.15",
+  "subtotal": "9753.84",
+  "tax_amount": "780.31",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

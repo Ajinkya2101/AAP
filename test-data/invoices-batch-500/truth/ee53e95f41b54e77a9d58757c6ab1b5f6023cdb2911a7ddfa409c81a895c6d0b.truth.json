@@ -1,0 +1,73 @@
+{
+ "sha256": "ee53e95f41b54e77a9d58757c6ab1b5f6023cdb2911a7ddfa409c81a895c6d0b",
+ "generator": "tools.invoicegen",
+ "layout": "rechnung",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Weitzel",
+  "vendor_address": "Karlheinz-Noack-Ring 7-5, 15422 Pritzwalk, Germany",
+  "vendor_tax_id": "DE616202812",
+  "vendor_email": "accounts@weitzel.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-11966",
+  "invoice_date": "16 September 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "€",
+  "subtotal": "550,64 €",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "550,64 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Business Data Mobile Plan Annual",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "504,88 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "International Mobile Plan Tier 2",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "45,76 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30211,
+  "vendor_site_id": 7195,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "550.64",
+  "subtotal": "550.64",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

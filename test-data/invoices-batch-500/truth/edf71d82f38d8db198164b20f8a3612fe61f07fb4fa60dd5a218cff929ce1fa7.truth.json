@@ -1,0 +1,72 @@
+{
+ "sha256": "edf71d82f38d8db198164b20f8a3612fe61f07fb4fa60dd5a218cff929ce1fa7",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Robinson Nguyen and Tate",
+  "vendor_address": "1395 Diana Locks Suite 242, East Lydiamouth, MN 32826",
+  "vendor_tax_id": "86-3876606",
+  "vendor_email": "accounts@robinson-nguyen-and-tate.example",
+  "vendor_phone": "(911) 336-6440",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-82105",
+  "invoice_date": "20-Sep-2026",
+  "due_date": null,
+  "po_number": "4500324",
+  "payment_terms": "Net 15",
+  "currency": "$",
+  "subtotal": "$205.40",
+  "tax_label": "Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$14.89",
+  "freight_amount": null,
+  "total": "$220.29",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Tri-fold 2826 Printed Brochure Enterprise",
+    "item_code": null,
+    "quantity": "100",
+    "uom": null,
+    "unit_price": "1.95",
+    "amount": "$195.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Tri-fold 1721 Printed Brochure 16\"",
+    "item_code": null,
+    "quantity": "8",
+    "uom": "Nos",
+    "unit_price": "$1.30",
+    "amount": "$10.40",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30001,
+  "vendor_site_id": 7001,
+  "org_id": 204,
+  "po_number": "4500324",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-20",
+  "invoice_amount": "220.29",
+  "subtotal": "205.40",
+  "tax_amount": "14.89",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

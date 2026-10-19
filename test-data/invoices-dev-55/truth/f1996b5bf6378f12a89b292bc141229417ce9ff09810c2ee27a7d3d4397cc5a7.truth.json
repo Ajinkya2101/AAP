@@ -1,0 +1,66 @@
+{
+ "sha256": "f1996b5bf6378f12a89b292bc141229417ce9ff09810c2ee27a7d3d4397cc5a7",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Wide World Consulting Group",
+  "vendor_address": null,
+  "vendor_tax_id": null,
+  "vendor_email": "accounts@wideworld-consulting.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "WW-0412",
+  "invoice_date": "03/04/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "4,800.00",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Consulting services - March",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "4,800.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": "S9",
+  "vendor_id": 30311,
+  "vendor_site_id": 7286,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": null,
+  "invoice_amount": "4800.00",
+  "subtotal": "4800.00",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [
+   "C9"
+  ],
+  "expect_flags": [
+   "two_date_formats"
+  ],
+  "notes": "Day/month order cannot be decided; no country hint on the invoice."
+ }
+}

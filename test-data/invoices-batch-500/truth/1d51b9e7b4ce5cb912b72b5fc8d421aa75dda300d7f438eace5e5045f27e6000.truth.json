@@ -1,0 +1,62 @@
+{
+ "sha256": "1d51b9e7b4ce5cb912b72b5fc8d421aa75dda300d7f438eace5e5045f27e6000",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Solis PLC Inc",
+  "vendor_address": "1369 Warren Locks, Collierstad, NC 41169",
+  "vendor_tax_id": "26-7281485",
+  "vendor_email": "billing@solis.example",
+  "vendor_phone": "(398) 831-7444",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-69892",
+  "invoice_date": "09/19/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "2% / 10 days, net 30",
+  "currency": "$",
+  "subtotal": "$2,854.44",
+  "tax_label": "Sales tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$228.36",
+  "freight_amount": null,
+  "total": "$3,082.80",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "SQL Database Managed Database Quarterly",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$2,854.44",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30116,
+  "vendor_site_id": 7101,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "3082.80",
+  "subtotal": "2854.44",
+  "tax_amount": "228.36",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

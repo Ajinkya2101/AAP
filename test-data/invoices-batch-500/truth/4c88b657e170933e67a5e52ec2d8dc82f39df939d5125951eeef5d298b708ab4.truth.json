@@ -1,0 +1,83 @@
+{
+ "sha256": "4c88b657e170933e67a5e52ec2d8dc82f39df939d5125951eeef5d298b708ab4",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Conradi",
+  "vendor_address": "Dragan-Hermighausen-Ring 4/9, 19868 Calw, Netherlands",
+  "vendor_tax_id": "NL842547681B26",
+  "vendor_email": "invoices@conradi.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "C-INV-33907",
+  "invoice_date": "21 September 2026",
+  "due_date": null,
+  "po_number": "4500692",
+  "payment_terms": "60 days net",
+  "currency": "€",
+  "subtotal": "15.238,31 €",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "15.238,31 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Cisco Catalyst C9200L-24P-4G",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "2.358,66 €",
+    "amount": "2.358,66 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Thermo Fisher 2271 Instrument 16\"",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "pcs",
+    "unit_price": "8.602,05",
+    "amount": "8.602,05 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Belden 3123 Cat6 Cable Box Enterprise",
+    "item_code": null,
+    "quantity": "20",
+    "uom": null,
+    "unit_price": "213,88",
+    "amount": "4.277,60 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30290,
+  "vendor_site_id": 7267,
+  "org_id": 204,
+  "po_number": "4500692",
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-21",
+  "invoice_amount": "15238.31",
+  "subtotal": "15238.31",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

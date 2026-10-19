@@ -1,0 +1,72 @@
+{
+ "sha256": "8c635ed6c7b3446fce35549ce19516901aa508c043c4986476001441651cb4ef",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Sandal-Bajaj Ltd",
+  "vendor_address": "10/900\nSane Nagar, Hyderabad - 606404, Himachal Pradesh, India",
+  "vendor_tax_id": "29XGICS3921I2Z3",
+  "vendor_email": "ar@sandal-bajaj.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "72785",
+  "invoice_date": "13 Sep 2026",
+  "due_date": null,
+  "po_number": "4500316",
+  "payment_terms": null,
+  "currency": "₹",
+  "subtotal": "₹187,134.94",
+  "tax_label": "GST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "₹33,684.29",
+  "freight_amount": null,
+  "total": "₹220,819.23",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Cisco Meraki MR 9402 Access Point Pro",
+    "item_code": null,
+    "quantity": "2",
+    "uom": "ea",
+    "unit_price": "₹70,438.61",
+    "amount": "₹140,877.22",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "DeWalt DCD791D2 20V Drill Kit",
+    "item_code": null,
+    "quantity": "4",
+    "uom": null,
+    "unit_price": "₹11,564.43",
+    "amount": "₹46,257.72",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30213,
+  "vendor_site_id": 7199,
+  "org_id": 458,
+  "po_number": "4500316",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "220819.23",
+  "subtotal": "187134.94",
+  "tax_amount": "33684.29",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

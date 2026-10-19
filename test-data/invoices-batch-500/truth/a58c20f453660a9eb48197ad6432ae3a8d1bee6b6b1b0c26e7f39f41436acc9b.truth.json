@@ -1,0 +1,72 @@
+{
+ "sha256": "a58c20f453660a9eb48197ad6432ae3a8d1bee6b6b1b0c26e7f39f41436acc9b",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Roberts-Bull",
+  "vendor_address": "Flat 21L\nJenkins Union, Millstown G3 0FN, United Kingdom",
+  "vendor_tax_id": "GB411767412",
+  "vendor_email": "ar@roberts-bull.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "44551",
+  "invoice_date": "27/09/2026",
+  "due_date": null,
+  "po_number": "4500935",
+  "payment_terms": "15 days",
+  "currency": "GBP",
+  "subtotal": "2,491.98",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "2,491.98",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": "GB53BNDW85380032963347",
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Standard Rate Electrical Labor US East",
+    "item_code": null,
+    "quantity": "8",
+    "uom": null,
+    "unit_price": "83.25",
+    "amount": "666.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Quarterly PM HVAC Service Basic",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "608.66",
+    "amount": "1,825.98",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30193,
+  "vendor_site_id": 7178,
+  "org_id": 204,
+  "po_number": "4500935",
+  "currency_code": "GBP",
+  "invoice_date": "2026-09-27",
+  "invoice_amount": "2491.98",
+  "subtotal": "2491.98",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

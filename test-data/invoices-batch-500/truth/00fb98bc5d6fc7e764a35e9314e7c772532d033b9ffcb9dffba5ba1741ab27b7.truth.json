@@ -1,0 +1,73 @@
+{
+ "sha256": "00fb98bc5d6fc7e764a35e9314e7c772532d033b9ffcb9dffba5ba1741ab27b7",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Narayanan-Basak Ltd",
+  "vendor_address": "52/05, Nair Ganj, Pune - 372063, West Bengal, India",
+  "vendor_tax_id": "09BHHCN2507S1ZG",
+  "vendor_email": "billing@narayanan-basak.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "50379",
+  "invoice_date": "10 Sep 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "Rs.",
+  "subtotal": "Rs. 1,061,785.53",
+  "tax_label": "GST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "Rs. 191,121.40",
+  "freight_amount": null,
+  "total": "Rs. 1,252,906.93",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Commercial Electric Service Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 382,194.63",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Green Tariff Electric Service US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 679,590.90",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30168,
+  "vendor_site_id": 7148,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-10",
+  "invoice_amount": "1252906.93",
+  "subtotal": "1061785.53",
+  "tax_amount": "191121.40",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

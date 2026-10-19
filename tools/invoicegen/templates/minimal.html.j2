@@ -1,0 +1,25 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import lines_table, totals_table, payment_block %}
+{% block style %}
+  body { font-family: "DejaVu Sans Mono", "Liberation Mono", monospace; font-size: 8.5pt; }
+  .totals { width: 50%; margin-left: 50%; }
+  .lines th { text-align: left; border-bottom: 1px dashed #000; }
+{% endblock %}
+{% block body %}
+<div><b>{{ inv.vendor.name }}</b></div>
+{% for l in inv.vendor.address_lines %}<div>{{ l }}</div>{% endfor %}
+{% if inv.vendor.email %}<div>{{ inv.vendor.email }}</div>{% endif %}
+{% if inv.vendor.tax_id %}<div>{{ labels.tax_id }}: {{ inv.vendor.tax_id }}</div>{% endif %}
+<br>
+<div>{{ labels.title }} {{ inv.invoice_number }}</div>
+<div>{{ labels.date }}: {{ inv.invoice_date }}</div>
+{% if inv.po_number %}<div>{{ labels.po }}: {{ inv.po_number }}</div>{% endif %}
+{% if inv.payment_terms %}<div>{{ labels.terms }}: {{ inv.payment_terms }}</div>{% endif %}
+{% if inv.currency_label %}<div>{{ labels.currency }}: {{ inv.currency_label }}</div>{% endif %}
+<br>
+<div>{{ labels.bill_to }}: {{ inv.bill_to | join(', ') }}</div>
+<br>
+{{ lines_table(inv, labels) }}
+{{ totals_table(inv, labels) }}
+<br>{{ payment_block(inv, labels) }}
+{% endblock %}

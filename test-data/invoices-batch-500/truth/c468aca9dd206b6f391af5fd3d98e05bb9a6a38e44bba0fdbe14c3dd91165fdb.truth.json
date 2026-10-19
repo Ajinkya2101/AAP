@@ -1,0 +1,62 @@
+{
+ "sha256": "c468aca9dd206b6f391af5fd3d98e05bb9a6a38e44bba0fdbe14c3dd91165fdb",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "White Saunders and Johnson Inc",
+  "vendor_address": "1672 Allen Shoals Apt. 661, Hahnborough, GA 59361",
+  "vendor_tax_id": "75-8706139",
+  "vendor_email": "billing@white-saunders-and-johnson.example",
+  "vendor_phone": "(881) 233-7528",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "WSA-INV-78760",
+  "invoice_date": "September 23, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payment due within 30 days",
+  "currency": "$",
+  "subtotal": "$25,358.58",
+  "tax_label": "Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$2,250.57",
+  "freight_amount": null,
+  "total": "$27,609.15",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Green Tariff Electric Service Quarterly",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$25,358.58",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30260,
+  "vendor_site_id": 7241,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-23",
+  "invoice_amount": "27609.15",
+  "subtotal": "25358.58",
+  "tax_amount": "2250.57",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

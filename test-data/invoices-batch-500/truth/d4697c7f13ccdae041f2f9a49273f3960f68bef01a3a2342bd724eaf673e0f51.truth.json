@@ -1,0 +1,62 @@
+{
+ "sha256": "d4697c7f13ccdae041f2f9a49273f3960f68bef01a3a2342bd724eaf673e0f51",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Lopez Davidson and Reynolds Corp",
+  "vendor_address": "660 Jamie Terrace Apt. 918, Lake Christinaborough, OH 25006",
+  "vendor_tax_id": "36-4089357",
+  "vendor_email": "ar@lopez-davidson-and-reynolds-corp.example",
+  "vendor_phone": "(466) 461-1379",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "LDA-INV-20392",
+  "invoice_date": "2026-09-26",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "$",
+  "subtotal": "$518.48",
+  "tax_label": "Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$46.02",
+  "freight_amount": null,
+  "total": "$564.50",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "E-waste Waste Pickup Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$518.48",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30270,
+  "vendor_site_id": 7250,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-26",
+  "invoice_amount": "564.50",
+  "subtotal": "518.48",
+  "tax_amount": "46.02",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

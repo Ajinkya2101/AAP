@@ -1,0 +1,83 @@
+{
+ "sha256": "fa6de679186679979d234f52064b2a5a5620df66d158c6c6250da75ca7c1fff5",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Parker-Curtis Ltd",
+  "vendor_address": "Studio 47\nThorpe Groves, North Sarashire L70 0ZL, United Kingdom",
+  "vendor_tax_id": "GB661094101",
+  "vendor_email": "invoices@parker-curtis.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "PL-INV-98262",
+  "invoice_date": "08 Sep 2026",
+  "due_date": "08 October 2026",
+  "po_number": "4501084",
+  "payment_terms": "Net 7",
+  "currency": "£",
+  "subtotal": "£32,112.10",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": "£124.00",
+  "total": "£32,236.10",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Dell PowerStore 8200 Storage Array Eco",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "14,023.19",
+    "amount": "£14,023.19",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Ubiquiti UniFi 6452 Access Point Heavy Duty",
+    "item_code": null,
+    "quantity": "15",
+    "uom": null,
+    "unit_price": "£841.29",
+    "amount": "£12,619.35",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Aruba CX 9531 Switch 14\"",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "£2,734.78",
+    "amount": "£5,469.56",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30160,
+  "vendor_site_id": 7139,
+  "org_id": 204,
+  "po_number": "4501084",
+  "currency_code": "GBP",
+  "invoice_date": "2026-09-08",
+  "invoice_amount": "32236.10",
+  "subtotal": "32112.10",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

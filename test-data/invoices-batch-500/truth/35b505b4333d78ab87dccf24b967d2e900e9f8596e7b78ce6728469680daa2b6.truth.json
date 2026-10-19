@@ -1,0 +1,73 @@
+{
+ "sha256": "35b505b4333d78ab87dccf24b967d2e900e9f8596e7b78ce6728469680daa2b6",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Jani Savant and Sarkar Pvt Ltd",
+  "vendor_address": "H.No. 827\nGokhale Nagar, Chennai - 145419, Tripura, India",
+  "vendor_tax_id": "29QMZCJ8944B3ZM",
+  "vendor_email": "accounts@jani-savant-and-sarkar-pvt.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "JSA79532",
+  "invoice_date": "18-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due on receipt",
+  "currency": "Rs.",
+  "subtotal": "Rs. 66,185.83",
+  "tax_label": "IGST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "Rs. 11,913.45",
+  "freight_amount": null,
+  "total": "Rs. 78,099.28",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Backup Vault Backup US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 30,189.96",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Cloud Storage Storage On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 35,995.87",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30202,
+  "vendor_site_id": 7189,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-18",
+  "invoice_amount": "78099.28",
+  "subtotal": "66185.83",
+  "tax_amount": "11913.45",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

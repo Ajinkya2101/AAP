@@ -1,0 +1,30 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import party_block, totals_table, payment_block %}
+{% block style %}
+  .top { border-bottom: 2px solid #232f3e; padding-bottom: 6px; }
+  .brand { font-size: 15pt; font-weight: bold; color: #232f3e; }
+  .svc td { border-bottom: 0.5px solid #ddd; padding: 6px; }
+  .svc th { text-align: left; color: #555; border-bottom: 1px solid #232f3e; }
+  .totals { width: 40%; margin-left: 60%; margin-top: 10px; }
+{% endblock %}
+{% block body %}
+<div class="top"><table><tr>
+  <td><div class="brand">{{ inv.vendor.name }}</div>
+    {% for l in inv.vendor.address_lines %}<div class="small">{{ l }}</div>{% endfor %}
+    {% if inv.vendor.email %}<div class="small">{{ inv.vendor.email }}</div>{% endif %}
+    {% if inv.vendor.tax_id %}<div class="small">{{ labels.tax_id }}: {{ inv.vendor.tax_id }}</div>{% endif %}</td>
+  <td class="num">
+    <div>{{ labels.number }}: {{ inv.invoice_number }}</div>
+    <div>{{ labels.date }}: {{ inv.invoice_date }}</div>
+    {% if inv.payment_terms %}<div>{{ labels.terms }}: {{ inv.payment_terms }}</div>{% endif %}
+    {% if inv.account_ref %}<div>Account: {{ inv.account_ref }}</div>{% endif %}
+    {% if inv.currency_label %}<div>{{ labels.currency }}: {{ inv.currency_label }}</div>{% endif %}
+  </td></tr></table></div>
+<br>{{ party_block(labels.bill_to, inv.bill_to) }}<br>
+<table class="svc">
+  <thead><tr><th>{{ labels.desc }}</th><th class="num">{{ labels.amount }}</th></tr></thead>
+  <tbody>{% for ln in inv.lines %}<tr><td>{{ ln.description }}</td><td class="num">{{ ln.amount }}</td></tr>{% endfor %}</tbody>
+</table>
+{{ totals_table(inv, labels) }}
+<br>{{ payment_block(inv, labels) }}
+{% endblock %}

@@ -1,0 +1,62 @@
+{
+ "sha256": "f2f680afeee57e98dff3b5ec10cebf82f75d32713e8eae8ae53eddefe91ad1d6",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Andra Thaker and Gera Pvt Ltd",
+  "vendor_address": "H.No. 21, Nayar Chowk, Pune - 342464, Himachal Pradesh, India",
+  "vendor_tax_id": "24YEMCA6359J7Z9",
+  "vendor_email": "invoices@andra-thaker-and-gera-pvt.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "ATA-INV-10953",
+  "invoice_date": "17/09/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payment due within 30 days",
+  "currency": "INR",
+  "subtotal": "222,624.11",
+  "tax_label": "GST 12%",
+  "tax_rate": "12%",
+  "tax_amount": "26,714.89",
+  "freight_amount": null,
+  "total": "249,339.00",
+  "bank_account": "70460747291715",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Deep Clean Janitorial Services Reserved",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "222,624.11",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30235,
+  "vendor_site_id": 7214,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "249339.00",
+  "subtotal": "222624.11",
+  "tax_amount": "26714.89",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

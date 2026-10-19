@@ -1,0 +1,73 @@
+{
+ "sha256": "86841277dda11125e3d98cc6c9d42a52939a6e19b2a8f6a2b73f2bf04d573baa",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Lee-Stephenson",
+  "vendor_address": "35 Hobbs Forks, East Sianmouth DN97 4XG, Ireland",
+  "vendor_tax_id": "IE90477425",
+  "vendor_email": "ar@lee-stephenson.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "L26197",
+  "invoice_date": "14.09.2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "2% / 10 days, net 30",
+  "currency": "€",
+  "subtotal": "€11,260.12",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "€11,260.12",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Digital Agency Retainer Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "€6,583.27",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Creative Agency Retainer Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "€4,676.85",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30287,
+  "vendor_site_id": 7262,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-14",
+  "invoice_amount": "11260.12",
+  "subtotal": "11260.12",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,62 @@
+{
+ "sha256": "9592b789442f5d431ee775e72550dd9072e7de9a5293b2abcc07cd7823442fc1",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Shankar Narula and Narayanan LLP",
+  "vendor_address": "215\nLoyal Nagar, Ahmedabad - 520060, Kerala, India",
+  "vendor_tax_id": "19XMJCS3608A9Z0",
+  "vendor_email": "accounts@shankar-narula-and-narayanan-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "SNA-INV-94960",
+  "invoice_date": "26.09.2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payable immediately",
+  "currency": "INR",
+  "subtotal": "23,636.70",
+  "tax_label": "IGST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "4,254.61",
+  "freight_amount": null,
+  "total": "27,891.31",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Bandwidth Data Transfer Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "23,636.70",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30035,
+  "vendor_site_id": 7028,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-26",
+  "invoice_amount": "27891.31",
+  "subtotal": "23636.70",
+  "tax_amount": "4254.61",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

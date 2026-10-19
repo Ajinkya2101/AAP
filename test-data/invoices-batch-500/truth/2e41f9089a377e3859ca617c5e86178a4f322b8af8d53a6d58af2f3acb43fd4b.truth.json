@@ -1,0 +1,73 @@
+{
+ "sha256": "2e41f9089a377e3859ca617c5e86178a4f322b8af8d53a6d58af2f3acb43fd4b",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Flowers Martin and Kelly Inc",
+  "vendor_address": "327 Nelson Route, Jacquelineland, IL 90699",
+  "vendor_tax_id": "20-6982358",
+  "vendor_email": "invoices@flowers-martin-and-kelly.example",
+  "vendor_phone": "(670) 425-2081",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "FMA-INV-71391",
+  "invoice_date": "September 27, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payable immediately",
+  "currency": "$",
+  "subtotal": "$12,416.14",
+  "tax_label": "Sales Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$744.97",
+  "freight_amount": null,
+  "total": "$13,161.11",
+  "bank_account": "971951794469",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Industrial Electric Service Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$6,843.60",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Commercial Electric Service Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$5,572.54",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30000,
+  "vendor_site_id": 7000,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-27",
+  "invoice_amount": "13161.11",
+  "subtotal": "12416.14",
+  "tax_amount": "744.97",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,75 @@
+{
+ "sha256": "8faa2862de11f44e42a97b4d45baf2dc8cf3f0c1f3695656f0aa4d7de8a175d9",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Contoso Office Products LLC",
+  "vendor_address": "233 S Wacker Dr, Chicago, IL 60606",
+  "vendor_tax_id": "36-4417205",
+  "vendor_email": "invoices@contoso-office.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "CT-88412",
+  "invoice_date": "08/06/2026",
+  "due_date": null,
+  "po_number": "4500130",
+  "payment_terms": "Net 30",
+  "currency": "$",
+  "subtotal": "$972.00",
+  "tax_label": "Sales Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$58.32",
+  "freight_amount": null,
+  "total": "$1,030.32",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Hammermill Copy Plus 8.5x11 (case)",
+    "item_code": null,
+    "quantity": "20",
+    "uom": null,
+    "unit_price": "$46.50",
+    "amount": "$930.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "BIC Round Stic Blue (12pk)",
+    "item_code": null,
+    "quantity": "10",
+    "uom": null,
+    "unit_price": "$4.20",
+    "amount": "$42.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": "S4",
+  "vendor_id": 30303,
+  "vendor_site_id": 7280,
+  "org_id": 204,
+  "po_number": "4500130",
+  "currency_code": "USD",
+  "invoice_date": "2026-08-06",
+  "invoice_amount": "1030.32",
+  "subtotal": "972.00",
+  "tax_amount": "58.32",
+  "expect_fail": [
+   "C10"
+  ],
+  "expect_warn": [],
+  "expect_flags": [],
+  "notes": "Resend of an invoice already in AP_INVOICES_ALL."
+ }
+}

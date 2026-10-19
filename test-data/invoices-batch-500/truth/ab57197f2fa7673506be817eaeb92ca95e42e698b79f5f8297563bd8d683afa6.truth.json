@@ -1,0 +1,62 @@
+{
+ "sha256": "ab57197f2fa7673506be817eaeb92ca95e42e698b79f5f8297563bd8d683afa6",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Harrison-Hudson",
+  "vendor_address": "Flat 35j\nFrederick Parks, Jennaton PR6M 6RR, Ireland",
+  "vendor_tax_id": "IE79162022",
+  "vendor_email": "ar@harrison-hudson.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "H/26-27/76280",
+  "invoice_date": "25.09.2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 60",
+  "currency": "EUR",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "7,940.17",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": "IE98LVIM61766204719609",
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Business Hours Guard Services Tier 2",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "7,940.17",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30154,
+  "vendor_site_id": 7134,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-25",
+  "invoice_amount": "7940.17",
+  "subtotal": "7940.17",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

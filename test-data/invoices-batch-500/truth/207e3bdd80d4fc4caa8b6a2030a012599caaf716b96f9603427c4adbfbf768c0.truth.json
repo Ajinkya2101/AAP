@@ -1,0 +1,62 @@
+{
+ "sha256": "207e3bdd80d4fc4caa8b6a2030a012599caaf716b96f9603427c4adbfbf768c0",
+ "generator": "tools.invoicegen",
+ "layout": "minimal",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Allen Inc Inc",
+  "vendor_address": "067 Amber Throughway, New Arthurton, TX 07899",
+  "vendor_tax_id": "60-3148454",
+  "vendor_email": "invoices@allen-inc.example",
+  "vendor_phone": "(498) 474-9314",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "AII13594",
+  "invoice_date": "2026-09-17",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payment within 7 days",
+  "currency": "$",
+  "subtotal": "$544.18",
+  "tax_label": "Tax 8.25%",
+  "tax_rate": "8.25%",
+  "tax_amount": "$44.89",
+  "freight_amount": null,
+  "total": "$589.07",
+  "bank_account": "60753168713",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Weekly Waste Pickup Reserved",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$544.18",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30197,
+  "vendor_site_id": 7183,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "589.07",
+  "subtotal": "544.18",
+  "tax_amount": "44.89",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

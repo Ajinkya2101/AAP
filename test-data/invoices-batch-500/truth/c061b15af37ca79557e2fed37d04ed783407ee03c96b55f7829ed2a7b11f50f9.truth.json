@@ -1,0 +1,73 @@
+{
+ "sha256": "c061b15af37ca79557e2fed37d04ed783407ee03c96b55f7829ed2a7b11f50f9",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Cannon-Boyd",
+  "vendor_address": "45581 Edward Lights Apt. 316, West Scott, OH 53925",
+  "vendor_tax_id": "41-8136077",
+  "vendor_email": "ar@cannon-boyd.example",
+  "vendor_phone": "(862) 397-7097",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "67224",
+  "invoice_date": "Sep 17, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "45 days",
+  "currency": "$",
+  "subtotal": "$14,486.06",
+  "tax_label": "Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$1,050.24",
+  "freight_amount": null,
+  "total": "$15,536.30",
+  "bank_account": "108416545117",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "PR Agency Retainer Standard",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$6,800.95",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "PR Agency Retainer On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$7,685.11",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30048,
+  "vendor_site_id": 7042,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "15536.30",
+  "subtotal": "14486.06",
+  "tax_amount": "1050.24",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

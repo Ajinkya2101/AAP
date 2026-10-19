@@ -1,0 +1,72 @@
+{
+ "sha256": "01b670784410ac221268d377bfe72780fc4274064678d2757b5c4e3342ab72e6",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Hunter-Estrada",
+  "vendor_address": "7738 Leon Underpass Apt. 148, Justinchester, WA 87513",
+  "vendor_tax_id": "75-8646795",
+  "vendor_email": "accounts@hunter-estrada.example",
+  "vendor_phone": "(924) 787-8836",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "H/26-27/38697",
+  "invoice_date": "Sep 23, 2026",
+  "due_date": "Oct 23, 2026",
+  "po_number": "4500586",
+  "payment_terms": "45 days",
+  "currency": "USD",
+  "subtotal": "$67,065.14",
+  "tax_label": "Sales Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$5,952.03",
+  "freight_amount": null,
+  "total": "$73,017.17",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Steelcase 2894 Lateral File Heavy Duty",
+    "item_code": null,
+    "quantity": "30",
+    "uom": "pcs",
+    "unit_price": "431.91",
+    "amount": "$12,957.30",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Dell PowerEdge 9964 Rack Server Enterprise",
+    "item_code": null,
+    "quantity": "4",
+    "uom": null,
+    "unit_price": "13,526.96",
+    "amount": "$54,107.84",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30034,
+  "vendor_site_id": 7027,
+  "org_id": 204,
+  "po_number": "4500586",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-23",
+  "invoice_amount": "73017.17",
+  "subtotal": "67065.14",
+  "tax_amount": "5952.03",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

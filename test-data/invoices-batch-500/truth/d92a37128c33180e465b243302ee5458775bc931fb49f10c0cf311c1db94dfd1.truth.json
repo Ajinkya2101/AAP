@@ -1,0 +1,83 @@
+{
+ "sha256": "d92a37128c33180e465b243302ee5458775bc931fb49f10c0cf311c1db94dfd1",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Chadha-Dayal LLP",
+  "vendor_address": "86/80, Nagi Path, Chennai - 699730, Kerala, India",
+  "vendor_tax_id": null,
+  "vendor_email": "invoices@chadha-dayal-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "CL/26-27/21798",
+  "invoice_date": "13.09.2026",
+  "due_date": "13-Oct-2026",
+  "po_number": "4500395",
+  "payment_terms": "2% / 10 days, net 30",
+  "currency": "INR",
+  "subtotal": "19,773,716.85",
+  "tax_label": "IGST 5%",
+  "tax_rate": "5%",
+  "tax_amount": "988,685.84",
+  "freight_amount": null,
+  "total": "20,762,402.69",
+  "bank_account": "78180419938796",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Service Desk Managed Services Annual",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "month",
+    "unit_price": "3,852,472.31",
+    "amount": "11,557,416.93",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Penetration Test Security Assessment Tier 1",
+    "item_code": null,
+    "quantity": "4",
+    "uom": null,
+    "unit_price": "633,875.55",
+    "amount": "2,535,502.20",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "SOC Monitoring Security Assessment Reserved",
+    "item_code": null,
+    "quantity": "12",
+    "uom": "ea",
+    "unit_price": "473,399.81",
+    "amount": "5,680,797.72",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30209,
+  "vendor_site_id": 7194,
+  "org_id": 458,
+  "po_number": "4500395",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "20762402.69",
+  "subtotal": "19773716.85",
+  "tax_amount": "988685.84",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

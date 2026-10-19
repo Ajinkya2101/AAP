@@ -1,0 +1,73 @@
+{
+ "sha256": "bdc1c4c852de0b1a6281484500f5b95ccc7b4d4dcc357536cdaae9fc93ad9b1a",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Williams-Diaz LLC",
+  "vendor_address": "83473 Gregory Ports Suite 746, South Cheryl, IL 66417",
+  "vendor_tax_id": "72-9906779",
+  "vendor_email": "accounts@williams-diaz.example",
+  "vendor_phone": "(355) 606-9227",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "WL/26-27/90073",
+  "invoice_date": "14-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due on receipt",
+  "currency": "USD",
+  "subtotal": "11,151.92",
+  "tax_label": "Sales Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "892.15",
+  "freight_amount": null,
+  "total": "12,044.07",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "24x7 Guard Services US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "4,999.30",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Business Hours Guard Services On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "6,152.62",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30134,
+  "vendor_site_id": 7115,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-14",
+  "invoice_amount": "12044.07",
+  "subtotal": "11151.92",
+  "tax_amount": "892.15",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}
