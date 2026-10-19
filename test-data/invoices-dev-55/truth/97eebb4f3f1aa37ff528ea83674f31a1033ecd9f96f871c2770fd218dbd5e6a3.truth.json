@@ -1,0 +1,62 @@
+{
+ "sha256": "97eebb4f3f1aa37ff528ea83674f31a1033ecd9f96f871c2770fd218dbd5e6a3",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Simmons-Ortega Corp",
+  "vendor_address": "11615 Angela Radial, Stephaniefort, NC 74109",
+  "vendor_tax_id": "34-6859883",
+  "vendor_email": "billing@simmons-ortega-corp.example",
+  "vendor_phone": "(564) 909-7375",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "62395",
+  "invoice_date": "2026-09-26",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 7",
+  "currency": "$",
+  "subtotal": "$64,714.91",
+  "tax_label": "Sales tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$4,691.83",
+  "freight_amount": null,
+  "total": "$69,406.74",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Event Guard Services Annual",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$64,714.91",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30108,
+  "vendor_site_id": 7092,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-26",
+  "invoice_amount": "69406.74",
+  "subtotal": "64714.91",
+  "tax_amount": "4691.83",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

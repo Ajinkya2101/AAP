@@ -1,0 +1,64 @@
+{
+ "sha256": "2ad89db86c5c9f9be6e988b5d940c507a18620ff4e0bd71506e4f288f3d93f29",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Proseware Lab Equipment Inc",
+  "vendor_address": "100 Cambridge St, Boston, MA 02114",
+  "vendor_tax_id": "04-3319274",
+  "vendor_email": "ar@proseware-lab.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "PLE-10233",
+  "invoice_date": "Sep 10, 2026",
+  "due_date": null,
+  "po_number": "4500171",
+  "payment_terms": "Net 30 days from date of invoice",
+  "currency": "$",
+  "subtotal": "$2,550.00",
+  "tax_label": "Sales tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$153.00",
+  "freight_amount": null,
+  "total": "$2,703.00",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Pyrex 1000 Beaker Set 6pc",
+    "item_code": null,
+    "quantity": "30",
+    "uom": null,
+    "unit_price": "$85.00",
+    "amount": "$2,550.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": "S10",
+  "vendor_id": 30312,
+  "vendor_site_id": 7287,
+  "org_id": 204,
+  "po_number": "4500171",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-10",
+  "invoice_amount": "2703.00",
+  "subtotal": "2550.00",
+  "tax_amount": "153.00",
+  "expect_fail": [
+   "V-PO"
+  ],
+  "expect_warn": [],
+  "expect_flags": [],
+  "notes": "PO is CLOSED FOR INVOICE."
+ }
+}

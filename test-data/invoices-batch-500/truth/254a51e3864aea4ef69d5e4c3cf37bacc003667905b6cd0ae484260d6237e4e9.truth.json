@@ -1,0 +1,72 @@
+{
+ "sha256": "254a51e3864aea4ef69d5e4c3cf37bacc003667905b6cd0ae484260d6237e4e9",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Chandran-Dube LLP",
+  "vendor_address": "H.No. 697\nSinha Chowk, Ahmedabad - 593692, Nagaland, India",
+  "vendor_tax_id": "29EQOCC6132Q6ZQ",
+  "vendor_email": "billing@chandran-dube-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "CL-INV-58888",
+  "invoice_date": "24/09/2026",
+  "due_date": null,
+  "po_number": "4500930",
+  "payment_terms": "Net 7",
+  "currency": "Rs.",
+  "subtotal": "Rs. 4,539,156.54",
+  "tax_label": "IGST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "Rs. 817,048.18",
+  "freight_amount": null,
+  "total": "Rs. 5,356,204.72",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Executive Search Placement Fee Reserved",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "unit",
+    "unit_price": "Rs. 514,708.92",
+    "amount": "Rs. 2,058,835.68",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Permanent Placement Fee EU (Ireland)",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "Each",
+    "unit_price": "Rs. 826,773.62",
+    "amount": "Rs. 2,480,320.86",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30150,
+  "vendor_site_id": 7128,
+  "org_id": 458,
+  "po_number": "4500930",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-24",
+  "invoice_amount": "5356204.72",
+  "subtotal": "4539156.54",
+  "tax_amount": "817048.18",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

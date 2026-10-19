@@ -1,0 +1,62 @@
+{
+ "sha256": "282ab24ef10e76f90f96efb8ecf2dd441584113729f81f7e824026a97567e246",
+ "generator": "tools.invoicegen",
+ "layout": "minimal",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Andrews-Haney",
+  "vendor_address": "90974 Catherine Knoll Apt. 394, Andrewfurt, GA 89336",
+  "vendor_tax_id": "30-2847769",
+  "vendor_email": "billing@andrews-haney.example",
+  "vendor_phone": "(322) 569-2389",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-35959",
+  "invoice_date": "September 17, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due on receipt",
+  "currency": "$",
+  "subtotal": "$1,606.14",
+  "tax_label": "Sales tax 8.25%",
+  "tax_rate": "8.25%",
+  "tax_amount": "$132.51",
+  "freight_amount": null,
+  "total": "$1,738.65",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "500 Mbps Dedicated Internet On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$1,606.14",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30081,
+  "vendor_site_id": 7075,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "1738.65",
+  "subtotal": "1606.14",
+  "tax_amount": "132.51",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,27 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import vendor_block, party_block, lines_table, totals_table, payment_block %}
+{% block style %}
+  .hdr { border-left: 6px solid {{ accent or '#2e7d32' }}; padding-left: 10px; }
+  .kv td { padding: 1px 6px; }
+  .lines th { text-align: left; border-bottom: 2px solid {{ accent or '#2e7d32' }}; }
+  .lines td { border-bottom: 0.5px solid #e0e0e0; }
+  .totals { width: 42%; margin-left: 58%; }
+{% endblock %}
+{% block body %}
+<div class="hdr">{{ vendor_block(inv.vendor, labels) }}</div><br>
+<table><tr>
+  <td style="width:50%">{{ party_block(labels.bill_to, inv.bill_to) }}</td>
+  <td><table class="kv">
+    <tr><td class="muted">{{ labels.title }} {{ labels.number }}</td><td>{{ inv.invoice_number }}</td></tr>
+    <tr><td class="muted">{{ labels.date }}</td><td>{{ inv.invoice_date }}</td></tr>
+    {% if inv.po_number %}<tr><td class="muted">{{ labels.po }}</td><td>{{ inv.po_number }}</td></tr>{% endif %}
+    {% if inv.payment_terms %}<tr><td class="muted">{{ labels.terms }}</td><td>{{ inv.payment_terms }}</td></tr>{% endif %}
+    {% if inv.due_date %}<tr><td class="muted">{{ labels.due }}</td><td>{{ inv.due_date }}</td></tr>{% endif %}
+    {% if inv.currency_label %}<tr><td class="muted">{{ labels.currency }}</td><td>{{ inv.currency_label }}</td></tr>{% endif %}
+  </table></td>
+</tr></table><br>
+{{ lines_table(inv, labels) }}
+{{ totals_table(inv, labels) }}
+<br>{{ payment_block(inv, labels) }}
+<p class="small muted">{{ labels.thanks }}</p>
+{% endblock %}

@@ -1,0 +1,62 @@
+{
+ "sha256": "444769b3df4b94c5721c914595e03fbfbbdd38fe00ad68b5027980b882d7ee08",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Powell Sharp and Taylor",
+  "vendor_address": "Flat 74p\nSharon Port, North Nicoleborough S83 4LN, United Kingdom",
+  "vendor_tax_id": "GB120734654",
+  "vendor_email": "accounts@powell-sharp-and-taylor.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "PSA-INV-12787",
+  "invoice_date": "11/09/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 30 days from date of invoice",
+  "currency": "£",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "£1,071.36",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Salesforce Sales Cloud Subscription On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "£1,071.36",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30285,
+  "vendor_site_id": 7261,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "GBP",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "1071.36",
+  "subtotal": "1071.36",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,73 @@
+{
+ "sha256": "fd58ba02b88d4285c977172bbea9d19507fd4979a18d3b0e9d831b747d9e7c02",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Chavez-Moore Inc",
+  "vendor_address": "22901 Ramos Manors, Jennifershire, OR 64157",
+  "vendor_tax_id": "64-7259939",
+  "vendor_email": "invoices@chavez-moore.example",
+  "vendor_phone": "(876) 905-8167",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-99801",
+  "invoice_date": "September 13, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due on receipt",
+  "currency": "$",
+  "subtotal": "$520.11",
+  "tax_label": "Sales Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$37.71",
+  "freight_amount": null,
+  "total": "$557.82",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Adobe Creative Cloud Annual Subscription Tier 1",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$236.74",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Atlassian Jira Annual Subscription US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$283.37",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30111,
+  "vendor_site_id": 7097,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "557.82",
+  "subtotal": "520.11",
+  "tax_amount": "37.71",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

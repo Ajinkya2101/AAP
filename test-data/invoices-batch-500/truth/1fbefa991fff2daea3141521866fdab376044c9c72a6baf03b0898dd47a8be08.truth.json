@@ -1,0 +1,72 @@
+{
+ "sha256": "1fbefa991fff2daea3141521866fdab376044c9c72a6baf03b0898dd47a8be08",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Potts and Sons Corp",
+  "vendor_address": "779 Rebecca Brook, West Samanthafort, OH 34045",
+  "vendor_tax_id": "61-7575126",
+  "vendor_email": "accounts@potts-and-sons-corp.example",
+  "vendor_phone": "(811) 494-1050",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-77487",
+  "invoice_date": "September 13, 2026",
+  "due_date": null,
+  "po_number": "4501090",
+  "payment_terms": "30 days end of month",
+  "currency": "USD",
+  "subtotal": "2,589.41",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "2,589.41",
+  "bank_account": "345328527035",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Parcel Freight Tier 2",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "435.91",
+    "amount": "1,307.73",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Express Freight Standard",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "Each",
+    "unit_price": "320.42",
+    "amount": "1,281.68",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30136,
+  "vendor_site_id": 7118,
+  "org_id": 204,
+  "po_number": "4501090",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "2589.41",
+  "subtotal": "2589.41",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

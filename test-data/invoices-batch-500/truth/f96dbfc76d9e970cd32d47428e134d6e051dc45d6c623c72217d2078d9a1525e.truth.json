@@ -1,0 +1,62 @@
+{
+ "sha256": "f96dbfc76d9e970cd32d47428e134d6e051dc45d6c623c72217d2078d9a1525e",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Morris-Campbell",
+  "vendor_address": "001 Smith Walks Apt. 770, New Melissa, WA 56573",
+  "vendor_tax_id": "80-8067639",
+  "vendor_email": "ar@morris-campbell.example",
+  "vendor_phone": "(926) 769-6105",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-44602",
+  "invoice_date": "Sep 10, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payment within 7 days",
+  "currency": "USD",
+  "subtotal": "3,671.20",
+  "tax_label": "Tax 8.25%",
+  "tax_rate": "8.25%",
+  "tax_amount": "302.87",
+  "freight_amount": null,
+  "total": "3,974.07",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Event Guard Services Reserved",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "3,671.20",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30291,
+  "vendor_site_id": 7269,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-10",
+  "invoice_amount": "3974.07",
+  "subtotal": "3671.20",
+  "tax_amount": "302.87",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

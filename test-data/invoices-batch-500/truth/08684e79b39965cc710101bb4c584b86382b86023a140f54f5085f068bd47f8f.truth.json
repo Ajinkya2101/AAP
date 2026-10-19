@@ -1,0 +1,72 @@
+{
+ "sha256": "08684e79b39965cc710101bb4c584b86382b86023a140f54f5085f068bd47f8f",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Parker-Curtis Ltd",
+  "vendor_address": "9 Eric Circle, Wrightmouth E9 9NP, United Kingdom",
+  "vendor_tax_id": "GB661094101",
+  "vendor_email": "accounts@parker-curtis.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "PL-INV-45315",
+  "invoice_date": "16 September 2026",
+  "due_date": null,
+  "po_number": "4500755",
+  "payment_terms": "7 days net",
+  "currency": "GBP",
+  "subtotal": "18,757.50",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "18,757.50",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Belden 7894 Cat6 Cable Box 16\"",
+    "item_code": null,
+    "quantity": "50",
+    "uom": null,
+    "unit_price": "151.42",
+    "amount": "7,571.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Aruba AP 1776 Access Point Enterprise",
+    "item_code": null,
+    "quantity": "10",
+    "uom": null,
+    "unit_price": "1,118.65",
+    "amount": "11,186.50",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30160,
+  "vendor_site_id": 7142,
+  "org_id": 204,
+  "po_number": "4500755",
+  "currency_code": "GBP",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "18757.50",
+  "subtotal": "18757.50",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

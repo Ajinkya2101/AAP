@@ -1,0 +1,21 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import vendor_block, party_block, meta_rows, lines_table, totals_table, payment_block %}
+{% block style %}
+  body { font-size: 8.5pt; }
+  .hdr td { border: 0.5px solid #999; }
+  .lines th, .lines td { border: 0.5px solid #999; }
+  .lines th { background: #f2f2f2; }
+  .totals { width: 35%; margin-left: 65%; }
+  .totals td { border: 0.5px solid #999; }
+{% endblock %}
+{% block body %}
+<table class="hdr"><tr>
+  <td style="width:40%">{{ vendor_block(inv.vendor, labels) }}</td>
+  <td style="width:30%">{{ party_block(labels.bill_to, inv.bill_to) }}</td>
+  <td><b>{{ labels.title }}</b><table>{{ meta_rows(inv, labels) }}</table></td>
+</tr></table>
+<br>
+{{ lines_table(inv, labels) }}
+{{ totals_table(inv, labels) }}
+<br>{{ payment_block(inv, labels) }}
+{% endblock %}

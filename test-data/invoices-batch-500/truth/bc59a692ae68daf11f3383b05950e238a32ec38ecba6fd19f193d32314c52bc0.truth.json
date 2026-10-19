@@ -1,0 +1,83 @@
+{
+ "sha256": "bc59a692ae68daf11f3383b05950e238a32ec38ecba6fd19f193d32314c52bc0",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Singh LLC Inc",
+  "vendor_address": "5412 Jacob Mission Suite 101, Danieltown, WA 46889",
+  "vendor_tax_id": "71-6337828",
+  "vendor_email": "accounts@singh.example",
+  "vendor_phone": "(946) 929-8547",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "SLI/26-27/24184",
+  "invoice_date": "Sep 13, 2026",
+  "due_date": null,
+  "po_number": "4501097",
+  "payment_terms": "Net 30 days from date of invoice",
+  "currency": "$",
+  "subtotal": "$11,561.11",
+  "tax_label": "Sales Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$838.18",
+  "freight_amount": null,
+  "total": "$12,399.29",
+  "bank_account": "522361954789",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Steelcase 1134 Lateral File Standard",
+    "item_code": null,
+    "quantity": "30",
+    "uom": "Nos",
+    "unit_price": "$288.32",
+    "amount": "$8,649.60",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "HON Ignition 1838 Task Chair Premium",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "$726.61",
+    "amount": "$726.61",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Herman Miller Aeron 5224 Task Chair Basic",
+    "item_code": null,
+    "quantity": "6",
+    "uom": "unit",
+    "unit_price": "364.15",
+    "amount": "$2,184.90",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30244,
+  "vendor_site_id": 7226,
+  "org_id": 204,
+  "po_number": "4501097",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "12399.29",
+  "subtotal": "11561.11",
+  "tax_amount": "838.18",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

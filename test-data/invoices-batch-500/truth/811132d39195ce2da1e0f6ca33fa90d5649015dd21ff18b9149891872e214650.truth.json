@@ -1,0 +1,83 @@
+{
+ "sha256": "811132d39195ce2da1e0f6ca33fa90d5649015dd21ff18b9149891872e214650",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Miller Lucas and Williams Inc",
+  "vendor_address": "5466 Shelton Center, Ritterhaven, CA 83192",
+  "vendor_tax_id": "23-7758043",
+  "vendor_email": "invoices@miller-lucas-and-williams.example",
+  "vendor_phone": "(682) 297-7800",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "MLA73117",
+  "invoice_date": "20-Sep-2026",
+  "due_date": "10/20/2026",
+  "po_number": "4500624",
+  "payment_terms": "Payment due within 30 days",
+  "currency": "USD",
+  "subtotal": "61,766.31",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "4,941.30",
+  "freight_amount": null,
+  "total": "66,707.61",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Agilent 9483 Instrument Premium",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "9,693.11",
+    "amount": "9,693.11",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Mettler Toledo 8283 Instrument 14\"",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "6,133.32",
+    "amount": "18,399.96",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Thermo Fisher 5229 Instrument Large",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "pcs",
+    "unit_price": "8,418.31",
+    "amount": "33,673.24",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30127,
+  "vendor_site_id": 7110,
+  "org_id": 204,
+  "po_number": "4500624",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-20",
+  "invoice_amount": "66707.61",
+  "subtotal": "61766.31",
+  "tax_amount": "4941.30",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "sha256": "7164b667c096992edac7292104b9d82057793212392874165edbe5dbe28df155",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Hall Garcia and Rivera",
+  "vendor_address": "267 Santos Throughway, Garciaberg, FL 38150",
+  "vendor_tax_id": "25-1414306",
+  "vendor_email": "invoices@hall-garcia-and-rivera.example",
+  "vendor_phone": "(584) 681-5817",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "HGA-INV-32062",
+  "invoice_date": "09/24/2026",
+  "due_date": null,
+  "po_number": "4500824",
+  "payment_terms": "2/10 Net 30",
+  "currency": "$",
+  "subtotal": "$87,197.73",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "$87,197.73",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Executive Search Placement Fee Reserved",
+    "item_code": null,
+    "quantity": "12",
+    "uom": "unit",
+    "unit_price": "6,711.86",
+    "amount": "$80,542.32",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Campus Placement Fee Basic",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "Each",
+    "unit_price": "6,655.41",
+    "amount": "$6,655.41",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30180,
+  "vendor_site_id": 7164,
+  "org_id": 204,
+  "po_number": "4500824",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-24",
+  "invoice_amount": "87197.73",
+  "subtotal": "87197.73",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

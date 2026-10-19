@@ -1,0 +1,72 @@
+{
+ "sha256": "33e247811560e9392825925e05feff9450823ebc32afc10ae9e4a118854a879f",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Riley Inc LLC",
+  "vendor_address": "3534 Anderson Rue Suite 751, South Dianeshire, MN 01721",
+  "vendor_tax_id": "25-5266245",
+  "vendor_email": "accounts@riley-inc.example",
+  "vendor_phone": "(295) 859-7297",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "RIL78815",
+  "invoice_date": "Sep 13, 2026",
+  "due_date": "2026-10-13",
+  "po_number": "4500839",
+  "payment_terms": "60 days net",
+  "currency": "$",
+  "subtotal": "$5,401.40",
+  "tax_label": "Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$479.37",
+  "freight_amount": null,
+  "total": "$5,880.77",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "LTL Freight On-Demand",
+    "item_code": null,
+    "quantity": "2",
+    "uom": "Each",
+    "unit_price": "$434.68",
+    "amount": "$869.36",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Virtual Training Basic",
+    "item_code": null,
+    "quantity": "4",
+    "uom": null,
+    "unit_price": "$1,133.01",
+    "amount": "$4,532.04",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30017,
+  "vendor_site_id": 7013,
+  "org_id": 204,
+  "po_number": "4500839",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "5880.77",
+  "subtotal": "5401.40",
+  "tax_amount": "479.37",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

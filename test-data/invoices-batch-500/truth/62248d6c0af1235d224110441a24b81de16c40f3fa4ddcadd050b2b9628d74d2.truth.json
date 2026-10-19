@@ -1,0 +1,73 @@
+{
+ "sha256": "62248d6c0af1235d224110441a24b81de16c40f3fa4ddcadd050b2b9628d74d2",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Allen Inc Inc",
+  "vendor_address": "067 Amber Throughway, New Arthurton, TX 07899",
+  "vendor_tax_id": "60-3148454",
+  "vendor_email": "invoices@allen-inc.example",
+  "vendor_phone": "(498) 474-9314",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "AII82466",
+  "invoice_date": "Sep 15, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 7",
+  "currency": "$",
+  "subtotal": "$2,169.17",
+  "tax_label": "Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$130.15",
+  "freight_amount": null,
+  "total": "$2,299.32",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Weekly Waste Pickup Reserved",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$458.30",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Recycling Waste Pickup Quarterly",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$1,710.87",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30197,
+  "vendor_site_id": 7183,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-15",
+  "invoice_amount": "2299.32",
+  "subtotal": "2169.17",
+  "tax_amount": "130.15",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "sha256": "d1681a683ba65811eba1ca1e9417a634edcd72b3c3ee6caf48c9e1d361b34103",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Wright Ltd",
+  "vendor_address": "94667 Cynthia Trafficway Apt. 684, Mariafurt, CO 91557",
+  "vendor_tax_id": "36-8603326",
+  "vendor_email": "accounts@wright.example",
+  "vendor_phone": "(546) 545-4052",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "21957",
+  "invoice_date": "2026-09-25",
+  "due_date": null,
+  "po_number": "4500894",
+  "payment_terms": null,
+  "currency": "USD",
+  "subtotal": "17,527.52",
+  "tax_label": "Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "1,555.57",
+  "freight_amount": null,
+  "total": "19,083.09",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Transformation Consulting Basic",
+    "item_code": null,
+    "quantity": "16",
+    "uom": "Hours",
+    "unit_price": "190.21",
+    "amount": "3,043.36",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Campus Placement Fee Basic",
+    "item_code": null,
+    "quantity": "2",
+    "uom": "EA",
+    "unit_price": "7,242.08",
+    "amount": "14,484.16",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30288,
+  "vendor_site_id": 7264,
+  "org_id": 204,
+  "po_number": "4500894",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-25",
+  "invoice_amount": "19083.09",
+  "subtotal": "17527.52",
+  "tax_amount": "1555.57",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

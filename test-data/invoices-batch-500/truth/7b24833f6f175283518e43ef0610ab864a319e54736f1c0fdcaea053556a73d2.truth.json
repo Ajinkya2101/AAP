@@ -1,0 +1,83 @@
+{
+ "sha256": "7b24833f6f175283518e43ef0610ab864a319e54736f1c0fdcaea053556a73d2",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Alvarez Joseph and West",
+  "vendor_address": "9578 Coleman Summit, North Kellyfurt, AZ 72641",
+  "vendor_tax_id": null,
+  "vendor_email": "invoices@alvarez-joseph-and-west.example",
+  "vendor_phone": "(672) 536-5888",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-59204",
+  "invoice_date": "September 11, 2026",
+  "due_date": "Oct 11, 2026",
+  "po_number": "4500454",
+  "payment_terms": "7 days net",
+  "currency": "USD",
+  "subtotal": "110,942.88",
+  "tax_label": "Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "8,043.36",
+  "freight_amount": "186.00",
+  "total": "119,172.24",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Corporate Legal Services Quarterly",
+    "item_code": null,
+    "quantity": "80",
+    "uom": null,
+    "unit_price": "1,270.86",
+    "amount": "101,668.80",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Employment Legal Services EU (Ireland)",
+    "item_code": null,
+    "quantity": "8",
+    "uom": null,
+    "unit_price": "417.54",
+    "amount": "3,340.32",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Corporate Legal Services Basic",
+    "item_code": null,
+    "quantity": "24",
+    "uom": null,
+    "unit_price": "247.24",
+    "amount": "5,933.76",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30056,
+  "vendor_site_id": 7053,
+  "org_id": 204,
+  "po_number": "4500454",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "119172.24",
+  "subtotal": "110942.88",
+  "tax_amount": "8043.36",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

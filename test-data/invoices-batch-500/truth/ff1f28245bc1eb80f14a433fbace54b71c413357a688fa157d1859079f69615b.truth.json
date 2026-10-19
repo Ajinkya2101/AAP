@@ -1,0 +1,73 @@
+{
+ "sha256": "ff1f28245bc1eb80f14a433fbace54b71c413357a688fa157d1859079f69615b",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Conley PLC LLC",
+  "vendor_address": "1036 Brown Villages, Rodriguezport, MN 66014",
+  "vendor_tax_id": "72-8179349",
+  "vendor_email": "accounts@conley.example",
+  "vendor_phone": "(210) 808-6769",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "CPL/26-27/28616",
+  "invoice_date": "September 23, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payable immediately",
+  "currency": "$",
+  "subtotal": "$1,574.18",
+  "tax_label": "Sales tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$125.93",
+  "freight_amount": null,
+  "total": "$1,700.11",
+  "bank_account": "123288749444",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Cold Storage Backup Quarterly",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$1,325.12",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Object Storage Storage Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$249.06",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30139,
+  "vendor_site_id": 7119,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-23",
+  "invoice_amount": "1700.11",
+  "subtotal": "1574.18",
+  "tax_amount": "125.93",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

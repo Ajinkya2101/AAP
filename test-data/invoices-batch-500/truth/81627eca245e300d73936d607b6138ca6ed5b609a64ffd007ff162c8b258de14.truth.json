@@ -1,0 +1,83 @@
+{
+ "sha256": "81627eca245e300d73936d607b6138ca6ed5b609a64ffd007ff162c8b258de14",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Holzapfel",
+  "vendor_address": "Dowergring 11/73, 97122 Regensburg, Netherlands",
+  "vendor_tax_id": "NL158331170B03",
+  "vendor_email": "ar@holzapfel.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "H76354",
+  "invoice_date": "2026-09-10",
+  "due_date": null,
+  "po_number": "4500898",
+  "payment_terms": "7 days net",
+  "currency": "€",
+  "subtotal": "11.898,40 €",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "11.898,40 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Cisco Catalyst C9200L-24P-4G",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "pcs",
+    "unit_price": "2.555,23",
+    "amount": "10.220,92 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Esselte 9605 File Folders Premium",
+    "item_code": null,
+    "quantity": "25",
+    "uom": "pk",
+    "unit_price": "36,62",
+    "amount": "915,50 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "HON Brigade 8156 Lateral File 16\"",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "380,99",
+    "amount": "761,98 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30132,
+  "vendor_site_id": 7114,
+  "org_id": 204,
+  "po_number": "4500898",
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-10",
+  "invoice_amount": "11898.40",
+  "subtotal": "11898.40",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

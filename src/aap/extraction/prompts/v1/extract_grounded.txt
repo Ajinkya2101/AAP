@@ -1,0 +1,1 @@
+Some pages have no text layer. For each header value you return, also add an entry to "evidence" with the field name, the page number and the box [x0, y0, x1, y1] in pixels of the page image where the value is printed.

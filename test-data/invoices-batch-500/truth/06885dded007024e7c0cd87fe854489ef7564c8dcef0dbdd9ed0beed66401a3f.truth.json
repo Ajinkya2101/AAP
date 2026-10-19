@@ -1,0 +1,62 @@
+{
+ "sha256": "06885dded007024e7c0cd87fe854489ef7564c8dcef0dbdd9ed0beed66401a3f",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "White Saunders and Johnson Inc",
+  "vendor_address": "1672 Allen Shoals Apt. 661, Hahnborough, GA 59361",
+  "vendor_tax_id": "75-8706139",
+  "vendor_email": "billing@white-saunders-and-johnson.example",
+  "vendor_phone": "(881) 233-7528",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "WSA-INV-71956",
+  "invoice_date": "Sep 20, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payment due within 30 days",
+  "currency": "$",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "$6,201.53",
+  "bank_account": "281223819448",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Industrial Electric Service Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$6,201.53",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30260,
+  "vendor_site_id": 7241,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-20",
+  "invoice_amount": "6201.53",
+  "subtotal": "6201.53",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

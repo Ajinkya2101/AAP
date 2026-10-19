@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}{{ inv.invoice_num.value if inv else doc.filename }}{% endblock %}
+{% block content %}
+<h1>{{ (inv.vendor_name.value ~ ' · ' ~ inv.invoice_num.value) if inv else (doc.filename or doc.id) }}
+  <span class="muted">— {{ doc.status }}</span></h1>
+<p class="muted">Document <code>{{ doc.id }}</code> · {{ doc.file_type }} · from {{ doc.source }}
+  {% if doc.parent_id %}(<a href="/ui/documents/{{ doc.parent_id }}">email</a>){% endif %}
+  {% if doc.flags %}· flags: {{ doc.flags | join(', ') }}{% endif %}
+  {% if doc.error %}· <span class="error">{{ doc.error }}</span>{% endif %}</p>
+<form method="post" action="/ui/documents/{{ doc.id }}/delete"
+      data-confirm="Delete this record? The file, the extracted data and its history are removed and cannot be restored. An invoice already posted to Oracle stays in Oracle."
+      onsubmit="return confirm(this.dataset.confirm)">
+  <p><a href="/ui#records">Back to the records</a> · <button class="danger">Delete record</button></p>
+</form>
+
+<div class="grid">
+  <div><iframe src="/api/documents/{{ doc.id }}/file" title="original"></iframe></div>
+  <div>
+    {% for t in tasks %}
+      <div class="panel"><b>{{ t.reason_codes | join(', ') or 'Review' }}</b>
+        {% if t.suggested_action %}<span class="muted"> · suggested: {{ t.suggested_action }}</span>{% endif %}
+        <pre>{{ t.summary }}</pre></div>
+    {% endfor %}
+
+    {% if can_decide %}
+    <form method="post" action="/ui/documents/{{ doc.id }}/decision" class="panel">
+      <b>Decision</b>
+      <table>
+        <thead><tr><th>#</th><th>Line</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th>
+          <th>PO line</th><th>GL account (non-PO)</th></tr></thead>
+        <tbody>
+        {% for ln in preview.lines if ln.line_type == 'ITEM' %}
+          <tr><td>{{ ln.line_number }}</td><td>{{ ln.description.value }}</td>
+            <td class="num">{{ ln.quantity.value or '' }}</td><td class="num">{{ ln.unit_price.value or '' }}</td>
+            <td class="num">{{ ln.amount.value or '' }}</td>
+            <td><input class="small" type="text" name="po_line_{{ ln.line_number }}" value="{{ ln.po_line_number.value or '' }}"></td>
+            <td><input class="acct" type="text" name="account_{{ ln.line_number }}" value="{{ ln.dist_account.value or '' }}"
+                       placeholder="01-510-6420-0000"></td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <p><input type="text" name="note" placeholder="Note (optional; required for reject)"></p>
+      <button class="primary" name="action" value="approve">Approve and post to Oracle</button>
+      <button class="danger" name="action" value="reject">Reject</button>
+      <span class="muted">PO: {{ preview.po_number.value or '—' }}</span>
+    </form>
+    {% endif %}
+
+    {% if source %}
+    <details class="panel">
+      <summary><b>Correct what was read from the invoice</b>
+        <span class="muted">· values as printed; the invoice is checked again afterwards</span></summary>
+      <form method="post" action="/ui/documents/{{ doc.id }}/corrections">
+        <table><tbody>
+        {% for name in source_header %}
+          <tr><td>{{ name }}</td>
+            <td><input type="text" name="h_{{ name }}" value="{{ source[name].value or '' }}"></td></tr>
+        {% endfor %}
+        </tbody></table>
+        <table>
+          <thead><tr><th>#</th>{% for name in source_line %}<th>{{ name }}</th>{% endfor %}<th>Remove</th></tr></thead>
+          <tbody>
+          {% for ln in source.lines %}
+            <tr><td>{{ ln.line_no }}</td>
+              {% for name in source_line %}
+                <td><input {% if name != 'description' %}class="small" {% endif %}type="text"
+                           name="l_{{ ln.line_no }}_{{ name }}" value="{{ ln[name].value or '' }}"></td>
+              {% endfor %}
+              <td><input type="checkbox" name="rm_{{ ln.line_no }}" aria-label="Remove line {{ ln.line_no }}"></td></tr>
+          {% endfor %}
+            <tr><td class="muted">new</td>
+              {% for name in source_line %}
+                <td><input {% if name != 'description' %}class="small" {% endif %}type="text" name="new_{{ name }}"
+                           aria-label="New line {{ name }}"></td>
+              {% endfor %}
+              <td></td></tr>
+          </tbody>
+        </table>
+        <p><input type="text" name="note" placeholder="Note (optional)"></p>
+        <button>Save corrections and check again</button>
+      </form>
+    </details>
+    {% endif %}
+
+    {% if inv %}
+    <h2>Invoice</h2>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th><th>On the invoice</th><th>Method</th><th>Flags</th></tr></thead>
+      <tbody>
+      {% for name, f in header %}
+        <tr><td>{{ name }}</td><td>{{ f.value if f.value is not none else '' }}</td>
+          <td class="muted">{{ f.source_value or '' }}</td><td class="muted">{{ f.method or '' }}</td>
+          <td class="warning">{{ (f.flags or []) | join(', ') }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    {% if validation %}
+    <h2>Validation</h2>
+    <table><tbody>
+      {% for r in validation if r.result != 'pass' and r.result != 'skip' %}
+        <tr><td class="{{ r.result }}">{{ r.result }}</td><td>{{ r.rule_id }}</td><td>{{ r.message }}</td></tr>
+      {% else %}<tr><td class="pass">All checks passed.</td></tr>{% endfor %}
+    </tbody></table>
+    {% endif %}
+
+    {% if decisions %}
+    <h2>Agent decisions</h2>
+    <table><thead><tr><th>Node</th><th>Chosen</th><th>Reason</th><th>Model</th></tr></thead><tbody>
+      {% for d in decisions %}
+        <tr><td>{{ d.node }}</td><td><code>{{ d.chosen | tojson | truncate(80) }}</code></td>
+          <td>{{ d.reason or '' }}</td><td class="muted">{{ d.model or '' }}</td></tr>
+      {% endfor %}
+    </tbody></table>
+    {% endif %}
+
+    {% if holds %}
+    <h2>Holds</h2>
+    <table><tbody>{% for h in holds %}
+      <tr><td>{{ h.hold_lookup_code }}</td><td>line {{ h.line_number }}</td><td>{{ h.status }}</td><td>{{ h.summary }}</td></tr>
+    {% endfor %}</tbody></table>
+    {% endif %}
+
+    {% if submissions %}
+    <h2>Oracle</h2>
+    <table><thead><tr><th>Key</th><th>Status</th><th>Request</th><th>Invoice id</th><th>Holds / errors</th></tr></thead><tbody>
+      {% for s in submissions %}
+        <tr><td><code>{{ s.idempotency_key[-10:] }}</code></td><td>{{ s.status }}</td><td>{{ s.oracle_request_id or '' }}</td>
+          <td>{{ s.oracle_invoice_id or '' }}</td>
+          <td>{{ (s.oracle_holds or []) | join(', ') }} <span class="error">{{ (s.oracle_errors or []) | join(', ') }}</span></td></tr>
+      {% endfor %}
+    </tbody></table>
+    {% endif %}
+
+    <h2>History</h2>
+    <table><tbody>{% for h in history %}
+      <tr><td>{{ h.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ h.to_status }}</td><td class="muted">{{ h.reason or '' }}</td></tr>
+    {% endfor %}</tbody></table>
+  </div>
+</div>
+{% endblock %}

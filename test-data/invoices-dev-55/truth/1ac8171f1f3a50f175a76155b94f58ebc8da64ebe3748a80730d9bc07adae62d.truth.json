@@ -1,0 +1,62 @@
+{
+ "sha256": "1ac8171f1f3a50f175a76155b94f58ebc8da64ebe3748a80730d9bc07adae62d",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Lucerne Printing Services",
+  "vendor_address": "575 8th Ave, New York, NY 10018",
+  "vendor_tax_id": "13-5561028",
+  "vendor_email": "billing@lucerne-print.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "LPS-88317",
+  "invoice_date": "Sept 12, 2026",
+  "due_date": null,
+  "po_number": "4500184",
+  "payment_terms": "Net 30",
+  "currency": "$",
+  "subtotal": "$2,100.00",
+  "tax_label": "Sales Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$186.38",
+  "freight_amount": null,
+  "total": "$2,286.38",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Tri-fold brochure 8.5x11 100lb gloss",
+    "item_code": null,
+    "quantity": "5000",
+    "uom": null,
+    "unit_price": "$0.42",
+    "amount": "$2,100.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": "S13",
+  "vendor_id": 30315,
+  "vendor_site_id": 7290,
+  "org_id": 204,
+  "po_number": "4500184",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-12",
+  "invoice_amount": "2286.38",
+  "subtotal": "2100.00",
+  "tax_amount": "186.38",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "notes": "Image-only PDF (route image_only)."
+ }
+}

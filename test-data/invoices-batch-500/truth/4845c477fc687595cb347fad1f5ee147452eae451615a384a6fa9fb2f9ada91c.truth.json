@@ -1,0 +1,62 @@
+{
+ "sha256": "4845c477fc687595cb347fad1f5ee147452eae451615a384a6fa9fb2f9ada91c",
+ "generator": "tools.invoicegen",
+ "layout": "minimal",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Lee Tran and Jones Corp",
+  "vendor_address": "16558 Fischer Flat, Duranview, FL 79467",
+  "vendor_tax_id": "53-8282586",
+  "vendor_email": "invoices@lee-tran-and-jones-corp.example",
+  "vendor_phone": "(495) 747-8594",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-64463",
+  "invoice_date": "2026-09-21",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 30",
+  "currency": "$",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "$29,201.85",
+  "bank_account": "721620033728",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Green Tariff Electric Service Quarterly",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$29,201.85",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30176,
+  "vendor_site_id": 7156,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-21",
+  "invoice_amount": "29201.85",
+  "subtotal": "29201.85",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

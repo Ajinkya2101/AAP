@@ -1,0 +1,49 @@
+<div class="chips">
+  <a class="chip {{ 'on' if not status }}" href="{{ records_url(None, q) }}#records" {% if not status %}aria-current="true"{% endif %}>All {{ total }}</a>
+  <a class="chip {{ 'on' if status == WAITING }}" href="{{ records_url(WAITING, q) }}#records" {% if status == WAITING %}aria-current="true"{% endif %}>Need Attention {{ waiting }}</a>
+  {% for s, n in counts %}
+    <a class="chip {{ 'on' if status == s }}" href="{{ records_url(s, q) }}#records" {% if status == s %}aria-current="true"{% endif %}>{{ s }} {{ n }}</a>
+  {% endfor %}
+</div>
+<div class="bulk">
+  <button id="delete-selected" class="danger" disabled hx-post="/ui/documents/delete" hx-swap="none"
+          hx-include="#records-list input[name=ids]:checked" hx-disabled-elt="this">Delete selected</button>
+  <span id="selected-count" class="muted">Tick records to delete several at once.</span>
+</div>
+<table>
+  <thead><tr><th class="check"><input id="check-all" type="checkbox" aria-label="Select every record on this page"></th>
+    <th>Received</th><th>Supplier</th><th>Invoice</th><th class="num">Amount</th><th>Status</th>
+    <th>Reasons</th><th>File</th><th>Source</th><th></th></tr></thead>
+  <tbody>
+  {% for d in docs %}
+    {% set name = d.invoice_num or d.filename or d.id|string|truncate(8, True, '') %}
+    <tr>
+      <td class="check"><input type="checkbox" name="ids" value="{{ d.id }}" data-name="{{ name }}" data-status="{{ d.status }}"
+                               aria-label="Select {{ name }}"></td>
+      <td>{{ d.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      <td>{{ d.vendor or '' }}</td>
+      <td><a href="/ui/documents/{{ d.id }}">{{ name }}</a></td>
+      <td class="num">{{ d.amount or '' }} {{ d.currency or '' }}</td>
+      <td>{{ d.status }}</td>
+      <td>{{ d.reasons | join(', ') }}</td>
+      <td><a href="/api/documents/{{ d.id }}/file" target="_blank">{{ d.file_type }}</a></td>
+      <td class="muted">{{ d.source }}</td>
+      <td><button data-delete data-name="{{ name }}" data-status="{{ d.status }}" aria-label="Delete {{ name }}"
+                  hx-post="/ui/documents/{{ d.id }}/delete" hx-swap="none" hx-disabled-elt="this">Delete</button></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="10" class="muted">
+      {% if q %}No invoices match “{{ q }}”{{ ' in this filter' if status }}. <a href="{{ records_url(status) }}#records">Clear the search</a>
+      {% elif status %}No invoices in this filter. <a href="{{ records_url() }}#records">Show all</a>
+      {% else %}No invoices yet. Upload the first files above.{% endif %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if docs %}
+<div class="pager">
+  <span class="muted">{{ first }}–{{ last }} of {{ matching }}</span>
+  {% if page > 1 %}<a href="{{ records_url(status, q, page - 1) }}#records">Previous</a>{% endif %}
+  {% if pages > 1 %}<span class="muted">Page {{ page }} of {{ pages }}</span>{% endif %}
+  {% if page < pages %}<a href="{{ records_url(status, q, page + 1) }}#records">Next</a>{% endif %}
+</div>
+{% endif %}

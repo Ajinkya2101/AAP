@@ -1,0 +1,6 @@
+# Copy to %UserProfile%\.wslconfig, then run: wsl --shutdown
+# (docs/IMPLEMENTATION-PLAN.md section 1.1)
+[wsl2]
+memory=24GB
+swap=8GB
+processors=20

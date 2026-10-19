@@ -1,0 +1,62 @@
+{
+ "sha256": "ff0f2c26e9ccb075c10561a66cc870af9c80b441d1630fac9b6a696ff99004be",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Lee-Stephenson",
+  "vendor_address": "35 Hobbs Forks, East Sianmouth DN97 4XG, Ireland",
+  "vendor_tax_id": "IE90477425",
+  "vendor_email": "ar@lee-stephenson.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "L20628",
+  "invoice_date": "14 September 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "2/10 Net 30",
+  "currency": "€",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "€5,594.11",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": "IE86XDWM49133424579889",
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Creative Agency Retainer Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "€5,594.11",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30287,
+  "vendor_site_id": 7262,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-14",
+  "invoice_amount": "5594.11",
+  "subtotal": "5594.11",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,13 @@
+# Optional dev override: bind-mount the source into api/worker for live reload.
+#   set DEV_RELOAD=1 in .env, then:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# Bind mounts from C:\ are slow under WSL2, so this is off by default (plan section 10).
+services:
+  api:
+    volumes:
+      - ./src:/app/src
+      - ./tools:/app/tools
+  worker:
+    volumes:
+      - ./src:/app/src
+      - ./tools:/app/tools

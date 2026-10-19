@@ -1,0 +1,62 @@
+{
+ "sha256": "5a04b2ff119928b55759cb2ceafbbcd2daee824d89ed55155d08194919f2f9e1",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Saunders Becker and Taylor LLC",
+  "vendor_address": "95214 Burgess Extensions Apt. 285, Lake Debbieport, FL 70080",
+  "vendor_tax_id": "50-9291408",
+  "vendor_email": "accounts@saunders-becker-and-taylor.example",
+  "vendor_phone": "(452) 592-7859",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "SBA-INV-39249",
+  "invoice_date": "2026-09-19",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "$",
+  "subtotal": "$2,223.85",
+  "tax_label": "Sales Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$133.43",
+  "freight_amount": null,
+  "total": "$2,357.28",
+  "bank_account": "905246147564",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Deep Clean Janitorial Services Reserved",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$2,223.85",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30085,
+  "vendor_site_id": 7077,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "2357.28",
+  "subtotal": "2223.85",
+  "tax_amount": "133.43",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

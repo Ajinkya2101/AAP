@@ -1,0 +1,83 @@
+{
+ "sha256": "9ed720668bdb760a3080ac334c57ea557f3d938aa4ab62c19ada69a2b553584a",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Wähner",
+  "vendor_address": "Jörgen-Bruder-Gasse 5-3, 04741 Schweinfurt, Netherlands",
+  "vendor_tax_id": "NL360765817B90",
+  "vendor_email": "billing@w-hner.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-80013",
+  "invoice_date": "16 September 2026",
+  "due_date": null,
+  "po_number": "4500830",
+  "payment_terms": "30 days end of month",
+  "currency": "EUR",
+  "subtotal": "540.826,66 €",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "540.826,66 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Corporate Legal Services Quarterly",
+    "item_code": null,
+    "quantity": "80",
+    "uom": null,
+    "unit_price": "1.275,79",
+    "amount": "102.063,20 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "10x20 Booth Package Quarterly",
+    "item_code": null,
+    "quantity": "2",
+    "uom": "Nos",
+    "unit_price": "35.053,73",
+    "amount": "70.107,46 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Employment Legal Services Annual",
+    "item_code": null,
+    "quantity": "80",
+    "uom": null,
+    "unit_price": "4.608,20",
+    "amount": "368.656,00 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30206,
+  "vendor_site_id": 7192,
+  "org_id": 204,
+  "po_number": "4500830",
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "540826.66",
+  "subtotal": "540826.66",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

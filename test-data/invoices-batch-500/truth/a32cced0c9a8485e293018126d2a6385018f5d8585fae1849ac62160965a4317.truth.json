@@ -1,0 +1,83 @@
+{
+ "sha256": "a32cced0c9a8485e293018126d2a6385018f5d8585fae1849ac62160965a4317",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Sanders LLC",
+  "vendor_address": "218 Chelsey Expressway, South Kiara, OH 58185",
+  "vendor_tax_id": null,
+  "vendor_email": "invoices@sanders.example",
+  "vendor_phone": "(909) 698-5769",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-25075",
+  "invoice_date": "26-Sep-2026",
+  "due_date": "2026-10-26",
+  "po_number": "4500562",
+  "payment_terms": "45 days",
+  "currency": "$",
+  "subtotal": "$8,229.77",
+  "tax_label": "Sales tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$658.38",
+  "freight_amount": null,
+  "total": "$8,888.15",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Virtual Training Basic",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "$1,105.87",
+    "amount": "$1,105.87",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Instructor-led Training Standard",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "$1,562.86",
+    "amount": "$1,562.86",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Certification Training Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "pcs",
+    "unit_price": "$1,390.26",
+    "amount": "$5,561.04",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30296,
+  "vendor_site_id": 7273,
+  "org_id": 204,
+  "po_number": "4500562",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-26",
+  "invoice_amount": "8888.15",
+  "subtotal": "8229.77",
+  "tax_amount": "658.38",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

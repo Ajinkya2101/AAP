@@ -1,0 +1,62 @@
+{
+ "sha256": "1162504f2f66fd103f020a58edd01077033299a913d892e4883bdbb077cddd3b",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Flowers Martin and Kelly Inc",
+  "vendor_address": "327 Nelson Route, Jacquelineland, IL 90699",
+  "vendor_tax_id": "20-6982358",
+  "vendor_email": "invoices@flowers-martin-and-kelly.example",
+  "vendor_phone": "(670) 425-2081",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "FMA-INV-67413",
+  "invoice_date": "09/18/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payable immediately",
+  "currency": "USD",
+  "subtotal": "5,759.23",
+  "tax_label": "Sales Tax 8.25%",
+  "tax_rate": "8.25%",
+  "tax_amount": "475.14",
+  "freight_amount": null,
+  "total": "6,234.37",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Commercial Electric Service Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "5,759.23",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30000,
+  "vendor_site_id": 7000,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-18",
+  "invoice_amount": "6234.37",
+  "subtotal": "5759.23",
+  "tax_amount": "475.14",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

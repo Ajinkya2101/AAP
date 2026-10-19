@@ -1,0 +1,73 @@
+{
+ "sha256": "d84f27319f0982107a972f9ed3c0f846b32140e1099ba1db89a0b5f93a624a6f",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Gandhi LLC Ltd",
+  "vendor_address": "H.No. 891\nBhat, Kolkata - 649927, Bihar, India",
+  "vendor_tax_id": "19WMXCG3275A2ZZ",
+  "vendor_email": "accounts@gandhi-llc.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "GLL-INV-75129",
+  "invoice_date": "09/09/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "15 days",
+  "currency": "₹",
+  "subtotal": "₹8,286.44",
+  "tax_label": "GST 5%",
+  "tax_rate": "5%",
+  "tax_amount": "₹414.32",
+  "freight_amount": null,
+  "total": "₹8,700.76",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "International Mobile Plan Tier 2",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "₹5,193.02",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Unlimited Mobile Plan US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "₹3,093.42",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30025,
+  "vendor_site_id": 7018,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-09",
+  "invoice_amount": "8700.76",
+  "subtotal": "8286.44",
+  "tax_amount": "414.32",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "sha256": "700d317a6151a68d32490741e780f30dfcb115b01cdc8ef169eb491a8b9eef04",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Foley Inc Inc",
+  "vendor_address": "4317 Elizabeth Row, Amystad, NY 84320",
+  "vendor_tax_id": "24-9849143",
+  "vendor_email": "ar@foley-inc.example",
+  "vendor_phone": "(262) 857-1526",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "73027",
+  "invoice_date": "Sep 13, 2026",
+  "due_date": "Oct 13, 2026",
+  "po_number": "4500386",
+  "payment_terms": "Net 15",
+  "currency": "$",
+  "subtotal": "$8,185.14",
+  "tax_label": "Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$491.11",
+  "freight_amount": null,
+  "total": "$8,676.25",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Tesa 7624 Packing Tape Compact",
+    "item_code": null,
+    "quantity": "20",
+    "uom": null,
+    "unit_price": "19.47",
+    "amount": "$389.40",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Thermo Fisher 2271 Instrument 16\"",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "ea",
+    "unit_price": "$7,795.74",
+    "amount": "$7,795.74",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30088,
+  "vendor_site_id": 7082,
+  "org_id": 204,
+  "po_number": "4500386",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "8676.25",
+  "subtotal": "8185.14",
+  "tax_amount": "491.11",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

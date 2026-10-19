@@ -1,0 +1,72 @@
+{
+ "sha256": "7f2ca8039f6e0abfc2fca47e82b79134e82a842565a292301bad5415354accba",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Brooks Lam and Hayes LLC",
+  "vendor_address": "7010 Chandler Union Apt. 333, North Donnastad, NC 70793",
+  "vendor_tax_id": "40-6085186",
+  "vendor_email": "accounts@brooks-lam-and-hayes.example",
+  "vendor_phone": "(718) 824-8101",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "38533",
+  "invoice_date": "24-Sep-2026",
+  "due_date": null,
+  "po_number": "4501011",
+  "payment_terms": "15 days",
+  "currency": "$",
+  "subtotal": "$100,376.79",
+  "tax_label": "Sales tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$8,908.44",
+  "freight_amount": null,
+  "total": "$109,285.23",
+  "bank_account": "193099491432",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Dell PowerEdge 2559 Rack Server Large",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "Each",
+    "unit_price": "10,165.38",
+    "amount": "$30,496.14",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Dell PowerStore 3587 Storage Array Pro",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "unit",
+    "unit_price": "$23,293.55",
+    "amount": "$69,880.65",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30008,
+  "vendor_site_id": 7009,
+  "org_id": 204,
+  "po_number": "4501011",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-24",
+  "invoice_amount": "109285.23",
+  "subtotal": "100376.79",
+  "tax_amount": "8908.44",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

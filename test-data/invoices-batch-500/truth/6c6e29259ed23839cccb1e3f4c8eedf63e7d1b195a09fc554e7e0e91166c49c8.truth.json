@@ -1,0 +1,62 @@
+{
+ "sha256": "6c6e29259ed23839cccb1e3f4c8eedf63e7d1b195a09fc554e7e0e91166c49c8",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Cannon-Boyd",
+  "vendor_address": "45581 Edward Lights Apt. 316, West Scott, OH 53925",
+  "vendor_tax_id": "41-8136077",
+  "vendor_email": "ar@cannon-boyd.example",
+  "vendor_phone": "(862) 397-7097",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "80642",
+  "invoice_date": "Sep 23, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 45",
+  "currency": "$",
+  "subtotal": "$5,755.90",
+  "tax_label": "Sales tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$460.47",
+  "freight_amount": null,
+  "total": "$6,216.37",
+  "bank_account": "108416545117",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Creative Agency Retainer Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$5,755.90",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30048,
+  "vendor_site_id": 7042,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-23",
+  "invoice_amount": "6216.37",
+  "subtotal": "5755.90",
+  "tax_amount": "460.47",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

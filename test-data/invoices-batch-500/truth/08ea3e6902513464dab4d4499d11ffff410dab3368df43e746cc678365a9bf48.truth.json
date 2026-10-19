@@ -1,0 +1,62 @@
+{
+ "sha256": "08ea3e6902513464dab4d4499d11ffff410dab3368df43e746cc678365a9bf48",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "White Saunders and Johnson Inc",
+  "vendor_address": "1672 Allen Shoals Apt. 661, Hahnborough, GA 59361",
+  "vendor_tax_id": "75-8706139",
+  "vendor_email": "billing@white-saunders-and-johnson.example",
+  "vendor_phone": "(881) 233-7528",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "WSA-INV-89553",
+  "invoice_date": "September 11, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "30 days net",
+  "currency": "$",
+  "subtotal": "$8,054.22",
+  "tax_label": "Sales tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$644.34",
+  "freight_amount": null,
+  "total": "$8,698.56",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Commercial Electric Service EU (Ireland)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$8,054.22",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30260,
+  "vendor_site_id": 7241,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "8698.56",
+  "subtotal": "8054.22",
+  "tax_amount": "644.34",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

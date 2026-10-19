@@ -1,0 +1,83 @@
+{
+ "sha256": "6e26f0bc9208526cd805196a8bf69849cf2d32e0b36a8837aa014294fe512190",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Duarte Burns and Hernandez Corp",
+  "vendor_address": "5339 Hall Trail Suite 057, Reedside, MN 92936",
+  "vendor_tax_id": "06-9951748",
+  "vendor_email": "ar@duarte-burns-and-hernandez-corp.example",
+  "vendor_phone": "(253) 857-5079",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-30733",
+  "invoice_date": "09/15/2026",
+  "due_date": null,
+  "po_number": "4501002",
+  "payment_terms": "60 days net",
+  "currency": "$",
+  "subtotal": "$73,788.08",
+  "tax_label": "Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$5,349.64",
+  "freight_amount": null,
+  "total": "$79,137.72",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Dell PowerEdge 9213 Rack Server Basic",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "pcs",
+    "unit_price": "6,678.41",
+    "amount": "$6,678.41",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Lenovo ThinkSystem 4924 Rack Server Premium",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "Each",
+    "unit_price": "$13,181.93",
+    "amount": "$39,545.79",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Dell PowerEdge 9964 Rack Server Enterprise",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "$13,781.94",
+    "amount": "$27,563.88",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30076,
+  "vendor_site_id": 7066,
+  "org_id": 204,
+  "po_number": "4501002",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-15",
+  "invoice_amount": "79137.72",
+  "subtotal": "73788.08",
+  "tax_amount": "5349.64",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

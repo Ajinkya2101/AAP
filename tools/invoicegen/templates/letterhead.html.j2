@@ -1,0 +1,26 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import party_block, meta_rows, lines_table, totals_table, payment_block %}
+{% block style %}
+  .lh { text-align: center; border-bottom: 3px double #333; padding-bottom: 6px; }
+  .lh .n { font-size: 18pt; font-family: "Liberation Serif", "DejaVu Serif", serif; }
+  .title { text-align: center; letter-spacing: 3px; font-size: 13pt; margin: 10px 0; }
+  .lines th { border-top: 1px solid #333; border-bottom: 1px solid #333; text-align: left; }
+  .totals { width: 42%; margin-left: 58%; }
+  .foot { position: fixed; bottom: -6mm; left: 0; right: 0; text-align: center; font-size: 7.5pt; color: #444; }
+{% endblock %}
+{% block body %}
+<div class="lh">
+  <div class="n">{{ inv.vendor.name }}</div>
+  <div class="small">{{ inv.vendor.address_lines | join(' · ') }}</div>
+  {% if inv.vendor.email or inv.vendor.phone %}<div class="small">{{ inv.vendor.email or '' }} {{ inv.vendor.phone or '' }}</div>{% endif %}
+</div>
+<div class="title">{{ labels.title }}</div>
+<table><tr>
+  <td style="width:55%">{{ party_block(labels.bill_to, inv.bill_to) }}</td>
+  <td><table>{{ meta_rows(inv, labels) }}</table></td>
+</tr></table><br>
+{{ lines_table(inv, labels) }}
+{{ totals_table(inv, labels) }}
+<br>{{ payment_block(inv, labels) }}
+{% if inv.vendor.tax_id %}<div class="foot">{{ labels.tax_id }}: {{ inv.vendor.tax_id }}</div>{% endif %}
+{% endblock %}

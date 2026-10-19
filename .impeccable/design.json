@@ -1,0 +1,339 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-03T11:11:38Z",
+  "title": "Design System: ACSE AP",
+  "extensions": {
+    "colorMeta": {
+      "ledger-blue": {
+        "role": "primary",
+        "displayName": "Ledger Blue",
+        "canonical": "#2856c9",
+        "tonalRamp": [
+          "#0f214f",
+          "#18347c",
+          "#2047a8",
+          "#2856c9",
+          "#5579d6",
+          "#7ea2ff",
+          "#b3c7f7",
+          "#e3eafc"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1d1d1f",
+        "tonalRamp": [
+          "#1d1d1f",
+          "#343438",
+          "#4d4d52",
+          "#6b6b70",
+          "#8b8b91",
+          "#b0b0b6",
+          "#d6d6da",
+          "#f6f6f8"
+        ]
+      },
+      "pencil": {
+        "role": "neutral",
+        "displayName": "Pencil",
+        "canonical": "#6b6b70",
+        "tonalRamp": [
+          "#1d1d1f",
+          "#343438",
+          "#4d4d52",
+          "#6b6b70",
+          "#8b8b91",
+          "#9a9aa3",
+          "#c4c4ca",
+          "#ececf0"
+        ]
+      },
+      "rule-line": {
+        "role": "neutral",
+        "displayName": "Rule Line",
+        "canonical": "#e3e3e6",
+        "tonalRamp": [
+          "#17171a",
+          "#202024",
+          "#34343a",
+          "#55555c",
+          "#8b8b91",
+          "#c4c4ca",
+          "#e3e3e6",
+          "#f6f6f8"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#17171a",
+          "#202024",
+          "#34343a",
+          "#6b6b70",
+          "#b0b0b6",
+          "#e3e3e6",
+          "#f6f6f8",
+          "#ffffff"
+        ]
+      },
+      "blotter": {
+        "role": "neutral",
+        "displayName": "Blotter",
+        "canonical": "#f6f6f8",
+        "tonalRamp": [
+          "#17171a",
+          "#202024",
+          "#34343a",
+          "#6b6b70",
+          "#b0b0b6",
+          "#e3e3e6",
+          "#f6f6f8",
+          "#ffffff"
+        ]
+      },
+      "pass-green": {
+        "role": "status",
+        "displayName": "Pass Green",
+        "canonical": "#1f7a3a",
+        "tonalRamp": [
+          "#0b2b14",
+          "#134d24",
+          "#1f7a3a",
+          "#2f9a50",
+          "#4cb96b",
+          "#6fcf8a",
+          "#a8e3b9",
+          "#e2f6e8"
+        ]
+      },
+      "warning-amber": {
+        "role": "status",
+        "displayName": "Warning Amber",
+        "canonical": "#9a6300",
+        "tonalRamp": [
+          "#2f1e00",
+          "#5c3c00",
+          "#9a6300",
+          "#b97c10",
+          "#d29a2c",
+          "#e8b34a",
+          "#f3d592",
+          "#fbf1da"
+        ]
+      },
+      "fail-red": {
+        "role": "status",
+        "displayName": "Fail Red",
+        "canonical": "#b3261e",
+        "tonalRamp": [
+          "#3d0c09",
+          "#6e1712",
+          "#b3261e",
+          "#d0443a",
+          "#e8665c",
+          "#ff8a80",
+          "#ffbdb7",
+          "#ffecea"
+        ]
+      },
+      "bar-gray": {
+        "role": "neutral",
+        "displayName": "Bar Gray",
+        "canonical": "#8d8d96",
+        "tonalRamp": [
+          "#1f1f23",
+          "#3a3a40",
+          "#56565e",
+          "#74747e",
+          "#8d8d96",
+          "#ababb2",
+          "#c9c9ce",
+          "#ededf0"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page title (Dashboard; Supplier · Invoice #) and the figure in a dashboard tile."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings on the review screen and the dashboard's zones (Upload invoices, Records, Breakdown)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All table cells, text and form fields."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Table headers (Pencil, no wrap), form labels and the Breakdown's sub-section headings."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Document IDs, submission keys, decision JSON."
+      }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      {
+        "name": "review-stack",
+        "value": "1000px"
+      },
+      {
+        "name": "tile-min",
+        "value": "150px"
+      },
+      {
+        "name": "breakdown-column-min",
+        "value": "300px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single forward action on a form, e.g. Approve and post to Oracle, Upload.",
+      "html": "<button class=\"ds-btn-primary\">Approve and post to Oracle</button>",
+      "css": ".ds-btn-primary { font: 14px/1.45 system-ui, sans-serif; padding: 4px 12px; border-radius: 5px; border: 1px solid var(--line, #e3e3e6); background: var(--panel, #f6f6f8); color: var(--fg, #1d1d1f); cursor: pointer; background: var(--accent, #2856c9); border-color: var(--accent, #2856c9); color: var(--bg, #fff); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent, #2856c9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Secondary actions: Search, Retry, Sync from Oracle now, and the Delete at the end of a table row.",
+      "html": "<button class=\"ds-btn-default\">Delete</button>",
+      "css": ".ds-btn-default { font: 14px/1.45 system-ui, sans-serif; padding: 4px 12px; border-radius: 5px; border: 1px solid var(--line, #e3e3e6); background: var(--panel, #f6f6f8); color: var(--fg, #1d1d1f); cursor: pointer; } .ds-btn-default:disabled { opacity: .6; cursor: default; } .ds-btn-default:focus-visible { outline: 2px solid var(--accent, #2856c9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive actions said once per screen (Reject, Delete selected, Delete record): red text, never a red fill.",
+      "html": "<button class=\"ds-btn-danger\">Delete selected</button>",
+      "css": ".ds-btn-danger { font: 14px/1.45 system-ui, sans-serif; padding: 4px 12px; border-radius: 5px; border: 1px solid var(--line, #e3e3e6); background: var(--panel, #f6f6f8); color: var(--fg, #1d1d1f); cursor: pointer; color: var(--bad, #b3261e); } .ds-btn-danger:disabled { opacity: .6; cursor: default; } .ds-btn-danger:focus-visible { outline: 2px solid var(--accent, #2856c9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Correction fields; placeholder shows the real format.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"01-510-6420-0000\">",
+      "css": ".ds-input { font: 14px/1.45 system-ui, sans-serif; padding: 4px 6px; border: 1px solid var(--line, #e3e3e6); border-radius: 4px; background: var(--bg, #fff); color: var(--fg, #1d1d1f); width: 13em; } .ds-input:focus-visible { outline: 2px solid var(--accent, #2856c9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Records Search",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Find a record by invoice number, supplier or file name; bold label, field, default button.",
+      "html": "<form class=\"ds-search\"><label for=\"ds-q\">Find</label><input id=\"ds-q\" type=\"search\" placeholder=\"Invoice number, supplier or file name\"><button type=\"button\">Search</button></form>",
+      "css": ".ds-search { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; font: 14px/1.45 system-ui, sans-serif; color: var(--fg, #1d1d1f); } .ds-search label { font-weight: 600; } .ds-search input { font: inherit; padding: 4px 6px; border: 1px solid var(--line, #e3e3e6); border-radius: 4px; background: var(--bg, #fff); color: var(--fg, #1d1d1f); width: 24em; max-width: 100%; } .ds-search button { font: 14px/1.45 system-ui, sans-serif; padding: 4px 12px; border-radius: 5px; border: 1px solid var(--line, #e3e3e6); background: var(--panel, #f6f6f8); color: var(--fg, #1d1d1f); cursor: pointer; } .ds-search input:focus-visible, .ds-search button:focus-visible { outline: 2px solid var(--accent, #2856c9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Filter Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Record filters with counts: All, Need Attention, then one per status; the selected chip is filled Ledger Blue.",
+      "html": "<div class=\"ds-chips\"><a class=\"ds-chip ds-chip-on\" href=\"#\" aria-current=\"true\">All 1067</a><a class=\"ds-chip\" href=\"#\">Need Attention 1063</a><a class=\"ds-chip\" href=\"#\">IN_REVIEW 1061</a><a class=\"ds-chip\" href=\"#\">ON_HOLD 2</a><a class=\"ds-chip\" href=\"#\">CREATED 4</a></div>",
+      "css": ".ds-chips { display: flex; gap: 6px; flex-wrap: wrap; font: 14px/1.45 system-ui, sans-serif; } .ds-chip { border: 1px solid var(--line, #e3e3e6); border-radius: 999px; padding: 2px 10px; text-decoration: none; color: var(--accent, #2856c9); } .ds-chip:hover { border-color: var(--accent, #2856c9); } .ds-chip-on { background: var(--accent, #2856c9); color: var(--bg, #fff); border-color: var(--accent, #2856c9); } .ds-chip:focus-visible { outline: 2px solid var(--accent, #2856c9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Figure Tiles",
+      "kind": "card",
+      "refersTo": "tile",
+      "description": "Dashboard figure strip: one count over a muted label. A tile with records behind it is a link and its figure is Ledger Blue.",
+      "html": "<div class=\"ds-tiles\"><a class=\"ds-tile ds-tile-link\" href=\"#\"><b>1063</b><span>Need Attention</span></a><a class=\"ds-tile ds-tile-link\" href=\"#\"><b>4</b><span>Created in Oracle</span></a><div class=\"ds-tile\"><b>0</b><span>In the pipeline</span></div></div>",
+      "css": ".ds-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; font: 14px/1.45 system-ui, sans-serif; } .ds-tile { background: var(--panel, #f6f6f8); border: 1px solid var(--line, #e3e3e6); border-radius: 8px; padding: 10px 12px; color: var(--fg, #1d1d1f); text-decoration: none; } .ds-tile b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; } .ds-tile span { color: var(--muted, #6b6b70); } .ds-tile-link b { color: var(--accent, #2856c9); } .ds-tile-link:hover { border-color: var(--accent, #2856c9); } .ds-tile-link:focus-visible { outline: 2px solid var(--accent, #2856c9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Review Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Review tasks and the decision form: reason codes in bold, suggested action muted, summary as written.",
+      "html": "<div class=\"ds-panel\"><b>QTY_VARIANCE</b><span class=\"ds-muted\"> · suggested: hold_until_resolved</span><pre>Line 1: billed 5, received 3 on PO 4500123 line 1.</pre></div>",
+      "css": ".ds-panel { font: 14px/1.45 system-ui, sans-serif; color: var(--fg, #1d1d1f); background: var(--panel, #f6f6f8); border: 1px solid var(--line, #e3e3e6); border-radius: 8px; padding: 10px 12px; } .ds-panel pre { white-space: pre-wrap; margin: 0; font: inherit; } .ds-muted { color: var(--muted, #6b6b70); }"
+    },
+    {
+      "name": "Bar List",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Breakdown bars: label, a neutral bar (longest is the full width), and the count always printed.",
+      "html": "<div class=\"ds-bars\"><span>GL_REVIEW</span><i style=\"width:100%\"></i><b>615</b><span>LINE_PAIRED_BY_MODEL</span><i style=\"width:4.6%\"></i><b>28</b><span>DUPLICATE</span><i style=\"width:1.3%\"></i><b>8</b></div>",
+      "css": ".ds-bars { display: grid; grid-template-columns: max-content minmax(40px, 1fr) max-content; gap: 4px 8px; align-items: center; font: 14px/1.45 system-ui, sans-serif; color: var(--fg, #1d1d1f); } .ds-bars i { display: block; height: 10px; min-width: 2px; background: var(--bar, #8d8d96); border-radius: 0 4px 4px 0; } .ds-bars b { font-weight: 400; text-align: right; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Brand, page links, acting-as on the right; the current page is bold and underlined.",
+      "html": "<header class=\"ds-nav\"><b>ACSE AP</b><a class=\"on\" href=\"#\">Dashboard</a><a href=\"#\">Admin</a><a href=\"#\">API</a><span class=\"ds-nav-who\">Acting as clerk</span></header>",
+      "css": ".ds-nav { display: flex; gap: 18px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line, #e3e3e6); font: 14px/1.45 system-ui, sans-serif; color: var(--fg, #1d1d1f); flex-wrap: wrap; } .ds-nav b { margin-right: 8px; } .ds-nav a { color: var(--accent, #2856c9); text-decoration: none; } .ds-nav a:hover { text-decoration: underline; } .ds-nav a.on { font-weight: 600; text-decoration: underline; } .ds-nav a:focus-visible { outline: 2px solid var(--accent, #2856c9); outline-offset: 2px; } .ds-nav-who { margin-left: auto; color: var(--muted, #6b6b70); }"
+    },
+    {
+      "name": "Ledger Table",
+      "kind": "custom",
+      "refersTo": "table-cell",
+      "description": "Signature: provenance-first field table with tabular numbers.",
+      "html": "<table class=\"ds-table\"><thead><tr><th>Field</th><th>Value</th><th>On the invoice</th><th>Method</th><th>Flags</th></tr></thead><tbody><tr><td>invoice_amount</td><td class=\"num\">1,240.00</td><td class=\"m\">$1,240.00</td><td class=\"m\">extracted</td><td></td></tr><tr><td>terms_name</td><td>NET30</td><td class=\"m\">30 Days</td><td class=\"m\">value_map</td><td class=\"w\">low_confidence</td></tr></tbody></table>",
+      "css": ".ds-table { border-collapse: collapse; width: 100%; font: 14px/1.45 system-ui, sans-serif; color: var(--fg, #1d1d1f); } .ds-table th, .ds-table td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line, #e3e3e6); vertical-align: top; } .ds-table th { color: var(--muted, #6b6b70); font-weight: 600; white-space: nowrap; } .ds-table td.num { text-align: right; font-variant-numeric: tabular-nums; } .ds-table .m { color: var(--muted, #6b6b70); } .ds-table .w { color: var(--warn, #9a6300); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Ledger",
+    "overview": "The UI looks like an accounting ledger: plain, exact and tabular. Numbers line up in their columns, every row says where its value came from, and nothing on screen is there for decoration. Clerks spend hours at a desk working through a queue of invoices, so the screens are dense, quiet and predictable. The only things that should catch the eye are a flag, a failed check or the next action.\n\nThe system is small on purpose: one stylesheet, the operating system's own font, one accent color and three status colors. Depth comes from borders and a light gray panel, never from shadows. Dark mode follows the operating system and uses the same tokens.\n\nThere is one binding rejection, no AI razzmatazz: no sparkles, gradients, glowing \"AI\" badges, chat bubbles or animated thinking states. Where a model was involved, the screen shows it as a plain Method column (extracted, value_map, fuzzy_llm, user), the same way a ledger names its source.",
+    "keyCharacteristics": [
+      "Tables do most of the work, with hairline rules between rows and right-aligned tabular numbers.",
+      "System font at 14px, with the hierarchy set by weight rather than size.",
+      "Flat: borders and a gray panel tint, no shadows.",
+      "One blue for links and the main action; green, amber and red only for pass, warning and fail.",
+      "Light and dark modes switch automatically with the operating system's setting."
+    ],
+    "rules": [
+      {
+        "name": "The Color Is Status Rule",
+        "body": "Green, amber and red mean pass, warning and fail, and nothing else. Blue means \"link\" or \"the main action\", and nothing else. A color that doesn't carry one of those meanings doesn't belong on the screen.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Palettes Rule",
+        "body": "Every new color is added as a light/dark pair in the :root block and its prefers-color-scheme: dark override. Never hard-code a hex value in a template. The one exception is the white background behind the original-file frame, which stays white because the document itself is white.",
+        "section": "colors"
+      },
+      {
+        "name": "The System Font Rule",
+        "body": "No web fonts. The stack is system-ui, sans-serif, and the UI has to render fully with no network.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Every amount, quantity and price is right-aligned with font-variant-numeric: tabular-nums so the digits line up down the column.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Shadow Rule",
+        "body": "box-shadow is never used. If something has to stand apart, give it a border or put it in a Blotter panel.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use a table for any list of records, with number columns right-aligned in tabular numbers.",
+      "Do show the source value and method next to every extracted value.",
+      "Do use Oracle EBS terms and codes as they are (QTY REC, IN_REVIEW, 01-510-6420-0000).",
+      "Do add every color as a light/dark pair in the :root tokens.",
+      "Do keep a single primary (Ledger Blue) button per form."
+    ],
+    "donts": [
+      "Don't add AI razzmatazz: no sparkle icons, gradients, glowing \"AI\" badges, chat bubbles, typing or thinking animations, or \"magic\" wording.",
+      "Don't use box-shadow, anywhere.",
+      "Don't load web fonts or any asset from a CDN. The UI has to work offline.",
+      "Don't use green, amber, red or blue for anything other than status, links and the main action.",
+      "Don't fill destructive buttons red. Use red text on the default button."
+    ]
+  }
+}

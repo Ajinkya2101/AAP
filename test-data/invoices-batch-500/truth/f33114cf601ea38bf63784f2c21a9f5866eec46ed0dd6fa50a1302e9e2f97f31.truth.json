@@ -1,0 +1,72 @@
+{
+ "sha256": "f33114cf601ea38bf63784f2c21a9f5866eec46ed0dd6fa50a1302e9e2f97f31",
+ "generator": "tools.invoicegen",
+ "layout": "rechnung",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Hoffmann",
+  "vendor_address": "Witold-Mülichen-Platz 1243, 60557 Ilmenau, Germany",
+  "vendor_tax_id": null,
+  "vendor_email": "accounts@hoffmann.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "62194",
+  "invoice_date": "19 September 2026",
+  "due_date": null,
+  "po_number": "4501069",
+  "payment_terms": "2/10 Net 30",
+  "currency": "€",
+  "subtotal": "1.292,44 €",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "1.292,44 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "3M 8127 Hi-Vis Vest 14\"",
+    "item_code": null,
+    "quantity": "12",
+    "uom": null,
+    "unit_price": "55,02",
+    "amount": "660,24 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Ergodyne 9111 Hi-Vis Vest 16\"",
+    "item_code": null,
+    "quantity": "10",
+    "uom": null,
+    "unit_price": "63,22",
+    "amount": "632,20 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30098,
+  "vendor_site_id": 7087,
+  "org_id": 204,
+  "po_number": "4501069",
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "1292.44",
+  "subtotal": "1292.44",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

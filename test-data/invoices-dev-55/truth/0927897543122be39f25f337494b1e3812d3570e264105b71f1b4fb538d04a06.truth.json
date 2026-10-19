@@ -1,0 +1,72 @@
+{
+ "sha256": "0927897543122be39f25f337494b1e3812d3570e264105b71f1b4fb538d04a06",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Herrera Chen and Andrews Corp",
+  "vendor_address": "96218 Jones Pine Apt. 670, West Ruben, CO 83819",
+  "vendor_tax_id": "25-2575550",
+  "vendor_email": "invoices@herrera-chen-and-andrews-corp.example",
+  "vendor_phone": "(464) 879-8970",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "HCA91779",
+  "invoice_date": "September 11, 2026",
+  "due_date": null,
+  "po_number": "4500544",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": "$167.77",
+  "tax_label": "Sales tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$10.07",
+  "freight_amount": null,
+  "total": "$177.84",
+  "bank_account": "297837048522",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Scotch 4739 Packing Tape Heavy Duty",
+    "item_code": null,
+    "quantity": "2",
+    "uom": "Roll",
+    "unit_price": "$25.79",
+    "amount": "$51.58",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Tesa 2325 Packing Tape Enterprise",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "Roll",
+    "unit_price": "$38.73",
+    "amount": "$116.19",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30142,
+  "vendor_site_id": 7120,
+  "org_id": 204,
+  "po_number": "4500544",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "177.84",
+  "subtotal": "167.77",
+  "tax_amount": "10.07",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

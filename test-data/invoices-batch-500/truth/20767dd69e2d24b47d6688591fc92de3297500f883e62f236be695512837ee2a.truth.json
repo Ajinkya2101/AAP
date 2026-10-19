@@ -1,0 +1,72 @@
+{
+ "sha256": "20767dd69e2d24b47d6688591fc92de3297500f883e62f236be695512837ee2a",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Jones and Sons Inc",
+  "vendor_address": "977 Adam Plaza, East Williamstad, GA 54415",
+  "vendor_tax_id": "55-1132511",
+  "vendor_email": "ar@jones-and-sons.example",
+  "vendor_phone": "(514) 366-8648",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "82680",
+  "invoice_date": "09/20/2026",
+  "due_date": "20-Oct-2026",
+  "po_number": "4500247",
+  "payment_terms": "45 days",
+  "currency": "$",
+  "subtotal": "$18,285.68",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$1,462.85",
+  "freight_amount": null,
+  "total": "$19,748.53",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Tri-fold 9772 Printed Brochure Eco",
+    "item_code": null,
+    "quantity": "12",
+    "uom": "pcs",
+    "unit_price": "1.04",
+    "amount": "$12.48",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Juniper EX 3921 Switch Small",
+    "item_code": null,
+    "quantity": "10",
+    "uom": null,
+    "unit_price": "$1,827.32",
+    "amount": "$18,273.20",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30228,
+  "vendor_site_id": 7210,
+  "org_id": 204,
+  "po_number": "4500247",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-20",
+  "invoice_amount": "19748.53",
+  "subtotal": "18285.68",
+  "tax_amount": "1462.85",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

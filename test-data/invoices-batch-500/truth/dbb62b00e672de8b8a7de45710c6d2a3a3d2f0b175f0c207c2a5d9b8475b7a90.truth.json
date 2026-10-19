@@ -1,0 +1,72 @@
+{
+ "sha256": "dbb62b00e672de8b8a7de45710c6d2a3a3d2f0b175f0c207c2a5d9b8475b7a90",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Brooks Lam and Hayes LLC",
+  "vendor_address": "7010 Chandler Union Apt. 333, North Donnastad, NC 70793",
+  "vendor_tax_id": null,
+  "vendor_email": "accounts@brooks-lam-and-hayes.example",
+  "vendor_phone": "(718) 824-8101",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "81654",
+  "invoice_date": "09/22/2026",
+  "due_date": null,
+  "po_number": "4500322",
+  "payment_terms": "15 days",
+  "currency": "$",
+  "subtotal": "$77,370.67",
+  "tax_label": "Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$4,642.24",
+  "freight_amount": null,
+  "total": "$82,012.91",
+  "bank_account": "193099491432",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Dell PowerStore 8200 Storage Array Eco",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "pcs",
+    "unit_price": "$13,436.25",
+    "amount": "$53,745.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "NetApp AFF 7948 Storage Array 16\"",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "$23,625.67",
+    "amount": "$23,625.67",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30008,
+  "vendor_site_id": 7009,
+  "org_id": 204,
+  "po_number": "4500322",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-22",
+  "invoice_amount": "82012.91",
+  "subtotal": "77370.67",
+  "tax_amount": "4642.24",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

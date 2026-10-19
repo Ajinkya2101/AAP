@@ -1,0 +1,83 @@
+{
+ "sha256": "c13bc823185903411e8a4f9cdae59ccc951e4fca2262f652d8064f786981a500",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Din Inc LLP",
+  "vendor_address": "H.No. 205, Walia Zila, Mumbai - 650473, Meghalaya, India",
+  "vendor_tax_id": "29VZECD7169N3ZU",
+  "vendor_email": "billing@din-inc-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "INV-2026-20942",
+  "invoice_date": "22.09.2026",
+  "due_date": "22 Oct 2026",
+  "po_number": "4500341",
+  "payment_terms": "Payment due within 30 days",
+  "currency": "INR",
+  "subtotal": "10,077.24",
+  "tax_label": "GST 5%",
+  "tax_rate": "5%",
+  "tax_amount": "503.86",
+  "freight_amount": null,
+  "total": "10,581.10",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Nature Valley 7735 Snack Box Standard",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "2,779.90",
+    "amount": "2,779.90",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Lavazza 3348 Coffee Beans Standard",
+    "item_code": null,
+    "quantity": "2",
+    "uom": "box",
+    "unit_price": "2,167.03",
+    "amount": "4,334.06",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Nature Valley 2732 Snack Box Compact",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "BX",
+    "unit_price": "2,963.28",
+    "amount": "2,963.28",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30036,
+  "vendor_site_id": 7032,
+  "org_id": 458,
+  "po_number": "4500341",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-22",
+  "invoice_amount": "10581.10",
+  "subtotal": "10077.24",
+  "tax_amount": "503.86",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

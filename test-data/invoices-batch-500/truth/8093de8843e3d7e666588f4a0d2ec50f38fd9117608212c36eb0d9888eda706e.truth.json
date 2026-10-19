@@ -1,0 +1,72 @@
+{
+ "sha256": "8093de8843e3d7e666588f4a0d2ec50f38fd9117608212c36eb0d9888eda706e",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Foley Inc Inc",
+  "vendor_address": "4317 Elizabeth Row, Amystad, NY 84320",
+  "vendor_tax_id": "24-9849143",
+  "vendor_email": "ar@foley-inc.example",
+  "vendor_phone": "(262) 857-1526",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "91301",
+  "invoice_date": "10-Sep-2026",
+  "due_date": null,
+  "po_number": "4500433",
+  "payment_terms": "15 days",
+  "currency": "USD",
+  "subtotal": "93,706.91",
+  "tax_label": "Sales Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "7,496.55",
+  "freight_amount": null,
+  "total": "101,203.46",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Scotch 4739 Packing Tape Heavy Duty",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "Roll",
+    "unit_price": "29.33",
+    "amount": "117.32",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "NetApp AFF 2478 Storage Array Enterprise",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "31,196.53",
+    "amount": "93,589.59",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30088,
+  "vendor_site_id": 7082,
+  "org_id": 204,
+  "po_number": "4500433",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-10",
+  "invoice_amount": "101203.46",
+  "subtotal": "93706.91",
+  "tax_amount": "7496.55",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

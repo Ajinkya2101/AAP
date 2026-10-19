@@ -1,0 +1,62 @@
+{
+ "sha256": "dbd5defb1a9aed5e70af4f6659c7f021e04f2e7c644a8ed2a4fcd4fec850110f",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Glover Bennett and Knowles",
+  "vendor_address": "9 Godfrey Pike, Hillmouth WR2 1WU, United Kingdom",
+  "vendor_tax_id": "GB870562271",
+  "vendor_email": "billing@glover-bennett-and-knowles.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "GBA72844",
+  "invoice_date": "25 September 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payment due within 30 days",
+  "currency": "£",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "£3,976.55",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Enterprise Support Support Renewal Standard",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "£3,976.55",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30212,
+  "vendor_site_id": 7198,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "GBP",
+  "invoice_date": "2026-09-25",
+  "invoice_amount": "3976.55",
+  "subtotal": "3976.55",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

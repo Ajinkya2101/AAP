@@ -1,0 +1,62 @@
+{
+ "sha256": "3f02669d01f03f5026fe6394249a191eed3763f23af5f0024387711ba7e20cfb",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "White-Green",
+  "vendor_address": "4641 Smith Plains Apt. 531, Jasonmouth, OH 85927",
+  "vendor_tax_id": "31-9832796",
+  "vendor_email": "invoices@white-green.example",
+  "vendor_phone": "(786) 488-5440",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "W/26-27/28483",
+  "invoice_date": "18-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 15",
+  "currency": "$",
+  "subtotal": "$37.05",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$2.96",
+  "freight_amount": null,
+  "total": "$40.01",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Unlimited Mobile Plan US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$37.05",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30049,
+  "vendor_site_id": 7046,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-18",
+  "invoice_amount": "40.01",
+  "subtotal": "37.05",
+  "tax_amount": "2.96",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

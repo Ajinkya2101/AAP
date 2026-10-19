@@ -1,0 +1,73 @@
+{
+ "sha256": "4e97d07291c95b7a9230b65ab138f10189a38ab0e0f0496046da3a50a53d6b96",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Shankar Narula and Narayanan LLP",
+  "vendor_address": "215\nLoyal Nagar, Ahmedabad - 520060, Kerala, India",
+  "vendor_tax_id": "19XMJCS3608A9Z0",
+  "vendor_email": "accounts@shankar-narula-and-narayanan-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "SNA-INV-83716",
+  "invoice_date": "18 Sep 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due on receipt",
+  "currency": "Rs.",
+  "subtotal": "Rs. 104,935.85",
+  "tax_label": "GST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "Rs. 18,888.45",
+  "freight_amount": null,
+  "total": "Rs. 123,824.30",
+  "bank_account": "30797032204116",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Load Balancing Data Transfer Standard",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 29,393.77",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "SQL Database Managed Database Standard",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 75,542.08",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30035,
+  "vendor_site_id": 7028,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-18",
+  "invoice_amount": "123824.30",
+  "subtotal": "104935.85",
+  "tax_amount": "18888.45",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

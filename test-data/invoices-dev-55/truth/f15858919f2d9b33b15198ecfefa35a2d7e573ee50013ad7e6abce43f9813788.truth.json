@@ -1,0 +1,72 @@
+{
+ "sha256": "f15858919f2d9b33b15198ecfefa35a2d7e573ee50013ad7e6abce43f9813788",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Mcintyre Rivas and Scott",
+  "vendor_address": "20047 Colton Plain Apt. 675, Blankenshipport, NY 88382",
+  "vendor_tax_id": null,
+  "vendor_email": "billing@mcintyre-rivas-and-scott.example",
+  "vendor_phone": "(765) 631-4973",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "MRA56621",
+  "invoice_date": "Sep 22, 2026",
+  "due_date": "2026-10-22",
+  "po_number": "4500300",
+  "payment_terms": "60 days net",
+  "currency": "$",
+  "subtotal": "$3,515.00",
+  "tax_label": "Sales tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$254.84",
+  "freight_amount": null,
+  "total": "$3,769.84",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Belden 7894 Cat6 Cable Box 16\"",
+    "item_code": null,
+    "quantity": "20",
+    "uom": "box",
+    "unit_price": "174.00",
+    "amount": "$3,480.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Booklet 5961 Printed Brochure Heavy Duty",
+    "item_code": null,
+    "quantity": "25",
+    "uom": "pcs",
+    "unit_price": "1.40",
+    "amount": "$35.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30087,
+  "vendor_site_id": 7080,
+  "org_id": 204,
+  "po_number": "4500300",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-22",
+  "invoice_amount": "3769.84",
+  "subtotal": "3515.00",
+  "tax_amount": "254.84",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

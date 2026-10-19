@@ -1,0 +1,62 @@
+{
+ "sha256": "7669baecae9241a8f613c458176e66cb2585694248e3edcdba80985780c2dd77",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Fox Ochoa and Adams Inc",
+  "vendor_address": "334 Desiree Walks Apt. 166, Millerfurt, TX 49937",
+  "vendor_tax_id": "23-9505552",
+  "vendor_email": "billing@fox-ochoa-and-adams.example",
+  "vendor_phone": "(511) 635-5237",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "38852",
+  "invoice_date": "September 17, 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "$",
+  "subtotal": "$3,201.13",
+  "tax_label": "Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$192.07",
+  "freight_amount": null,
+  "total": "$3,393.20",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Enterprise Support Support Renewal Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$3,201.13",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30238,
+  "vendor_site_id": 7217,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "3393.20",
+  "subtotal": "3201.13",
+  "tax_amount": "192.07",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

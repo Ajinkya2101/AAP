@@ -1,0 +1,73 @@
+{
+ "sha256": "2d7572c6f2b08d13a136ee388eba28e8e26c90083e73be36c6ef19f4578c734e",
+ "generator": "tools.invoicegen",
+ "layout": "minimal",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Dyal Khurana and Issac LLP",
+  "vendor_address": "98/65\nKhare Ganj, Chennai - 564838, Karnataka, India",
+  "vendor_tax_id": "24NVICD6843C1ZA",
+  "vendor_email": "accounts@dyal-khurana-and-issac-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "87628",
+  "invoice_date": "18.09.2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payable immediately",
+  "currency": "INR",
+  "subtotal": "1,495,123.07",
+  "tax_label": "IGST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "269,122.15",
+  "freight_amount": null,
+  "total": "1,764,245.22",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "24x7 Guard Services US East",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "491,465.91",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "24x7 Guard Services Quarterly",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "1,003,657.16",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30298,
+  "vendor_site_id": 7274,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-18",
+  "invoice_amount": "1764245.22",
+  "subtotal": "1495123.07",
+  "tax_amount": "269122.15",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,83 @@
+{
+ "sha256": "0ba681c776d56e932f079fc908a3f639eff2086ca25dae0694a81d9e371ebd79",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Meza-Tucker Corp",
+  "vendor_address": "88805 Carla Drives Apt. 292, East Eric, GA 95027",
+  "vendor_tax_id": null,
+  "vendor_email": "accounts@meza-tucker-corp.example",
+  "vendor_phone": "(352) 971-7771",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "MC-INV-62726",
+  "invoice_date": "27-Sep-2026",
+  "due_date": null,
+  "po_number": "4500818",
+  "payment_terms": "15 days",
+  "currency": "$",
+  "subtotal": "$43,905.32",
+  "tax_label": "Tax 8.875%",
+  "tax_rate": "8.875%",
+  "tax_amount": "$3,896.60",
+  "freight_amount": null,
+  "total": "$47,801.92",
+  "bank_account": "633393232843",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "HON Brigade 9913 Lateral File 14\"",
+    "item_code": null,
+    "quantity": "20",
+    "uom": "EA",
+    "unit_price": "$299.48",
+    "amount": "$5,989.60",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Steelcase Migration 1591 Standing Desk Enterprise",
+    "item_code": null,
+    "quantity": "10",
+    "uom": null,
+    "unit_price": "$1,041.37",
+    "amount": "$10,413.70",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "HON Brigade 8156 Lateral File 16\"",
+    "item_code": null,
+    "quantity": "69",
+    "uom": "EA",
+    "unit_price": "398.58",
+    "amount": "$27,502.02",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30130,
+  "vendor_site_id": 7113,
+  "org_id": 204,
+  "po_number": "4500818",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-27",
+  "invoice_amount": "47801.92",
+  "subtotal": "43905.32",
+  "tax_amount": "3896.60",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

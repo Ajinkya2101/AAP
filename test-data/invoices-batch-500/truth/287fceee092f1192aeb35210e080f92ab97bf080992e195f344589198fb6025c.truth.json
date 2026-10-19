@@ -1,0 +1,72 @@
+{
+ "sha256": "287fceee092f1192aeb35210e080f92ab97bf080992e195f344589198fb6025c",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Dyer Cox and Bates plc",
+  "vendor_address": "01 Jenna Summit, Port Conor ME8Y 5FQ, United Kingdom",
+  "vendor_tax_id": null,
+  "vendor_email": "invoices@dyer-cox-and-bates.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-77127",
+  "invoice_date": "10 Sep 2026",
+  "due_date": "10 Oct 2026",
+  "po_number": "4500490",
+  "payment_terms": "Net 30 days from date of invoice",
+  "currency": "£",
+  "subtotal": "£8,791.19",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "£8,791.19",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Haldiram 6766 Snack Box Small",
+    "item_code": null,
+    "quantity": "5",
+    "uom": null,
+    "unit_price": "£29.99",
+    "amount": "£149.95",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Agilent 8314 Instrument Basic",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "4,320.62",
+    "amount": "£8,641.24",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30246,
+  "vendor_site_id": 7227,
+  "org_id": 204,
+  "po_number": "4500490",
+  "currency_code": "GBP",
+  "invoice_date": "2026-09-10",
+  "invoice_amount": "8791.19",
+  "subtotal": "8791.19",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

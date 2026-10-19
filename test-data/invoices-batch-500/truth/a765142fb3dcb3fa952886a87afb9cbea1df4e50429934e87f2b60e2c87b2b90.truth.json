@@ -1,0 +1,62 @@
+{
+ "sha256": "a765142fb3dcb3fa952886a87afb9cbea1df4e50429934e87f2b60e2c87b2b90",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Wagner-Jordan",
+  "vendor_address": "7365 Ross Stream, Port Dianaside, OH 12964",
+  "vendor_tax_id": "98-3954562",
+  "vendor_email": "ar@wagner-jordan.example",
+  "vendor_phone": "(663) 629-9597",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-62081",
+  "invoice_date": "2026-09-23",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due on receipt",
+  "currency": "$",
+  "subtotal": "$5,759.44",
+  "tax_label": "Sales tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$417.56",
+  "freight_amount": null,
+  "total": "$6,177.00",
+  "bank_account": "60401756049",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Business Hours Guard Services Tier 2",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$5,759.44",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30106,
+  "vendor_site_id": 7091,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-23",
+  "invoice_amount": "6177.00",
+  "subtotal": "5759.44",
+  "tax_amount": "417.56",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

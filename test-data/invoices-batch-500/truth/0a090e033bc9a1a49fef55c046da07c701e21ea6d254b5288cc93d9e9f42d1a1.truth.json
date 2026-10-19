@@ -1,0 +1,73 @@
+{
+ "sha256": "0a090e033bc9a1a49fef55c046da07c701e21ea6d254b5288cc93d9e9f42d1a1",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Jha Sem and Chahal Ltd",
+  "vendor_address": "22\nAmble Path, Noida - 575375, Assam, India",
+  "vendor_tax_id": "29AETCJ2983Q2Z0",
+  "vendor_email": "accounts@jha-sem-and-chahal.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "49843",
+  "invoice_date": "17-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "₹",
+  "subtotal": "₹1,763,633.90",
+  "tax_label": "IGST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "₹317,454.10",
+  "freight_amount": null,
+  "total": "₹2,081,088.00",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Commercial Electric Service Premium",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "₹767,104.90",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Industrial Electric Service Tier 2",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "₹996,529.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30153,
+  "vendor_site_id": 7133,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "2081088.00",
+  "subtotal": "1763633.90",
+  "tax_amount": "317454.10",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

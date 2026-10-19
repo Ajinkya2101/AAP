@@ -1,0 +1,62 @@
+{
+ "sha256": "23f91e0ca6ff4e39cc96bb6e0f7a5a939f77d30b5b77795dac629b0e601451d2",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Shankar Narula and Narayanan LLP",
+  "vendor_address": "215\nLoyal Nagar, Ahmedabad - 520060, Kerala, India",
+  "vendor_tax_id": "19XMJCS3608A9Z0",
+  "vendor_email": "accounts@shankar-narula-and-narayanan-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "SNA-INV-18838",
+  "invoice_date": "11-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due on receipt",
+  "currency": "INR",
+  "subtotal": "379,100.90",
+  "tax_label": "GST 12%",
+  "tax_rate": "12%",
+  "tax_amount": "45,492.11",
+  "freight_amount": null,
+  "total": "424,593.01",
+  "bank_account": "30797032204116",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Object Storage Storage Annual",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "379,100.90",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30035,
+  "vendor_site_id": 7028,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "424593.01",
+  "subtotal": "379100.90",
+  "tax_amount": "45492.11",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

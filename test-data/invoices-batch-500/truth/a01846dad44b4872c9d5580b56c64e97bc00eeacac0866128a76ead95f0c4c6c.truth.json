@@ -1,0 +1,66 @@
+{
+ "sha256": "a01846dad44b4872c9d5580b56c64e97bc00eeacac0866128a76ead95f0c4c6c",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Northwind IT Supplies Inc",
+  "vendor_address": "1200 Commerce St, Dallas, TX 75201",
+  "vendor_tax_id": "84-1234567",
+  "vendor_email": "billing@northwind.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "NW-INV-20533",
+  "invoice_date": "22-Sep-2026",
+  "due_date": null,
+  "po_number": "4500188",
+  "payment_terms": "Net 30 days from date of invoice",
+  "currency": "$",
+  "subtotal": "$900.00",
+  "tax_label": "Sales tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$72.00",
+  "freight_amount": null,
+  "total": "$972.00",
+  "bank_account": "55012093311",
+  "bank_routing": "026009593",
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Dell Dock WD19S USB-C 130W",
+    "item_code": null,
+    "quantity": "5",
+    "uom": null,
+    "unit_price": "$180.00",
+    "amount": "$900.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": "S15",
+  "vendor_id": 30418,
+  "vendor_site_id": 7276,
+  "org_id": 204,
+  "po_number": "4500188",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-22",
+  "invoice_amount": "972.00",
+  "subtotal": "900.00",
+  "tax_amount": "72.00",
+  "expect_fail": [
+   "C11"
+  ],
+  "expect_warn": [],
+  "expect_flags": [
+   "unknown_sender"
+  ],
+  "notes": "Look-alike sender domain and a different bank account."
+ }
+}

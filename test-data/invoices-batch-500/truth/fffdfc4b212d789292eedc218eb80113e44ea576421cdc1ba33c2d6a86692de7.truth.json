@@ -1,0 +1,62 @@
+{
+ "sha256": "fffdfc4b212d789292eedc218eb80113e44ea576421cdc1ba33c2d6a86692de7",
+ "generator": "tools.invoicegen",
+ "layout": "classic",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Fox Ochoa and Adams Inc",
+  "vendor_address": "334 Desiree Walks Apt. 166, Millerfurt, TX 49937",
+  "vendor_tax_id": "23-9505552",
+  "vendor_email": "billing@fox-ochoa-and-adams.example",
+  "vendor_phone": "(511) 635-5237",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "50957",
+  "invoice_date": "09/12/2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due upon receipt",
+  "currency": "$",
+  "subtotal": "$798.44",
+  "tax_label": "Sales Tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$57.89",
+  "freight_amount": null,
+  "total": "$856.33",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Salesforce Sales Cloud Subscription Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$798.44",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30238,
+  "vendor_site_id": 7217,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-12",
+  "invoice_amount": "856.33",
+  "subtotal": "798.44",
+  "tax_amount": "57.89",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "sha256": "3ea19c6d8216f958f0c99879530a4af8ff95a0fb506aa33f69d3284818939ba5",
+ "generator": "tools.invoicegen",
+ "layout": "modern",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Wright Ltd",
+  "vendor_address": "94667 Cynthia Trafficway Apt. 684, Mariafurt, CO 91557",
+  "vendor_tax_id": "36-8603326",
+  "vendor_email": "accounts@wright.example",
+  "vendor_phone": "(546) 545-4052",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "85786",
+  "invoice_date": "2026-09-19",
+  "due_date": null,
+  "po_number": "4500379",
+  "payment_terms": "Net 15",
+  "currency": "$",
+  "subtotal": "$6,151.76",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$492.14",
+  "freight_amount": null,
+  "total": "$6,643.90",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Strategy Consulting US East",
+    "item_code": null,
+    "quantity": "16",
+    "uom": "HR",
+    "unit_price": "250.72",
+    "amount": "$4,011.52",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Strategy Consulting Tier 1",
+    "item_code": null,
+    "quantity": "8",
+    "uom": "hrs",
+    "unit_price": "267.53",
+    "amount": "$2,140.24",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30288,
+  "vendor_site_id": 7264,
+  "org_id": 204,
+  "po_number": "4500379",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-19",
+  "invoice_amount": "6643.90",
+  "subtotal": "6151.76",
+  "tax_amount": "492.14",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

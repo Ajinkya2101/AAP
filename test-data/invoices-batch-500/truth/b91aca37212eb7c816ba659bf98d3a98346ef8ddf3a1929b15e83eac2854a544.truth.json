@@ -1,0 +1,83 @@
+{
+ "sha256": "b91aca37212eb7c816ba659bf98d3a98346ef8ddf3a1929b15e83eac2854a544",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Nguyen-Ellis Inc",
+  "vendor_address": "696 Michael Vista Suite 924, Emilyfort, OH 81042",
+  "vendor_tax_id": "05-9459266",
+  "vendor_email": "billing@nguyen-ellis.example",
+  "vendor_phone": "(278) 778-2509",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "NI67015",
+  "invoice_date": "12-Sep-2026",
+  "due_date": null,
+  "po_number": "4500681",
+  "payment_terms": "2/10 Net 30",
+  "currency": "USD",
+  "subtotal": "96,303.26",
+  "tax_label": "Sales Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "5,778.20",
+  "freight_amount": "207.00",
+  "total": "102,288.46",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Lenovo ThinkPad 8283 Notebook Pro",
+    "item_code": null,
+    "quantity": "50",
+    "uom": "ea",
+    "unit_price": "1,704.24",
+    "amount": "85,212.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Bosch 7490 Cordless Drill Eco",
+    "item_code": null,
+    "quantity": "10",
+    "uom": null,
+    "unit_price": "158.31",
+    "amount": "1,583.10",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Apple iPhone 8364 Smartphone Premium",
+    "item_code": null,
+    "quantity": "8",
+    "uom": "Nos",
+    "unit_price": "1,188.52",
+    "amount": "9,508.16",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30272,
+  "vendor_site_id": 7251,
+  "org_id": 204,
+  "po_number": "4500681",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-12",
+  "invoice_amount": "102288.46",
+  "subtotal": "96303.26",
+  "tax_amount": "5778.20",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

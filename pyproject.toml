@@ -1,0 +1,96 @@
+[project]
+name = "aap"
+version = "0.1.0"
+description = "ACSE Autonomous AP: invoice pipeline, agent layer and mock Oracle EBS"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # core
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "structlog>=24.4",
+    "python-dateutil>=2.9",
+    # api
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.12",
+    # db / queue
+    "psycopg[binary,pool]>=3.2",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14",
+    "procrastinate>=2.15,<3",
+    "pgvector>=0.3.6",
+    # llm
+    "openai>=1.54",
+    "httpx>=0.27",
+    "huggingface-hub>=0.26",
+    # ingest / parse
+    "filetype>=1.2",
+    "pdfplumber>=0.11.4",
+    "pypdfium2>=4.30",
+    "pillow>=11.0",
+    "opencv-python-headless>=4.10",
+    "openpyxl>=3.1.5",
+    "xlrd>=2.0.1",
+    "pandas>=2.2",
+    "tabulate>=0.9",
+    "charset-normalizer>=3.4",
+    "html2text>=2024.2.26",
+    "bleach>=6.2",
+    "extract-msg>=0.52",   # license check pending (IP-05 / T-02)
+    # normalize / map
+    "dateparser>=1.2",
+    "babel>=2.16",
+    "rapidfuzz>=3.10",
+    # mock EBS seed + invoice generator
+    "faker>=30.8",
+    "weasyprint>=63.0",
+    "numpy>=2.1",
+    "langgraph>=1.2.12",
+    "langgraph-checkpoint-postgres>=3.1.2",
+    "scipy>=1.18.1",
+    "onnxruntime>=1.20",
+    "tokenizers>=0.20",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "testcontainers[postgres]>=4.8",
+    "ruff>=0.7",
+    "mypy>=1.13",
+]
+
+[project.scripts]
+aap-mock = "aap.ebs_mock.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aap"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+markers = [
+    "integration: needs a PostgreSQL (testcontainers or PG_TEST_DSN)",
+    "e2e: needs a seeded EBS + AAP database and the invoice generator",
+]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests", "tools"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+# UP046: pydantic generic models keep the Generic[T] form.
+ignore = ["E501", "UP046"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true

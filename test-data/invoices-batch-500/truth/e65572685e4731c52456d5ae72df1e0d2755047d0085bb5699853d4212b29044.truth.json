@@ -1,0 +1,83 @@
+{
+ "sha256": "e65572685e4731c52456d5ae72df1e0d2755047d0085bb5699853d4212b29044",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Din Inc LLP",
+  "vendor_address": "964\nRege, Bengaluru - 533619, Uttar Pradesh, India",
+  "vendor_tax_id": "29VZECD7169N3ZU",
+  "vendor_email": "ar@din-inc-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "INV-2026-74233",
+  "invoice_date": "10/09/2026",
+  "due_date": null,
+  "po_number": "4500476",
+  "payment_terms": "Net 30",
+  "currency": "INR",
+  "subtotal": "21,598.56",
+  "tax_label": "IGST 12%",
+  "tax_rate": "12%",
+  "tax_amount": "2,591.83",
+  "freight_amount": null,
+  "total": "24,190.39",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Haldiram 6766 Snack Box Small",
+    "item_code": null,
+    "quantity": "2",
+    "uom": "box",
+    "unit_price": "2,702.78",
+    "amount": "5,405.56",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Lavazza 3348 Coffee Beans Standard",
+    "item_code": null,
+    "quantity": "4",
+    "uom": null,
+    "unit_price": "2,244.12",
+    "amount": "8,976.48",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Starbucks 8842 Coffee Beans Enterprise",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "3,608.26",
+    "amount": "7,216.52",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30036,
+  "vendor_site_id": 7034,
+  "org_id": 458,
+  "po_number": "4500476",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-10",
+  "invoice_amount": "24190.39",
+  "subtotal": "21598.56",
+  "tax_amount": "2591.83",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

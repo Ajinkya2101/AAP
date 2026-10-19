@@ -1,0 +1,83 @@
+{
+ "sha256": "a32c955c5c4c90a772c9cb4817e97e0a8888efd15c9769202a07571facc3cabd",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Walker Hernandez and Baker",
+  "vendor_address": "947 Taylor Hollow Suite 488, North Brian, WA 65223",
+  "vendor_tax_id": "37-6640128",
+  "vendor_email": "accounts@walker-hernandez-and-baker.example",
+  "vendor_phone": "(573) 487-6751",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "WHA/26-27/74442",
+  "invoice_date": "September 15, 2026",
+  "due_date": null,
+  "po_number": "4501018",
+  "payment_terms": "Net 30 EOM",
+  "currency": "USD",
+  "subtotal": "$60.65",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$4.85",
+  "freight_amount": null,
+  "total": "$65.50",
+  "bank_account": "1175617484",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Bi-fold 8243 Printed Brochure Standard",
+    "item_code": null,
+    "quantity": "5",
+    "uom": null,
+    "unit_price": "1.21",
+    "amount": "$6.05",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Booklet 5961 Printed Brochure Heavy Duty",
+    "item_code": null,
+    "quantity": "5",
+    "uom": null,
+    "unit_price": "1.42",
+    "amount": "$7.10",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Tri-fold 9772 Printed Brochure Eco",
+    "item_code": null,
+    "quantity": "50",
+    "uom": null,
+    "unit_price": "$0.95",
+    "amount": "$47.50",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30069,
+  "vendor_site_id": 7059,
+  "org_id": 204,
+  "po_number": "4501018",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-15",
+  "invoice_amount": "65.50",
+  "subtotal": "60.65",
+  "tax_amount": "4.85",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

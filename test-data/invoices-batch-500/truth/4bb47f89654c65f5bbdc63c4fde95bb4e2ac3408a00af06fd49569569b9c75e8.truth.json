@@ -1,0 +1,72 @@
+{
+ "sha256": "4bb47f89654c65f5bbdc63c4fde95bb4e2ac3408a00af06fd49569569b9c75e8",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Bray Warren and Campbell Corp",
+  "vendor_address": "04711 Vasquez Ports Apt. 229, Taylormouth, NC 40325",
+  "vendor_tax_id": "06-3242783",
+  "vendor_email": "accounts@bray-warren-and-campbell-corp.example",
+  "vendor_phone": "(701) 763-9119",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "BWA36621",
+  "invoice_date": "2026-09-23",
+  "due_date": null,
+  "po_number": "4500710",
+  "payment_terms": "Net 30 EOM",
+  "currency": "$",
+  "subtotal": "$17,890.20",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$1,431.22",
+  "freight_amount": null,
+  "total": "$19,321.42",
+  "bank_account": "869046733083",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Cisco Catalyst 4255 Switch 16\"",
+    "item_code": null,
+    "quantity": "1",
+    "uom": null,
+    "unit_price": "3,236.04",
+    "amount": "$3,236.04",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Cisco Catalyst 7569 Switch Premium",
+    "item_code": null,
+    "quantity": "4",
+    "uom": null,
+    "unit_price": "3,663.54",
+    "amount": "$14,654.16",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30062,
+  "vendor_site_id": 7056,
+  "org_id": 204,
+  "po_number": "4500710",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-23",
+  "invoice_amount": "19321.42",
+  "subtotal": "17890.20",
+  "tax_amount": "1431.22",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

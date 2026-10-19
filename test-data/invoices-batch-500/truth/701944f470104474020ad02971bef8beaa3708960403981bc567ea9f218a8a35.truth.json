@@ -1,0 +1,72 @@
+{
+ "sha256": "701944f470104474020ad02971bef8beaa3708960403981bc567ea9f218a8a35",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Khalsa Group Ltd",
+  "vendor_address": "H.No. 46, Memon Ganj, Noida - 581094, Mizoram, India",
+  "vendor_tax_id": "19AHSCK8056L4Z3",
+  "vendor_email": "accounts@khalsa.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "44476",
+  "invoice_date": "13.09.2026",
+  "due_date": null,
+  "po_number": "4500817",
+  "payment_terms": "Payment due within 30 days",
+  "currency": "₹",
+  "subtotal": "₹4,792,174.96",
+  "tax_label": "GST 12%",
+  "tax_rate": "12%",
+  "tax_amount": "₹575,061.00",
+  "freight_amount": null,
+  "total": "₹5,367,235.96",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Pure Storage FlashArray 4942 Storage Array Small",
+    "item_code": null,
+    "quantity": "2",
+    "uom": "EA",
+    "unit_price": "1,296,821.54",
+    "amount": "₹2,593,643.08",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Lenovo ThinkSystem 6226 Rack Server Small",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "Each",
+    "unit_price": "₹549,632.97",
+    "amount": "₹2,198,531.88",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30143,
+  "vendor_site_id": 7122,
+  "org_id": 458,
+  "po_number": "4500817",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-13",
+  "invoice_amount": "5367235.96",
+  "subtotal": "4792174.96",
+  "tax_amount": "575061.00",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

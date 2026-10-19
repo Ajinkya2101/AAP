@@ -1,0 +1,64 @@
+{
+ "sha256": "184a45742c88e0c4311b69129b0f06fb5c2840acdb31def7c68bc7f647bb617a",
+ "generator": "tools.invoicegen",
+ "layout": "compact",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Litware Components Inc",
+  "vendor_address": "2100 N First St, San Jose, CA 95131",
+  "vendor_tax_id": "94-2201384",
+  "vendor_email": "ar@litware.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "LW-3391",
+  "invoice_date": "2026-09-11",
+  "due_date": null,
+  "po_number": "4500156",
+  "payment_terms": "Net 30 days from date of invoice",
+  "currency": "$",
+  "subtotal": "$4,800.00",
+  "tax_label": "Sales tax 7.25%",
+  "tax_rate": "7.25%",
+  "tax_amount": "$348.00",
+  "freight_amount": null,
+  "total": "$5,148.00",
+  "bank_account": "987654321000",
+  "bank_routing": "111000025",
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Cisco Catalyst C9200L-24P-4G",
+    "item_code": null,
+    "quantity": "2",
+    "uom": null,
+    "unit_price": "$2,400.00",
+    "amount": "$4,800.00",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": "S6",
+  "vendor_id": 30306,
+  "vendor_site_id": 7282,
+  "org_id": 204,
+  "po_number": "4500156",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-11",
+  "invoice_amount": "5148.00",
+  "subtotal": "4800.00",
+  "tax_amount": "348.00",
+  "expect_fail": [
+   "C11"
+  ],
+  "expect_warn": [],
+  "expect_flags": [],
+  "notes": "Bank account differs from IBY_EXT_BANK_ACCOUNTS: fraud flag."
+ }
+}

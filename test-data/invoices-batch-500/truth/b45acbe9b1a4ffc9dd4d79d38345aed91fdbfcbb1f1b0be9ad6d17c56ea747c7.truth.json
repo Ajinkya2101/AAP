@@ -1,0 +1,62 @@
+{
+ "sha256": "b45acbe9b1a4ffc9dd4d79d38345aed91fdbfcbb1f1b0be9ad6d17c56ea747c7",
+ "generator": "tools.invoicegen",
+ "layout": "service",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Lachmann KGaA",
+  "vendor_address": "Heinz-Werner-Franke-Allee 505, 83922 Kronach, Netherlands",
+  "vendor_tax_id": "NL268774186B20",
+  "vendor_email": "ar@lachmann-kgaa.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "LK-INV-83526",
+  "invoice_date": "14.09.2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "7 days net",
+  "currency": "€",
+  "subtotal": null,
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "4.791,94 €",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Business Hours Guard Services On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "4.791,94 €",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30215,
+  "vendor_site_id": 7201,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "EUR",
+  "invoice_date": "2026-09-14",
+  "invoice_amount": "4791.94",
+  "subtotal": "4791.94",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

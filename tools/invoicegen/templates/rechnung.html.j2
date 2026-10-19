@@ -1,0 +1,23 @@
+{% extends "base.html.j2" %}
+{% from "macros.html.j2" import party_block, meta_rows, lines_table, totals_table, payment_block %}
+{% block style %}
+  .sender { font-size: 7pt; text-decoration: underline; color: #444; }
+  h1 { font-size: 16pt; margin: 14px 0 6px; }
+  .lines th { border-bottom: 1px solid #000; text-align: left; }
+  .totals { width: 45%; margin-left: 55%; }
+  .foot { margin-top: 18px; border-top: 0.5px solid #999; font-size: 7.5pt; color: #333; }
+{% endblock %}
+{% block body %}
+<div class="sender">{{ inv.vendor.name }} · {{ inv.vendor.address_lines | join(' · ') }}</div>
+<table><tr>
+  <td style="width:58%">{{ party_block('', inv.bill_to) }}</td>
+  <td><table>{{ meta_rows(inv, labels) }}</table></td>
+</tr></table>
+<h1>{{ labels.title }}</h1>
+{{ lines_table(inv, labels) }}
+{{ totals_table(inv, labels) }}
+<div class="foot">
+  <div>{{ inv.vendor.name }} · {{ labels.tax_id }}: {{ inv.vendor.tax_id or '' }} {% if inv.vendor.email %}· {{ inv.vendor.email }}{% endif %}</div>
+  {{ payment_block(inv, labels) }}
+</div>
+{% endblock %}

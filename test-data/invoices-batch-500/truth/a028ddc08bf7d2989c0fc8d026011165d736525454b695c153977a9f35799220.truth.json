@@ -1,0 +1,83 @@
+{
+ "sha256": "a028ddc08bf7d2989c0fc8d026011165d736525454b695c153977a9f35799220",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Narasimhan LLC Pvt Ltd",
+  "vendor_address": "28/92\nIyengar Ganj, Ahmedabad - 578395, Haryana, India",
+  "vendor_tax_id": "29IPVCN7047I2ZI",
+  "vendor_email": "accounts@narasimhan-llc-pvt.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "68087",
+  "invoice_date": "24-Sep-2026",
+  "due_date": null,
+  "po_number": "4500600",
+  "payment_terms": "Net 30",
+  "currency": "INR",
+  "subtotal": "2,013,866.27",
+  "tax_label": "GST 18%",
+  "tax_rate": "18%",
+  "tax_amount": "362,495.93",
+  "freight_amount": null,
+  "total": "2,376,362.20",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Parcel Freight Premium",
+    "item_code": null,
+    "quantity": "3",
+    "uom": "EA",
+    "unit_price": "43,281.77",
+    "amount": "129,845.31",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Express Freight Quarterly",
+    "item_code": null,
+    "quantity": "4",
+    "uom": "ea",
+    "unit_price": "105,287.94",
+    "amount": "421,151.76",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Employment Legal Services EU (Ireland)",
+    "item_code": null,
+    "quantity": "40",
+    "uom": null,
+    "unit_price": "36,571.73",
+    "amount": "1,462,869.20",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30083,
+  "vendor_site_id": 7076,
+  "org_id": 458,
+  "po_number": "4500600",
+  "currency_code": "INR",
+  "invoice_date": "2026-09-24",
+  "invoice_amount": "2376362.20",
+  "subtotal": "2013866.27",
+  "tax_amount": "362495.93",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

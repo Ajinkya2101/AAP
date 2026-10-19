@@ -1,0 +1,73 @@
+{
+ "sha256": "b91385fd274f656dd064cc0bfcf4aa5f110428f079dc723bc383b496e2ea737a",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": true,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Shankar Narula and Narayanan LLP",
+  "vendor_address": "215\nLoyal Nagar, Ahmedabad - 520060, Kerala, India",
+  "vendor_tax_id": "19XMJCS3608A9Z0",
+  "vendor_email": "accounts@shankar-narula-and-narayanan-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "SNA-INV-63922",
+  "invoice_date": "25 Sep 2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Payable immediately",
+  "currency": "₹",
+  "subtotal": "₹342,682.96",
+  "tax_label": "IGST 5%",
+  "tax_rate": "5%",
+  "tax_amount": "₹17,134.15",
+  "freight_amount": null,
+  "total": "₹359,817.11",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Object Storage Storage Annual",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "₹322,147.38",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Bandwidth Data Transfer Asia Pacific (Mumbai)",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "₹20,535.58",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30035,
+  "vendor_site_id": 7028,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-25",
+  "invoice_amount": "359817.11",
+  "subtotal": "342682.96",
+  "tax_amount": "17134.15",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

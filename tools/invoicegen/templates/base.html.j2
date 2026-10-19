@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="{{ lang or 'en' }}">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: {{ page_size or 'Letter' }}; margin: 16mm 14mm 18mm 14mm;
+          @bottom-center { content: "{{ labels.page }} " counter(page) " / " counter(pages); font-size: 8pt; color: #666; } }
+  body { font-family: {{ (font or '"DejaVu Sans", "Liberation Sans", sans-serif') | safe }}; font-size: 9.5pt; color: #111; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 4px 6px; vertical-align: top; }
+  .num { text-align: right; white-space: nowrap; }
+  .muted { color: #555; }
+  .small { font-size: 8pt; }
+  .totals td { padding: 3px 6px; }
+  .nowrap { white-space: nowrap; }
+  {% block style %}{% endblock %}
+</style>
+</head>
+<body>
+{% block body %}{% endblock %}
+</body>
+</html>

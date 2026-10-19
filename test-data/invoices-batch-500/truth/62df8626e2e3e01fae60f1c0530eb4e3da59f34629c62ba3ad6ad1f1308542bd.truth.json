@@ -1,0 +1,72 @@
+{
+ "sha256": "62df8626e2e3e01fae60f1c0530eb4e3da59f34629c62ba3ad6ad1f1308542bd",
+ "generator": "tools.invoicegen",
+ "layout": "letterhead",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Ramirez and Sons Corp",
+  "vendor_address": "02053 Smith Greens, New John, FL 07369",
+  "vendor_tax_id": "66-7152746",
+  "vendor_email": "ar@ramirez-and-sons-corp.example",
+  "vendor_phone": "(244) 835-1934",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "RAS/26-27/19671",
+  "invoice_date": "Sep 17, 2026",
+  "due_date": null,
+  "po_number": "4500478",
+  "payment_terms": "2% / 10 days, net 30",
+  "currency": "$",
+  "subtotal": "$5,165.60",
+  "tax_label": "Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$309.94",
+  "freight_amount": "$142.00",
+  "total": "$5,617.54",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Deep Clean Janitorial Services Premium",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "Mo",
+    "unit_price": "$4,552.40",
+    "amount": "$4,552.40",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Stanley 9701 Tool 16\"",
+    "item_code": null,
+    "quantity": "10",
+    "uom": null,
+    "unit_price": "61.32",
+    "amount": "$613.20",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30099,
+  "vendor_site_id": 7088,
+  "org_id": 204,
+  "po_number": "4500478",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-17",
+  "invoice_amount": "5617.54",
+  "subtotal": "5165.60",
+  "tax_amount": "309.94",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

@@ -1,0 +1,73 @@
+{
+ "sha256": "78279dbcb341eecab1c1f34d3ea24d32cedd464bfa1aa3afeb106be2d46bfec2",
+ "generator": "tools.invoicegen",
+ "layout": "cloud",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Morgan Cook and Jackson",
+  "vendor_address": "231 Jonathan Extensions Apt. 127, New Williamstad, CA 61312",
+  "vendor_tax_id": "33-5195866",
+  "vendor_email": "accounts@morgan-cook-and-jackson.example",
+  "vendor_phone": "(798) 984-6105",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "INV-2026-28884",
+  "invoice_date": "26-Sep-2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Due on receipt",
+  "currency": "$",
+  "subtotal": "$893.34",
+  "tax_label": "Sales Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$53.60",
+  "freight_amount": null,
+  "total": "$946.94",
+  "bank_account": "436304613467",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "On-site Imaging & Setup Tier 1",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$556.76",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Depot Imaging & Setup Basic",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "$336.58",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30121,
+  "vendor_site_id": 7104,
+  "org_id": 204,
+  "po_number": null,
+  "currency_code": "USD",
+  "invoice_date": "2026-09-26",
+  "invoice_amount": "946.94",
+  "subtotal": "893.34",
+  "tax_amount": "53.60",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

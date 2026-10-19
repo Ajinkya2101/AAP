@@ -1,0 +1,72 @@
+{
+ "sha256": "f0e739c0fd69a39614288e3981b4c0bf0a898eaacee0c202e908728f89e8f6f7",
+ "generator": "tools.invoicegen",
+ "layout": "boxed",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Herrera Chen and Andrews Corp",
+  "vendor_address": "1531 Anderson Knoll, Zavalaview, WA 72068",
+  "vendor_tax_id": null,
+  "vendor_email": "invoices@herrera-chen-and-andrews-corp.example",
+  "vendor_phone": "(574) 669-1222",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "HCA18770",
+  "invoice_date": "September 22, 2026",
+  "due_date": null,
+  "po_number": "4500772",
+  "payment_terms": "30 days net",
+  "currency": "$",
+  "subtotal": "$2,454.54",
+  "tax_label": "Tax 8%",
+  "tax_rate": "8%",
+  "tax_amount": "$196.36",
+  "freight_amount": null,
+  "total": "$2,650.90",
+  "bank_account": "297837048522",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Ansell 5295 Nitrile Gloves Premium",
+    "item_code": null,
+    "quantity": "30",
+    "uom": "box",
+    "unit_price": "$55.25",
+    "amount": "$1,657.50",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Pyrex 7685 Beaker Set Small",
+    "item_code": null,
+    "quantity": "12",
+    "uom": null,
+    "unit_price": "$66.42",
+    "amount": "$797.04",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30142,
+  "vendor_site_id": 7121,
+  "org_id": 204,
+  "po_number": "4500772",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-22",
+  "invoice_amount": "2650.90",
+  "subtotal": "2454.54",
+  "tax_amount": "196.36",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "sha256": "b15a0814b036e0f0ed696d13696c5ffb98d7f12e4ff4346ebd6f8402b672f02c",
+ "generator": "tools.invoicegen",
+ "layout": "minimal",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Riley Butler and Hernandez Inc",
+  "vendor_address": "8547 Murray Street, Jerryshire, GA 46661",
+  "vendor_tax_id": null,
+  "vendor_email": "invoices@riley-butler-and-hernandez.example",
+  "vendor_phone": "(672) 283-5042",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "82094",
+  "invoice_date": "09/21/2026",
+  "due_date": null,
+  "po_number": "4500364",
+  "payment_terms": "2/10 Net 30",
+  "currency": "$",
+  "subtotal": "$6,438.97",
+  "tax_label": "Sales Tax 6%",
+  "tax_rate": "6%",
+  "tax_amount": "$386.34",
+  "freight_amount": null,
+  "total": "$6,825.31",
+  "bank_account": "833138782905",
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Aruba CX 9913 Switch Compact",
+    "item_code": null,
+    "quantity": "3",
+    "uom": null,
+    "unit_price": "$2,135.74",
+    "amount": "$6,407.22",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Booklet 8572 Printed Brochure Large",
+    "item_code": null,
+    "quantity": "25",
+    "uom": "Each",
+    "unit_price": "1.27",
+    "amount": "$31.75",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30223,
+  "vendor_site_id": 7206,
+  "org_id": 204,
+  "po_number": "4500364",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-21",
+  "invoice_amount": "6825.31",
+  "subtotal": "6438.97",
+  "tax_amount": "386.34",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}

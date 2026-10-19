@@ -1,0 +1,73 @@
+{
+ "sha256": "ef7dcf8b9796734fb9066ef5ab0230c28995e8cae6e0bff2f91782eff0c8cf3f",
+ "generator": "tools.invoicegen",
+ "layout": "gst",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Chana LLC LLP",
+  "vendor_address": "41/752\nKapoor Path, Pune - 339541, Andhra Pradesh, India",
+  "vendor_tax_id": "07WHNCC3569I2Z7",
+  "vendor_email": "accounts@chana-llc-llp.example",
+  "vendor_phone": null,
+  "bill_to": "ACSE India Pvt Ltd, Accounts Payable, Survey No 12, Hinjewadi Phase 1, Pune, Maharashtra 411057",
+  "ship_to": null,
+  "invoice_number": "INV-2026-46746",
+  "invoice_date": "27.09.2026",
+  "due_date": null,
+  "po_number": null,
+  "payment_terms": "Net 45",
+  "currency": "Rs.",
+  "subtotal": "Rs. 5,161,511.21",
+  "tax_label": "GST 12%",
+  "tax_rate": "12%",
+  "tax_amount": "Rs. 619,381.35",
+  "freight_amount": null,
+  "total": "Rs. 5,780,892.56",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Business Hours Guard Services On-Demand",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 533,354.13",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Event Guard Services Annual",
+    "item_code": null,
+    "quantity": null,
+    "uom": null,
+    "unit_price": null,
+    "amount": "Rs. 4,628,157.08",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30091,
+  "vendor_site_id": 7083,
+  "org_id": 458,
+  "po_number": null,
+  "currency_code": "INR",
+  "invoice_date": "2026-09-27",
+  "invoice_amount": "5780892.56",
+  "subtotal": "5161511.21",
+  "tax_amount": "619381.35",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": [],
+  "long_invoice": false
+ }
+}

@@ -1,0 +1,11 @@
+<div class="tiles">
+  <a class="tile" href="{{ records_url() }}#records"><b>{{ figures.total }}</b><span class="muted">Invoices processed</span></a>
+  <a class="tile" href="{{ records_url(figures.WAITING) }}#records"><b>{{ figures.needs }}</b><span class="muted">Need Attention</span></a>
+  <a class="tile" href="{{ records_url('CREATED') }}#records"><b>{{ figures.posted }}</b><span class="muted">Created in Oracle</span></a>
+  <div class="tile"><b>{{ figures.moving }}</b><span class="muted">In the pipeline</span></div>
+  {% if figures.failed %}
+  <a class="tile" href="{{ records_url('FAILED') }}#records"><b class="fail">{{ figures.failed }}</b><span class="muted">Failed</span></a>
+  {% else %}
+  <div class="tile"><b>0</b><span class="muted">Failed</span></div>
+  {% endif %}
+</div>

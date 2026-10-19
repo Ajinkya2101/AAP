@@ -1,0 +1,83 @@
+{
+ "sha256": "abefbeefe3278d49a9beed00839cea0141ddc21706e5a9d39c71433e454a333c",
+ "generator": "tools.invoicegen",
+ "layout": "sidebar",
+ "scanned": false,
+ "pages": 1,
+ "file_kind": "pdf",
+ "source": {
+  "vendor_name": "Miller-Williams LLC",
+  "vendor_address": "39904 Kathryn Extensions, Navarroview, CA 62170",
+  "vendor_tax_id": "16-8229428",
+  "vendor_email": "ar@miller-williams.example",
+  "vendor_phone": "(300) 885-1223",
+  "bill_to": "ACSE Corp, Accounts Payable, 2500 Ross Ave, Dallas, TX 75201",
+  "ship_to": null,
+  "invoice_number": "ML-INV-32479",
+  "invoice_date": "Sep 16, 2026",
+  "due_date": null,
+  "po_number": "4500215",
+  "payment_terms": null,
+  "currency": "$",
+  "subtotal": "$53,159.02",
+  "tax_label": null,
+  "tax_rate": null,
+  "tax_amount": null,
+  "freight_amount": null,
+  "total": "$53,159.02",
+  "bank_account": null,
+  "bank_routing": null,
+  "iban": null,
+  "remit_to": null,
+  "lines": [
+   {
+    "description": "Employment Legal Services Annual",
+    "item_code": null,
+    "quantity": "8",
+    "uom": null,
+    "unit_price": "4,944.07",
+    "amount": "$39,552.56",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "IP Legal Services Tier 2",
+    "item_code": null,
+    "quantity": "24",
+    "uom": "hrs",
+    "unit_price": "495.46",
+    "amount": "$11,891.04",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   },
+   {
+    "description": "Instructor-led Training On-Demand",
+    "item_code": null,
+    "quantity": "1",
+    "uom": "EA",
+    "unit_price": "1,715.42",
+    "amount": "$1,715.42",
+    "tax_rate": null,
+    "po_line_ref": null,
+    "_page": 1
+   }
+  ]
+ },
+ "expected": {
+  "scenario": null,
+  "vendor_id": 30070,
+  "vendor_site_id": 7060,
+  "org_id": 204,
+  "po_number": "4500215",
+  "currency_code": "USD",
+  "invoice_date": "2026-09-16",
+  "invoice_amount": "53159.02",
+  "subtotal": "53159.02",
+  "tax_amount": "0",
+  "expect_fail": [],
+  "expect_warn": [],
+  "expect_flags": []
+ }
+}
