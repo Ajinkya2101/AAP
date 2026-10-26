@@ -17,6 +17,7 @@ There is no separate OCR engine. Scanned pages go to the vision model as images.
 - **Where:** pipeline stage 5, `src/aap/extraction/extract.py`.
 - **What it does:** takes the page images, plus the PDF text layer when it is good enough, and returns the invoice as structured JSON (header fields and lines).
 - **Why a vision model:** invoices arrive as scans and photos as well as digital PDFs. One model handles both, and the layout (tables, totals boxes) carries meaning that plain text loses.
+- **Prompt:** `extraction/prompts/v4` (`CURRENT_VERSION`). It also asks for the document title, the customer's store / location, every printed tax row and any bank-change notice, and forbids computed values (due date from the terms, unit price from the amount).
 - **Guard rails:** the output must match a JSON schema. Up to 4 page images per request; longer invoices are split into several requests. Values are then checked against the text layer; on image-only pages they are flagged `unverified_image_only`.
 
 ## 2. Choices: the "pick one" model
@@ -31,7 +32,7 @@ There is no separate OCR engine. Scanned pages go to the vision model as images.
 |---|---|---|---|
 | `map.supplier` | Which supplier sent this invoice? | No alias, tax ID, exact name or email-domain match, and no clear fuzzy winner | Flagged `check_map` |
 | `map.site` | Which supplier site matches the address? | Several pay sites and no clear address winner | Flagged `check_map` |
-| `map.terms` | Which payment terms mean the same? | No alias, exact name or parsable pattern (net N, discount, EOM, immediate) | Flagged `check_map` |
+| `map.terms` | Which payment terms mean the same? | No alias, exact name or parsable pattern (net N, discount, EOM, immediate), and no printed due date to derive the terms from | Flagged `check_map` |
 | `map.category` | Which purchasing category fits this line? | The supplier has no past line with the same text | Flagged `check_map` |
 | `agent.pair_lines` | Which PO line is this invoice line? | Best score below 0.80, or less than 0.15 ahead of the next line | Reason `LINE_PAIRED_BY_MODEL` |
 | `agent.gl_code` | Which GL account for this non-PO line? | Similar past lines disagree, or similarity is below 0.90 | Always goes to review |
@@ -49,7 +50,7 @@ There is no separate OCR engine. Scanned pages go to the vision model as images.
 
 ## Not models
 
-- **RapidFuzz and regex:** all the fuzzy scoring and terms parsing before a model is asked.
+- **RapidFuzz and regex:** all the fuzzy scoring and terms parsing before a model is asked; also the invoice type (credit memo), price basis (per 1000, cents), Canada hint and freight rows at normalize.
 - **Stub backend (`LLM_BACKEND=stub`):** no model at all. Extraction answers come from ground-truth files and choices take the first candidate. For development and tests without a GPU.
 
 ## Settings

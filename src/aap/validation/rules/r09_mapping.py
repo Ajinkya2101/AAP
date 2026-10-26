@@ -23,6 +23,9 @@ def mapping_complete(ctx: RuleContext) -> list[RuleResult]:
     if check:
         out.append(result("V-05", "Mapping complete", WARN,
                           "chosen by the model from candidates, please check: " + ", ".join(check[:10]), *check))
+    if Flag.terms_due_date_conflict in ctx.inv.terms_id.flags:
+        out.append(result("V-05", "Mapping complete", WARN, ctx.inv.terms_id.note or
+                          "printed payment terms and due date disagree", "terms_id"))
     if "tax_id_name_conflict" in ctx.inv.vendor_id.flags:
         out.append(result("V-05", "Mapping complete", WARN,
                           "supplier found by tax ID but the printed name is different", "vendor_id"))

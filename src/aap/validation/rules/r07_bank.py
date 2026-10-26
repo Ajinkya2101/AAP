@@ -9,6 +9,14 @@ from ..engine import FAIL, PASS, SKIP, RuleContext, RuleResult, result, rule
 @rule("C11", "Bank details unchanged")
 def bank_details(ctx: RuleContext) -> list[RuleResult]:
     inv = ctx.inv
+    notice = inv.bank_change_notice.value
+    if notice:
+        # "Please use new routing number effective immediately": the classic bank-change scam wording,
+        # also when the supplier is not mapped yet or the new number happens to be on file.
+        return [result("C11", "Bank details unchanged", FAIL,
+                       f"the invoice announces new bank details ({notice[:160]}): confirm with the supplier by "
+                       "phone, on a number already on file, before paying", "bank_change_notice", "bank_account",
+                       fraud=True)]
     acct, iban = inv.bank_account.value, inv.iban.value
     if not acct and not iban:
         return [result("C11", "Bank details unchanged", SKIP, "no bank details printed")]

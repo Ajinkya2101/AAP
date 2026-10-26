@@ -51,13 +51,13 @@ class StubClient:
                 source.setdefault("evidence", [])
             else:
                 source.pop("evidence", None)
-            return source
+            return _fill_missing(source, req.schema)
         from aap.extraction.heuristic import heuristic_extract
 
         data = heuristic_extract("\n\n".join(req.context.get("page_texts") or []))
         if grounded:
             data["evidence"] = []
-        return data
+        return _fill_missing(data, req.schema)
 
     # ------------------------------------------------------------ choose
     def _choose(self, req: LlmRequest) -> dict[str, Any]:
@@ -74,6 +74,14 @@ class StubClient:
 
     def _generic(self, req: LlmRequest) -> dict[str, Any]:
         raise LlmError(f"stub backend has no handler for task {req.task!r}")
+
+
+def _fill_missing(data: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+    """Truth files and the regex fallback predate newer schema keys: answer those with null
+    (an empty list for list keys), as the model does for a value that is not printed."""
+    for key, sub in schema.get("properties", {}).items():
+        data.setdefault(key, [] if sub.get("type") == "array" else None)
+    return data
 
 
 def load_truth(truth_dir: Path, sha256: str | None) -> dict[str, Any] | None:

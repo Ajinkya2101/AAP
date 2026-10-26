@@ -11,22 +11,25 @@ import re
 from typing import Any
 
 from aap.schemas.fields import Field, Flag
-from aap.schemas.source import HEADER_FIELDS, LINE_FIELDS, SourceInvoice
+from aap.schemas.source import HEADER_FIELDS, LINE_FIELDS, TAX_FIELDS, SourceInvoice
 
 from .extract import PageInput
 
 _NORM = re.compile(r"[^0-9a-zÀ-ɏ]+")
+_NORM_PCT = re.compile(r"[^0-9a-zÀ-ɏ%]+")
 
 
-def norm(s: str) -> str:
-    return _NORM.sub("", s.lower())
+def norm(s: str, keep_percent: bool = False) -> str:
+    """Letters and digits only. keep_percent: a rate "12%" must not match a bare "12" elsewhere
+    on the page (Énergir sample: the model's "12%" was "found" in a date)."""
+    return (_NORM_PCT if keep_percent else _NORM).sub("", s.lower())
 
 
-def _find_in_words(target: str, words: list[dict[str, Any]]) -> list[float] | None:
+def _find_in_words(target: str, words: list[dict[str, Any]], keep_percent: bool = False) -> list[float] | None:
     """Consecutive words whose normalized concatenation equals the target."""
     if not target:
         return None
-    normed = [norm(w["text"]) for w in words]
+    normed = [norm(w["text"], keep_percent) for w in words]
     for i in range(len(words)):
         acc = ""
         for j in range(i, min(i + 40, len(words))):
@@ -49,20 +52,22 @@ def _find_in_words(target: str, words: list[dict[str, Any]]) -> list[float] | No
 def locate(field: Field[str], pages: list[PageInput], evidence: dict[str, dict[str, Any]], name: str) -> None:
     if not field.present:
         return
-    target = norm(field.source_value or str(field.value))
+    raw = field.source_value or str(field.value)
+    pct = "%" in raw
+    target = norm(raw, pct)
     if not target:
         return
     has_text_layer = False
     for p in pages:
         if p.route == "text_and_image" and p.words:
             has_text_layer = True
-            bbox = _find_in_words(target, p.words)
+            bbox = _find_in_words(target, p.words, pct)
             if bbox:
                 field.page, field.bbox = p.page_no, [round(v, 2) for v in bbox]
                 return
         elif p.route == "text_only" and p.text:
             has_text_layer = True
-            if target in norm(p.text):
+            if target in norm(p.text, pct):
                 field.page = p.page_no
                 return
     ev = evidence.get(name)
@@ -94,6 +99,9 @@ def source_check(src: SourceInvoice, pages: list[PageInput], evidence: list[dict
     for ln in src.lines:
         for name in LINE_FIELDS:
             locate(getattr(ln, name), pages, ev, f"lines[{ln.line_no}].{name}")
+    for t in src.taxes:
+        for name in TAX_FIELDS:
+            locate(getattr(t, name), pages, ev, f"taxes[{t.tax_no}].{name}")
     stats = {"checked": 0, "not_found": 0, "unverified": 0}
     for name in HEADER_FIELDS:
         f = getattr(src, name)

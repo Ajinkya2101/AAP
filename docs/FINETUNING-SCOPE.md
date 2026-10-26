@@ -78,7 +78,7 @@ header field and line. Nothing else in the pipeline can recover a value it misre
 
 **Technical conditions for a useful adapter:**
 
-- **Train in the serving format.** Same system prompt (`prompts/v3`), same image resolution
+- **Train in the serving format.** Same system prompt (`prompts/v4` today), same image resolution
   (`VLLM_MAX_PIXELS`), same text-layer attachment, same JSON key order as `ExtractedInvoice`. A mismatch
   between training and serving input costs more accuracy than the tuning gains.
 - **Keep schema-constrained decoding.** vLLM enforces the JSON schema today. A tuned model keeps that, so
@@ -121,6 +121,10 @@ the model. The model was reached 8 times in 631 invoices. All 8 inputs were extr
 
 So there is no terms-matching problem to tune. The cause was upstream and is addressed in prompt v3. Real
 phrases that the rules miss should become value-map rows, which take effect at once and can be removed.
+
+The customer's real samples (2026-10-23) often print only a due date. Since 2026-10-26 the terms are then
+derived from the days between invoice and due date, also when the model's printed terms are not found on
+the page (PLAN-REAL-INVOICES.md R1.3), which takes more cases away from the model.
 
 ### Unit of measure mapping (stage 7): not feasible
 
@@ -198,7 +202,7 @@ Writing the open-interface rows, running the import and reading the result. No j
 
 | Method | Fits | Does not fit |
 |---|---|---|
-| Prompt change | Wrong-field errors, missed labels. Free, immediate, versioned (`prompts/v3`) | Visual misreads |
+| Prompt change | Wrong-field errors, missed labels. Free, immediate, versioned (`prompts/vN`, today v4) | Visual misreads |
 | Value map or history row | Any repeated printed value: terms, units, supplier names, GL text | First occurrence of a new value |
 | LoRA / QLoRA on the vision model | Extraction, once 500 to 1,000 corrected real invoices exist (my estimate) | Anything needing Oracle IDs from memory |
 | LoRA on a text choice model | PO line pairing, if measurement shows a need | Choice points reached under 3% of the time |
@@ -223,7 +227,8 @@ Writing the open-interface rows, running the import and reading the result. No j
 - **Value-map proposals:** an approved model pick for supplier or terms becomes a proposal on the admin page.
 - **Usage report:** `python -m aap.eval.model_use` shows how often each choice point asks the model.
 - **Export:** `python -m aap.finetune.export --out <dir>` writes `extraction.jsonl`, `choices.jsonl` and
-  the page images.
+  the page images. Extraction targets are in the model's flat answer shape, including the `taxes` rows of
+  the v4 schema.
 
 ## Order of work
 

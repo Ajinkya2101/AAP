@@ -4,7 +4,7 @@
 |---|---|
 | Audience | Oracle EBS technical consultants, integration and DBA teams |
 | Scope | Every action in the AAP UI, every background job, and the data each one reads and writes |
-| Date | 2026-09-30 |
+| Date | 2026-09-30 (updated 2026-10-26: real-invoice changes, APLOAD file) |
 | Related documents | [HOW-IT-WORKS.md](HOW-IT-WORKS.md) (internals), [ARCHITECTURE.md](ARCHITECTURE.md), [TECH-STACK.md](TECH-STACK.md) §9, [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) §3 (mock EBS tables) |
 
 > **Status of the "Real EBS" columns.** The application is built and tested against the **mock EBS**: a PostgreSQL database with EBS table names, column names, `APPS` views, the Payables Open Interface and a mock `APXIIMPT`. The real Oracle adapter (`EbsOpenInterfaceAdapter`, python-oracledb) is **not built yet**. The "Real EBS" columns below give the target objects that the adapter will use. They are the same objects the mock copies, and §6 lists where the two differ.
@@ -50,7 +50,7 @@ flowchart LR
 | Seeding (mock only) | `ebs_owner` (`EBS_OWNER_DSN`) | Not used | Mock only |
 | Application database | `aap_app` (`AAP_DSN`); `aap_owner` for migrations | Same | `audit_event` is INSERT-only for `aap_app` |
 
-The adapter is selected with `ADAPTER` in `.env` (today only `ebs_mock`). The invoice source written to `AP_INVOICES_INTERFACE.SOURCE` is `INVOICE_SOURCE` (default `AAP`). This value must exist as a Payables `SOURCE` lookup in EBS.
+The adapter is selected with `ADAPTER` in `.env` (today only `ebs_mock`). The invoice source written to `AP_INVOICES_INTERFACE.SOURCE` (and to the InvoiceSource column of the APLOAD file, §3.9) is `INVOICE_SOURCE` (default `AAP`). This value must exist as a Payables `SOURCE` lookup in EBS.
 
 ---
 
@@ -174,8 +174,8 @@ From `ORACLE_ERROR` the clerk corrects and approves again (a new version and a n
 | `AP_INVOICES_INTERFACE` column | Value |
 |---|---|
 | `INVOICE_ID` | Next value of `AP_INVOICES_INTERFACE_S` |
-| `INVOICE_NUM`, `INVOICE_DATE`, `GL_DATE` | From the approved invoice. `GL_DATE` is the invoice date when its AP period is open, otherwise the current date. |
-| `INVOICE_TYPE_LOOKUP_CODE` | `STANDARD`, or `CREDIT` when the total is negative |
+| `INVOICE_NUM`, `INVOICE_DATE`, `GL_DATE` | From the approved invoice. `GL_DATE` follows `GL_DATE_POLICY`: `invoice_date` (default) = the invoice date when its AP period is open, otherwise the current date; `today` = always the current date. |
+| `INVOICE_TYPE_LOOKUP_CODE` | The invoice type from the document title: `CREDIT` for a credit memo / note (amounts made negative), otherwise `STANDARD`; always `CREDIT` when the total is negative. Rule C13 stops a `CREDIT` with a positive total. |
 | `VENDOR_ID`, `VENDOR_SITE_ID`, `VENDOR_SITE_CODE`, `ORG_ID` | From the mapping (reference copy of `AP_SUPPLIERS`, `AP_SUPPLIER_SITES_ALL`) |
 | `INVOICE_AMOUNT`, `INVOICE_CURRENCY_CODE` | From the invoice. `INVOICE_AMOUNT` = sum of the lines. |
 | `EXCHANGE_RATE_TYPE`, `EXCHANGE_DATE` | `Corporate` and the GL date, only when the invoice currency is not the ledger currency. EBS calculates the rate. |
@@ -187,7 +187,7 @@ From `ORACLE_ERROR` the clerk corrects and approves again (a new version and a n
 
 | `AP_INVOICE_LINES_INTERFACE` column | Value |
 |---|---|
-| `LINE_NUMBER`, `LINE_TYPE_LOOKUP_CODE` | 1…n; `ITEM`, `TAX` or `FREIGHT`. Header tax and freight become their own lines. |
+| `LINE_NUMBER`, `LINE_TYPE_LOOKUP_CODE` | 1…n; `ITEM`, `TAX` or `FREIGHT`. Header tax and freight become their own lines: one `TAX` line per printed tax row (for example GST and QST), and a printed freight row stays a `FREIGHT` line in its place. |
 | `AMOUNT`, `DESCRIPTION` | From the line |
 | `QUANTITY_INVOICED`, `UNIT_PRICE`, `UNIT_OF_MEAS_LOOKUP_CODE` | ITEM lines only |
 | `PO_NUMBER`, `PO_LINE_NUMBER` | PO-matched lines. EBS derives the account from the PO distribution. |
@@ -234,6 +234,17 @@ No EBS writes. The vendor's reply comes back through the mailbox poll (§4.3).
 
 The page itself has no EBS access. Sync now reads EBS through the worker.
 
+### 3.9 APLOAD file (API and command line, no UI button)
+
+The customer's existing AP interfaces load a pipe-delimited file (`APILOAD_<date>.csv`) of `H` (header) and `L` (line) rows instead of writing the open-interface tables. The application writes the same file for its invoices. Approval still posts through the open interface (§3.5); whether the file replaces that is open (PLAN-REAL-INVOICES.md R2.4). Format: HOW-IT-WORKS.md §11.4.
+
+| Action | Reads | Writes |
+|---|---|---|
+| `GET /api/documents/{id}/apload` (one invoice) | The `approved` `aap.invoice_version`; before approval, the latest reviewed version + `aap.agent_run.outcome` (header `X-AAP-Approved: false`) | – (text response) |
+| `python -m aap.submit.apload --out <file> [--document <id> …]` | Every document with an `approved` version, or the ones given | The file (for example under `/data/filestore/apload/`) |
+
+No EBS access. The file carries the supplier number and site name (from the mapping), the GL account for lines without a PO line, and `INVOICE_SOURCE` as InvoiceSource.
+
 ---
 
 ## 4. Automatic actions (no button)
@@ -248,8 +259,8 @@ These run one job per stage in the worker, after an upload or a received email.
 | 3 Parse | Text, words with coordinates, tables, page images | File store | `aap.page`, file store `pages/<document_id>/<n>.png` |
 | 4 Route | Text-layer quality per page: text + image, image only, or text only | `aap.page` | `aap.page.route` |
 | 5 Extract | The LLM reads the values exactly as printed | `aap.page`, page images | `aap.extraction_run` (prompt version, raw output), `aap.invoice_version` (kind `source`) |
-| 6 Normalize | Dates, amounts, currency, PO number, bank details | – | `aap.invoice_version` (kind `normalized`) |
-| 7 Map | Printed values → EBS ids: supplier, site, OU, terms, UOM, category, tax rate code | Reference copy: `aap.ref_supplier`, `ref_supplier_site`, `ref_operating_unit`, `ref_terms`, `ref_currency`, `ref_uom`, `ref_category`, `ref_tax_rate`, `ref_gl_period`; `aap.value_map`; `aap.gl_history_line` | `aap.invoice_version` (kind `mapped`), `aap.agent_decision` for every LLM choice |
+| 6 Normalize | Dates, amounts, currency, PO number, bank details; invoice type from the title (credit memo → negative amounts); tax rows summed; unit prices per 1000 / in cents converted | – | `aap.invoice_version` (kind `normalized`) |
+| 7 Map | Printed values → EBS ids: supplier, site, OU, terms (from the printed terms or the due date), UOM, category, tax rate code; store / location → cost center (value maps `location`) | Reference copy: `aap.ref_supplier`, `ref_supplier_site`, `ref_operating_unit`, `ref_terms`, `ref_currency`, `ref_uom`, `ref_category`, `ref_tax_rate`, `ref_gl_period`; `aap.value_map`; `aap.gl_history_line` | `aap.invoice_version` (kind `mapped`), `aap.agent_decision` for every LLM choice |
 | 8 Validate | The rules below | See the rules table | `aap.validation_result` |
 
 **Validation rules and their source:**
@@ -262,9 +273,10 @@ These run one job per stage in the worker, after an upload or a received email.
 | C8 | Supplier and site active; pay site in the OU | Reference copy | `ref_supplier`, `ref_supplier_site` ← `AP_SUPPLIERS`, `AP_SUPPLIER_SITES_ALL` | same |
 | C9, V-GL | Invoice date sensible; GL date in an open AP period | Reference copy | `ref_gl_period` ← `GL_PERIOD_STATUSES` (application 200) | same |
 | C10 | Duplicate invoice (same supplier and invoice number) | `aap.invoice_version` **and live EBS** | `AP_INVOICES_ALL` | same |
-| C11 | Bank account / IBAN = supplier bank (fraud check) | Reference copy | `ref_supplier_bank` ← `IBY_EXT_BANK_ACCOUNTS` + `IBY_ACCOUNT_OWNERS` | same |
+| C11 | Bank account / IBAN = supplier bank (fraud check); fails on any printed bank-change notice | Reference copy | `ref_supplier_bank` ← `IBY_EXT_BANK_ACCOUNTS` + `IBY_ACCOUNT_OWNERS` | same |
 | C12 | Source check (value is on the page) | Invoice only | – | – |
-| V-05 | Every EBS value mapped | Invoice only | – | – |
+| C13 | Invoice type matches the sign of the total | Invoice only | – | – |
+| V-05 | Every EBS value mapped; printed terms that disagree with the due date | Invoice only | – | – |
 | V-PO | PO exists in the OU, same supplier, approved and open for invoicing | **Live EBS** | `PO_HEADERS_ALL`, `PO_LINES_ALL`, `PO_LINE_LOCATIONS_ALL`, `PO_DISTRIBUTIONS_ALL` | same |
 | V-FX | Corporate rate exists for a foreign-currency invoice | **Live EBS** | `GL_DAILY_RATES` | same |
 | V-REF | Reference copy is current | `aap.ref_sync_run` | – | – |
@@ -333,6 +345,7 @@ Account: read-only. The UI and the mapping read only the copy. If the copy is to
 | Vendor follow-ups | Hourly | `aap.email_outbox`, `aap.email_message` | After 3 days (`VENDOR_REPLY_REMINDER_DAYS`): one reminder draft (needs approval). After 7 days (`VENDOR_REPLY_TIMEOUT_DAYS`): `aap.review_task` `VENDOR_NO_REPLY`, status `IN_REVIEW` |
 | Embedding backfill | Every 5 min | `aap.gl_history_line` without a vector | `aap.gl_history_line.embedding` |
 | Requeue stalled | Every minute | Documents in an intermediate status for more than 5 min with no job | `aap.procrastinate_jobs` |
+| Recover orphaned jobs | At worker start (`WORKER_RECOVER_ON_START`) | `aap.procrastinate_jobs` in status `doing` (left by a worker that died) | Those jobs back to `todo` |
 
 None of these write to EBS.
 
@@ -385,8 +398,10 @@ Nothing else in EBS is read or written. Base-table writes (`AP_INVOICES_ALL`, li
 | Idempotency key | `AP_INVOICES_INTERFACE.ATTRIBUTE15`, copied to `AP_INVOICES_ALL.ATTRIBUTE15` | The customer must reserve invoice DFF segment `ATTRIBUTE15` (or another free segment) for AAP; the import copies interface attributes to the invoice DFF. |
 | Supplier DFFs | `AP_SUPPLIERS.ATTRIBUTE1` = PO required (`Y`/`N`), `ATTRIBUTE2` = default cost centre | Map to the customer's own DFF segments, or leave unused (then every supplier is treated as PO required and GL coding uses history only). |
 | Item DFF | `MTL_SYSTEM_ITEMS_B.ATTRIBUTE1` = vendor catalogue wording (used only by the test-invoice generator) | Not used. |
-| Chart of accounts | 4 segments, `Company-CostCentre-Account-SubAccount` (`01-510-6420-0000`); value sets `ACSE_COMPANY`, `ACSE_COST_CENTRE`, `ACSE_ACCOUNT` | The value set names are hard-coded in the CCID query today and must be made configurable for the customer's chart of accounts (segment count, order, value set names). |
-| Invoice source | `AAP` | Create the Payables `SOURCE` lookup value (`INVOICE_SOURCE`). |
+| Chart of accounts | 4 segments, `Company-CostCentre-Account-SubAccount` (`01-510-6420-0000`); value sets `ACSE_COMPANY`, `ACSE_COST_CENTRE`, `ACSE_ACCOUNT` | The value set names are hard-coded in the CCID query today and must be made configurable for the customer's chart of accounts (segment count, order, value set names). The customer's APLOAD sample shows 8 segments separated by `.`, segment 3 = location (PLAN-REAL-INVOICES.md R2.1, R2.2). |
+| Store / location → cost center | No `location` value maps loaded, so `cost_center` stays empty | Load the customer's store ↔ cost-center table as `aap.value_map` rows with `map_type = location` (R2.1). |
+| Invoice source | `AAP` | Create the Payables `SOURCE` lookup value (`INVOICE_SOURCE`). The customer's APLOAD sample uses `BRUIN`; the source for AAP invoices is open (R2.4). |
+| Submit format | Open interface tables (§3.5) | Open interface, or the customer's APLOAD file (§3.9) delivered to their existing load (R2.4). |
 | Concurrent request lookup | `FND_CONCURRENT_REQUESTS.ARGUMENT3` = group id | Adjust to the argument position of `GROUP_ID` in the customer's `APXIIMPT` definition. |
 | Import delay | Random 1–10 s (`EBS_IMPORT_DELAY_MIN/MAX`) | Depends on the Concurrent Manager queue. The poll limit (120 × 5 s) may need to increase; see ARCHITECTURE.md §9.2 (15 minutes). |
 | Invoice image | Kept in the AAP file store only | Not attached to the EBS invoice. Attaching it (`FND_ATTACHED_DOCUMENTS`) is not in scope. |

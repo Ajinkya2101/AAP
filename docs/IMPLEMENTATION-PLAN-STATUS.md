@@ -3,7 +3,7 @@
 | Item | Value |
 |---|---|
 | Status | Tracking copy of IMPLEMENTATION-PLAN.md (Draft 0.1) |
-| Last updated | 2026-09-28 |
+| Last updated | 2026-10-26 (real-invoice readiness R1: [PLAN-REAL-INVOICES.md](PLAN-REAL-INVOICES.md)) |
 | Scope | Mock Oracle EBS in PostgreSQL, mailbox intake, Python pipeline, agent layer, containerized runtime, minimal UI |
 | Builds on | PLAN.md, TECH-STACK.md, ARCHITECTURE.md, DIAGRAMS.md, WORKED-EXAMPLE.md |
 
@@ -19,13 +19,27 @@ Legend: ✅ done and verified · 🟡 done except one item · 🟠 in progress �
 | 3 | Invoice generator | ✅ |
 | 4 | Pipeline 1–8 | ✅ stub and vLLM modes run end to end (vLLM accuracy findings → Phase 6) |
 | 5 | Mailbox | ✅ |
-| 6 | Eval baseline | ✅ harness + real-model baseline; prompt v2 passes both PLAN 4 gates on the dev set (held-out 515 set: see below) |
+| 6 | Eval baseline | ✅ harness + real-model baseline; prompt v2 passes both PLAN 4 gates on the dev set (held-out 515 set: see below); current prompt v4 still passes them (header 99.3 %, line F1 100 %) |
 | 7 | Agents: match + GL | ✅ |
 | 8 | Agents: exceptions | ✅ |
 | 9 | Submit + result | ✅ |
 | 10 | Minimal UI + hardening | ✅ |
 
 Details per phase: §12. Verification evidence: below. Deviations from the plan: §0.1.
+
+After the phases: **real-invoice readiness** from the customer's samples (5 invoice PDFs and their `APILOAD` file). Phase R1 (fixes that need no outside input) is done; R2 waits on the functional team. Plan, items and results: [PLAN-REAL-INVOICES.md](PLAN-REAL-INVOICES.md).
+
+### Added 2026-10-26 (PLAN-REAL-INVOICES R1)
+
+| Area | What | Verified by |
+|---|---|---|
+| Worker stability | Lock around every PDFium call (parallel parse crashed the worker); at start, jobs left `doing` by a dead worker go back to `todo` (`WORKER_RECOVER_ON_START`) | 5 sample PDFs parsed in parallel; `test_worker_recover.py` |
+| Extraction | Prompt v4; schema adds `document_type`, `location_ref`, `bank_change_notice`, `taxes` (one row per printed tax); source check keeps `%` | `invoices-dev-55` real-model eval: header 99.3 %, line F1 100 %, `po_number` 94.5 → 100 % |
+| Normalize | Invoice type from the title (credit → negative); several taxes summed; price per 1000 / in cents → per unit; implausible bank numbers and IBANs dropped; freight rows → `FREIGHT`; Canada hint → CAD | `test_real_invoice_rules.py` |
+| Map | Terms from the due date when none (or none verifiable) are printed; one TAX line per tax row; store / location → cost center (value maps `location`); `GL_DATE_POLICY` | `test_real_invoice_rules.py` |
+| Validation | C4 per tax row; C11 fails on a bank-change notice; new C13 invoice type vs sign; V-05 warns on a terms / due-date conflict | `test_real_invoice_rules.py` |
+| APLOAD | The customer's pipe-delimited AP interface file: `GET /api/documents/{id}/apload`, `python -m aap.submit.apload` | `test_apload.py` (byte-for-byte against the sample) |
+| Tests | 83 unit tests; e2e S1–S15 with the stub LLM: 23 passed, 3 skipped (embeddings) | |
 
 ### Verification (last runs, 2026-09-29)
 
@@ -144,7 +158,7 @@ Everything else in the existing docs still applies: R-01…R-07, the canonical m
 | Alembic | Hand-written migrations | Baseline `0001` builds from model metadata | Every later schema change must be a new revision |
 | Similar-history search (GL, S2) | bge-m3 + pgvector | RapidFuzz behind the same function | Embeddings not wired yet; `gl_history_line.embedding` exists |
 | Non-PO history lines | No item | Seeder puts the item on non-PO history lines (R12 allows it) | Gives history a category, so exact-history mapping works without the LLM |
-| GL date | Not specified | Invoice date if its AP period is open, else today | Prevents V-GL failures for old invoices (S9) |
+| GL date | Not specified | `GL_DATE_POLICY=invoice_date` (default): invoice date if its AP period is open, else today; `today`: always today (EBS Workbench default) | Prevents V-GL failures for old invoices (S9); the customer's default is open (PLAN-REAL-INVOICES R2.6) |
 | Vendor replies | IMAP poller | IMAP poller (`aap.mailbox.poller`); `POST /api/documents/{id}/vendor-reply` stays for manual entry | Done in Phase 5 |
 | IMAP client | `imapclient` | stdlib `imaplib` behind the `MailboxConnector` protocol | No new dependency; the protocol hides it |
 | vLLM image | `vllm/vllm-openai` pinned | `aap-vllm:dev` = v0.10.1.1 + a one-line patch (`docker/vllm.Dockerfile`): the vision encoder falls back to PyTorch SDPA instead of xformers | xformers runs a Hopper-only kernel on sm_120 → `CUDA error: invalid argument` at engine start |
@@ -153,10 +167,11 @@ Everything else in the existing docs still applies: R-01…R-07, the canonical m
 | Hold API | `apply_hold` | `apps.ap_holds_pkg_insert_single_hold` (mirrors `AP_HOLDS_PKG.INSERT_SINGLE_HOLD`), re-applied by every `migrate` | `apps_intf` cannot write base tables; APXIIMPT places `QTY REC`/`PRICE` itself, the API adds the rest |
 | Pre-submit duplicate check | V-06 again at stage 10 | Not repeated; Oracle's import rejects (`DUPLICATE INVOICE NUMBER`) | Approving a C10 failure is an explicit clerk decision; Oracle stays the last line of defence |
 | Exact-history GL | Unanimous history (WORKED-EXAMPLE 2 wording) | ≥ 90 % of ≥ 3 past lines (`GL_EXACT_AUTO` / `GL_EXACT_MIN`) | Seeded history contains ~4 % miscoding; unanimity sent 85 % of invoices to review |
-| Prompts | v1 | v2 (`extraction/prompts/v2`), v1 kept | Eval findings (bank labels, invented prices, evidence loop) |
+| Prompts | v1 | v4 (`extraction/prompts/v4`), v1–v3 kept | v2: eval findings (bank labels, invented prices, evidence loop); v3: value not label, terms, PO labels, subtotal; v4: the customer's real samples (PLAN-REAL-INVOICES) |
 | Embeddings runtime | sentence-transformers / torch | ONNX Runtime + tokenizers (`aap.embed`) | No 2.5 GB CUDA torch wheel in the worker; 1.7 GB peak memory |
 | Alembic baseline | Frozen metadata | `0001` still builds from the live models, so later revisions use `IF NOT EXISTS` | Fresh and upgraded databases stay identical |
-| Stuck jobs | — | Periodic `requeue_stalled` job (every minute) | Recovers documents whose enqueue failed |
+| Stuck jobs | — | Periodic `requeue_stalled` job (every minute); at worker start, jobs left `doing` go back to `todo` (`WORKER_RECOVER_ON_START`) | Recovers documents whose enqueue failed, and jobs a crashed worker was running (`requeue_stalled` skips those) |
+| Submit format | Open interface | Open interface, plus the customer's APLOAD file (`aap.submit.apload`) | Their existing AP interfaces use it; which one goes live is PLAN-REAL-INVOICES R2.4 |
 | Mock data date | — | `SEED_ANCHOR_DATE` (default 2026-09-28) | AUG-26/SEP-26 are the open periods; re-seed later with a newer anchor |
 | Vendor wording of items | — | `MTL_SYSTEM_ITEMS_B.ATTRIBUTE1` (mock-only DFF) | Generated invoices describe items differently from the PO |
 
@@ -500,7 +515,7 @@ Each stage is one idempotent Procrastinate task. It reads the previous stage's o
 | 5 Extract | `extraction/` | `openai` SDK → vLLM, xgrammar via `response_format` | Prompt files are versioned in `extraction/prompts/vN/`. Invoices over 4 pages are chunked. `source_check.py` flags `not_found_in_source`. |
 | 6 Normalize | `normalize/` | `dateparser`, Babel, `Decimal` | Two-date-format flag, currency from vendor default |
 | 7 Map | `mapping/` | RapidFuzz | Exact → fuzzy top 5 → LLM enum choice. Covers supplier, site, terms, currency, UOM, category, tax rate. |
-| 8 Validate | `validation/rules/` | — | One module per rule, covering V-01…V-07 plus WORKED-EXAMPLE C1–C12 (EIN/GSTIN checksum, bank match, open GL period, duplicate) |
+| 8 Validate | `validation/rules/` | — | One module per rule, covering V-01…V-07 plus WORKED-EXAMPLE C1–C12 (EIN/GSTIN checksum, bank match, open GL period, duplicate) and C13 (invoice type vs sign, added 2026-10-26) |
 | → | **Agent layer** | §8 | |
 | 10 Submit | `submit/` | adapter | Idempotency key, `GROUP_ID`, and polling `FND_CONCURRENT_REQUESTS` |
 | 11 Result | `submit/result.py` | adapter | Reads `AP_INTERFACE_REJECTIONS` → `ORACLE_ERROR` with reasons |
@@ -688,7 +703,7 @@ Priority order: **mock EBS → pipeline → mailbox → agents**, with the UI la
 | ID | Item |
 |---|---|
 | IP-01 | Confirm the mailbox provider for production (IMAP + OAuth2 or Microsoft Graph) |
-| IP-02 | Confirm the chart-of-accounts segment structure to mirror (4 segments assumed) |
+| IP-02 | Confirm the chart-of-accounts segment structure to mirror (4 segments assumed; the customer's APLOAD sample shows 8 segments separated by `.`, segment 3 = location: PLAN-REAL-INVOICES R2.1, R2.2) |
 | IP-03 | Confirm the operating units and currencies to seed (US + India assumed) |
 | IP-04 | Real tolerance values for `AP_TOLERANCE_TEMPLATES` (finance) |
 | IP-05 | `extract-msg` license (T-02) |

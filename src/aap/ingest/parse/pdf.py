@@ -3,13 +3,33 @@
 from __future__ import annotations
 
 import io
+import threading
 
 import pdfplumber
 import pypdfium2 as pdfium
+from PIL import Image
 
 from aap.config import get_settings
 
 from .common import ParsedPage, ParseError, png_bytes
+
+# PDFium is not thread-safe, and parse jobs run as threads of one worker process (ingest
+# concurrency 8): two renders at once crashed the worker ("double free or corruption").
+# Every PDFium call (open, render, close) holds this lock; pdfplumber is pure Python and does not.
+_PDFIUM_LOCK = threading.Lock()
+
+
+def _render(pdf_doc: pdfium.PdfDocument, index: int) -> Image.Image:
+    with _PDFIUM_LOCK:
+        page = pdf_doc[index]
+        try:
+            bitmap = page.render(scale=get_settings().page_render_dpi / 72)
+            try:
+                return bitmap.to_pil().copy()      # copy: the PIL image must not share the bitmap buffer
+            finally:
+                bitmap.close()
+        finally:
+            page.close()
 
 
 def _markdown(table: list[list[str | None]]) -> str:
@@ -26,7 +46,8 @@ def _markdown(table: list[list[str | None]]) -> str:
 def parse_pdf(data: bytes) -> list[ParsedPage]:
     pages: list[ParsedPage] = []
     try:
-        pdf_doc = pdfium.PdfDocument(data)
+        with _PDFIUM_LOCK:
+            pdf_doc = pdfium.PdfDocument(data)
     except pdfium.PdfiumError as exc:
         raise ParseError(f"damaged PDF: {exc}") from exc
     try:
@@ -42,7 +63,7 @@ def parse_pdf(data: bytes) -> list[ParsedPage]:
                     err = str(exc)
                 else:
                     err = None
-                img = pdf_doc[i - 1].render(scale=get_settings().page_render_dpi / 72).to_pil()
+                img = _render(pdf_doc, i - 1)
                 pages.append(ParsedPage(
                     page_no=i, kind="pdf", text=text,
                     words=[{"text": w["text"], "x0": round(w["x0"], 2), "top": round(w["top"], 2),
@@ -56,7 +77,8 @@ def parse_pdf(data: bytes) -> list[ParsedPage]:
     except Exception as exc:  # noqa: BLE001
         raise ParseError(f"cannot read PDF: {exc}") from exc
     finally:
-        pdf_doc.close()
+        with _PDFIUM_LOCK:
+            pdf_doc.close()
     if not pages:
         raise ParseError("PDF has no pages")
     return pages

@@ -41,6 +41,10 @@ class Flag:
     currency_ambiguous = "currency_ambiguous"
     currency_from_vendor_default = "currency_from_vendor_default"
     missing = "missing"
+    terms_due_date_conflict = "terms_due_date_conflict"
+    sign_from_document_type = "sign_from_document_type"   # credit memo printed with positive amounts
+    price_basis = "price_basis"                           # unit price printed per 100 / per 1000 units
+    implausible_value = "implausible_value"               # read, but cannot be real (e.g. bank account 000)
 
 
 class Field(BaseModel, Generic[T]):
