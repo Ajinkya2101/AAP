@@ -4,6 +4,7 @@ Autonomous AP: invoice pipeline, agent layer and a mock Oracle EBS, all local.
 Design: [docs/IMPLEMENTATION-PLAN.md](docs/IMPLEMENTATION-PLAN.md) (all phases implemented; progress in
 [docs/IMPLEMENTATION-PLAN-STATUS.md](docs/IMPLEMENTATION-PLAN-STATUS.md)).
 How the code works, end to end with diagrams: [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md).
+Current work, making it ready for the customer's real invoices: [docs/PLAN-REAL-INVOICES.md](docs/PLAN-REAL-INVOICES.md).
 
 ## Run
 
@@ -84,6 +85,21 @@ CREATED (or ORACLE_ERROR with the reject codes). Optional `corrections` set a PO
 line: `{"lines": {"1": {"po_line_number": 1}, "2": {"dist_account": "01-510-6420-0000"}}}`.
 `GET /api/documents/{id}/submissions` shows the Oracle request, invoice id and holds.
 
+### APLOAD file (the customer's AP interface format)
+
+Their existing AP interfaces load a pipe-delimited file of H (header) and L (line) rows
+(sample `APILOAD_20251118.csv`; format in `src/aap/submit/apload.py`). The same rows for our invoices:
+
+```bat
+:: one invoice (before approval: the version a clerk would approve now, header X-AAP-Approved: false)
+curl http://localhost:8080/api/documents/<id>/apload
+:: every approved invoice, or the ones given with --document
+docker compose exec worker python -m aap.submit.apload --out /data/filestore/apload/APILOAD_20261026.csv
+```
+
+Approval still posts through the open interface; whether the APLOAD file replaces that is open
+(docs/PLAN-REAL-INVOICES.md, R2.4).
+
 ### Corrections and training data
 
 Before any model fine-tuning the application collects labels from the clerks' work:
@@ -109,11 +125,11 @@ Before any model fine-tuning the application collects labels from the clerks' wo
 | `src/aap/adapters/` | `ErpReadPort` / `ErpWritePort`; `MockEbsAdapter` (SQL against the `apps` views) |
 | `src/aap/db/` | SQLAlchemy models, Alembic migrations, `migrate` entry point |
 | `src/aap/ingest/` | Stages 1-4: intake, unpack (email), parse (PDF/image/sheet/text), route |
-| `src/aap/extraction/` | Stage 5: versioned prompts, extractor (4-image chunks), source check |
+| `src/aap/extraction/` | Stage 5: versioned prompts (current `v4`), extractor (4-image chunks), source check |
 | `src/aap/normalize/`, `mapping/`, `validation/` | Stages 6-8 |
 | `src/aap/llm/` | `LLM_BACKEND=vllm` or `stub` |
 | `src/aap/agents/` | LangGraph agent layer: triage, PO match, GL coding, `recheck_holds` |
-| `src/aap/submit/` | Stages 10-11: approve / reject, corrections of the reading, open-interface submit, result polling |
+| `src/aap/submit/` | Stages 10-11: approve / reject, corrections of the reading, open-interface submit, result polling; `apload.py`: the customer's APLOAD file |
 | `src/aap/embed/` | bge-m3 embeddings (ONNX, CPU) for GL-history similarity; backfill job |
 | `src/aap/eval/` | Eval harness, metrics, report (Phase 6); `model_use`: how often the model is asked |
 | `src/aap/finetune/` | Export of the training examples collected from corrections and approvals |
@@ -150,3 +166,7 @@ To run the scenarios against the real model, use the `worker` service (it is on 
   `LINES AMOUNT MISMATCH` (the plan's longer wording does not fit).
 - `MTL_SYSTEM_ITEMS_B.ATTRIBUTE1` holds the vendor's catalogue wording (mock-only DFF) so generated
   invoices describe items differently from the PO.
+- `GL_DATE_POLICY` picks the GL date: `invoice_date` (default; the invoice date if its AP period is open,
+  else today) or `today` (the EBS Invoice Workbench default).
+- The worker puts jobs a crashed worker left running back on the queue at start
+  (`WORKER_RECOVER_ON_START=true`). Set it to `false` before running more than one worker process.

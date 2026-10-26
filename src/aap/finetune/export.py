@@ -31,7 +31,7 @@ from sqlalchemy.orm import Session
 from aap.db.models import AgentDecision, Document, ExtractionRun, InvoiceVersion, Page
 from aap.db.session import session_scope
 from aap.filestore import FileStore
-from aap.schemas.source import HEADER_FIELDS, LINE_FIELDS
+from aap.schemas.source import HEADER_FIELDS, LINE_FIELDS, TAX_FIELDS
 from aap.submit.correct import USER_BACKEND
 
 POSTED = {"APPROVED", "SUBMITTED", "CREATED"}
@@ -41,6 +41,8 @@ REAL_BACKEND = "vllm"
 def _flat(source_invoice: dict[str, Any]) -> dict[str, Any]:
     """SourceInvoice JSON -> the flat shape the extraction model answers with."""
     out: dict[str, Any] = {name: (source_invoice.get(name) or {}).get("value") for name in HEADER_FIELDS}
+    out["taxes"] = [{name: (t.get(name) or {}).get("value") for name in TAX_FIELDS}
+                    for t in source_invoice.get("taxes") or []]
     out["lines"] = [{name: (ln.get(name) or {}).get("value") for name in LINE_FIELDS}
                     for ln in source_invoice.get("lines") or []]
     return out

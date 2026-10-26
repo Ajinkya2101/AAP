@@ -15,12 +15,13 @@ from pydantic import Field as PydField
 from .fields import Field
 
 HEADER_FIELDS = [
-    "vendor_name", "vendor_address", "vendor_tax_id", "vendor_email", "vendor_phone",
-    "bill_to", "ship_to", "invoice_number", "invoice_date", "due_date", "po_number",
+    "document_type", "vendor_name", "vendor_address", "vendor_tax_id", "vendor_email", "vendor_phone",
+    "bill_to", "ship_to", "location_ref", "invoice_number", "invoice_date", "due_date", "po_number",
     "payment_terms", "currency", "subtotal", "tax_label", "tax_rate", "tax_amount",
-    "freight_amount", "total", "bank_account", "bank_routing", "iban", "remit_to",
+    "freight_amount", "total", "bank_account", "bank_routing", "iban", "remit_to", "bank_change_notice",
 ]
 LINE_FIELDS = ["description", "item_code", "quantity", "uom", "unit_price", "amount", "tax_rate", "po_line_ref"]
+TAX_FIELDS = ["label", "rate", "amount"]
 
 
 # ------------------------------------------------------------- LLM output
@@ -37,11 +38,20 @@ class ExtractedLine(BaseModel):
     po_line_ref: str | None
 
 
+class ExtractedTax(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    label: str | None
+    rate: str | None
+    amount: str | None
+
+
 class ExtractedInvoice(BaseModel):
     """Every key is required and nullable, so the model always answers every field."""
 
     model_config = ConfigDict(extra="forbid")
 
+    document_type: str | None
     vendor_name: str | None
     vendor_address: str | None
     vendor_tax_id: str | None
@@ -49,6 +59,7 @@ class ExtractedInvoice(BaseModel):
     vendor_phone: str | None
     bill_to: str | None
     ship_to: str | None
+    location_ref: str | None
     invoice_number: str | None
     invoice_date: str | None
     due_date: str | None
@@ -59,17 +70,19 @@ class ExtractedInvoice(BaseModel):
     tax_label: str | None
     tax_rate: str | None
     tax_amount: str | None
+    taxes: list[ExtractedTax]
     freight_amount: str | None
     total: str | None
     bank_account: str | None
     bank_routing: str | None
     iban: str | None
     remit_to: str | None
+    bank_change_notice: str | None
     lines: list[ExtractedLine]
 
 
-# Header fields that can carry evidence (everything except the line list).
-EVIDENCE_FIELDS = tuple(f for f in ExtractedInvoice.model_fields if f != "lines")
+# Header fields that can carry evidence (everything except the line and tax lists).
+EVIDENCE_FIELDS = tuple(f for f in ExtractedInvoice.model_fields if f not in ("lines", "taxes"))
 EvidenceField = Literal[EVIDENCE_FIELDS]  # type: ignore[valid-type]
 
 
@@ -102,7 +115,15 @@ class SourceLine(BaseModel):
     po_line_ref: Field[str] = PydField(default_factory=Field[str])
 
 
+class SourceTax(BaseModel):
+    tax_no: int
+    label: Field[str] = PydField(default_factory=Field[str])
+    rate: Field[str] = PydField(default_factory=Field[str])
+    amount: Field[str] = PydField(default_factory=Field[str])
+
+
 class SourceInvoice(BaseModel):
+    document_type: Field[str] = PydField(default_factory=Field[str])
     vendor_name: Field[str] = PydField(default_factory=Field[str])
     vendor_address: Field[str] = PydField(default_factory=Field[str])
     vendor_tax_id: Field[str] = PydField(default_factory=Field[str])
@@ -110,6 +131,7 @@ class SourceInvoice(BaseModel):
     vendor_phone: Field[str] = PydField(default_factory=Field[str])
     bill_to: Field[str] = PydField(default_factory=Field[str])
     ship_to: Field[str] = PydField(default_factory=Field[str])
+    location_ref: Field[str] = PydField(default_factory=Field[str])
     invoice_number: Field[str] = PydField(default_factory=Field[str])
     invoice_date: Field[str] = PydField(default_factory=Field[str])
     due_date: Field[str] = PydField(default_factory=Field[str])
@@ -126,6 +148,8 @@ class SourceInvoice(BaseModel):
     bank_routing: Field[str] = PydField(default_factory=Field[str])
     iban: Field[str] = PydField(default_factory=Field[str])
     remit_to: Field[str] = PydField(default_factory=Field[str])
+    bank_change_notice: Field[str] = PydField(default_factory=Field[str])
+    taxes: list[SourceTax] = PydField(default_factory=list)
     lines: list[SourceLine] = PydField(default_factory=list)
     flags: list[str] = PydField(default_factory=list)
 
@@ -143,6 +167,9 @@ class SourceInvoice(BaseModel):
                 ld[name] = Field[str](value=_clean(v), source_value=v)
             lines.append(SourceLine(**ld))
         data["lines"] = lines
+        data["taxes"] = [SourceTax(tax_no=i, **{name: Field[str](value=_clean(getattr(t, name)),
+                                                                 source_value=getattr(t, name)) for name in TAX_FIELDS})
+                         for i, t in enumerate(ex.taxes, start=1)]
         return cls(**data)
 
 

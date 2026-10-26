@@ -11,6 +11,7 @@ Rule ids: MVP V-01..V-07 and WORKED-EXAMPLE C1..C12 where they coincide:
   C4  tax maths                     C10 duplicate invoice (V-06)
   C5  grand total (V-03)            C11 bank details unchanged (fraud)
   C6  tax ID format / checksum      C12 source check
+                                    C13 invoice type vs sign
   V-05 mapping complete  V-PO purchase order  V-GL open GL period
   V-FX exchange rate     V-REF reference data age  V-SENDER known sender
 """

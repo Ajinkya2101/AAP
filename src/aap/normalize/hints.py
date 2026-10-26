@@ -13,13 +13,19 @@ IN_ADDR = re.compile(r"(?i)\b(india|maharashtra|karnataka|tamil nadu|telangana|g
                      r"bangalore|chennai|hyderabad|kolkata|noida)\b")
 DE_ADDR = re.compile(r"(?i)\b(germany|deutschland|stra(ss|ß)e|str\.)\b|\b\d{5}\s+[A-ZÄÖÜ][a-zäöüß]+\b")
 GB_ADDR = re.compile(r"(?i)\b(united kingdom|england|scotland|wales|uk)\b|\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b")
+# Canadian postal code (A1A 1A1), optionally after a province code.
+CA_ADDR = re.compile(r"\b[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z]\s?\d[ABCEGHJ-NPRSTV-Z]\d\b")
+# Canadian sales taxes; "GST" alone is also Indian, so it is not a hint.
+CA_TAX = re.compile(r"(?i)\b(TPS|TVQ|QST|HST|PST|TVH)\b")
 COUNTRY_WORDS = {"united states": "US", "usa": "US", "u.s.a": "US", "india": "IN", "germany": "DE",
-                 "deutschland": "DE", "france": "FR", "netherlands": "NL", "ireland": "IE", "united kingdom": "GB"}
+                 "deutschland": "DE", "france": "FR", "netherlands": "NL", "ireland": "IE", "united kingdom": "GB",
+                 "canada": "CA", "québec": "CA", "quebec": "CA", "ontario": "CA", "british columbia": "CA",
+                 "alberta": "CA"}
 
 
 def country_hint(*, vendor_address: str | None = None, vendor_tax_id: str | None = None,
                  vendor_phone: str | None = None, currency_text: str | None = None,
-                 remit_to: str | None = None) -> str | None:
+                 remit_to: str | None = None, tax_labels: list[str | None] | None = None) -> str | None:
     kind = classify_tax_id(vendor_tax_id)
     if kind == "EIN":
         return "US"
@@ -41,8 +47,12 @@ def country_hint(*, vendor_address: str | None = None, vendor_tax_id: str | None
             return "IN"
         if DE_ADDR.search(text):
             return "DE"
+        if CA_ADDR.search(text):
+            return "CA"
         if GB_ADDR.search(text):
             return "GB"
+    if any(label and CA_TAX.search(label) for label in tax_labels or []):
+        return "CA"
     if vendor_phone:
         if vendor_phone.strip().startswith("+91"):
             return "IN"

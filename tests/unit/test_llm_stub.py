@@ -7,7 +7,7 @@ from aap.schemas.source import ExtractedInvoice, ExtractedInvoiceGrounded
 
 
 def test_stub_extract_reads_truth_sidecar(tmp_path):
-    source = {k: None for k in ExtractedInvoice.model_fields if k != "lines"}
+    source = {k: None for k in ExtractedInvoice.model_fields if k not in ("lines", "taxes")}
     source.update(invoice_number="X-1", total="$10.00")
     source["lines"] = [{"description": "a", "item_code": None, "quantity": "1", "uom": None, "unit_price": "$10.00",
                         "amount": "$10.00", "tax_rate": None, "po_line_ref": None, "_page": 1}]

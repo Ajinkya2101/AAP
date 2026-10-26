@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from pydantic import BaseModel
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
@@ -110,6 +110,22 @@ def get_file(session: DB, document_id: uuid.UUID) -> FileResponse:
         raise HTTPException(404, "document not found")
     return FileResponse(FileStore().absolute(doc.storage_path), media_type=doc.mime_type or "application/octet-stream",
                         filename=doc.filename or f"{doc.id}.{doc.file_type}", content_disposition_type="inline")
+
+
+@app.get("/api/documents/{document_id}/apload", tags=["documents"], response_class=PlainTextResponse)
+def get_apload(session: DB, document_id: uuid.UUID) -> PlainTextResponse:
+    """The invoice as APLOAD rows (the customer's pipe-delimited AP interface file). Before approval:
+    the version a clerk would approve now (header `X-AAP-Approved: false`)."""
+    from aap.submit.apload import AploadError, apload_text, document_invoice
+
+    try:
+        inv, approved = document_invoice(session, document_id)
+        body = apload_text([inv])
+    except AploadError as exc:
+        raise HTTPException(409 if "missing" in str(exc) else 404, str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001 - e.g. no invoice version yet
+        raise HTTPException(409, f"no invoice to export: {exc}") from exc
+    return PlainTextResponse(body, headers={"X-AAP-Approved": str(approved).lower()})
 
 
 @app.post("/api/documents/{document_id}/retry", tags=["documents"])

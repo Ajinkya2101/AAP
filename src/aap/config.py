@@ -73,8 +73,16 @@ class Settings(BaseSettings):
     gl_exact_auto: float = 0.90
     gl_exact_min: int = 3
 
+    # worker
+    # At start, jobs left `doing` by a crashed worker go back to `todo`. Only correct with one
+    # worker process: switch off before running several worker replicas.
+    worker_recover_on_start: bool = True
+
     # pipeline
     invoice_source: str = "AAP"
+    # GL date: invoice_date = the invoice date when its AP period is open, otherwise today;
+    # today = always today (the EBS Invoice Workbench default).
+    gl_date_policy: Literal["invoice_date", "today"] = "invoice_date"
     text_quality_threshold: float = 0.60
     invoice_max_age_days: int = 365
     amount_tolerance: Decimal = Field(default=Decimal("0.01"))

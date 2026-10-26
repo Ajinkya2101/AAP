@@ -41,7 +41,7 @@ def line_maths(ctx: RuleContext) -> list[RuleResult]:
 @rule("C3", "Lines add up to subtotal")
 def lines_subtotal(ctx: RuleContext) -> list[RuleResult]:
     inv = ctx.inv
-    lines = inv.item_lines()
+    lines = [ln for ln in inv.lines if ln.printed and ln.line_type != "TAX"]   # items and printed freight rows
     if not lines or inv.subtotal.value is None or any(ln.amount.value is None for ln in lines):
         return [result("C3", "Lines add up to subtotal", SKIP, "subtotal or line amounts not available")]
     total = sum((Decimal(ln.amount.value) for ln in lines), Decimal(0))
@@ -54,6 +54,8 @@ def lines_subtotal(ctx: RuleContext) -> list[RuleResult]:
 @rule("C4", "Tax maths")
 def tax_maths(ctx: RuleContext) -> list[RuleResult]:
     inv = ctx.inv
+    if len(inv.taxes) > 1:
+        return _tax_rows(inv)
     rate, sub, tax = inv.tax_rate.value, inv.subtotal.value, inv.tax_amount.value
     if rate is None or sub is None or tax is None:
         return [result("C4", "Tax maths", SKIP, "no printed tax rate")]
@@ -62,6 +64,25 @@ def tax_maths(ctx: RuleContext) -> list[RuleResult]:
         return [result("C4", "Tax maths", FAIL, f"{sub} x {rate}% = {expected}, invoice shows tax {tax}",
                        "tax_amount", expected=str(expected), printed=str(tax))]
     return [result("C4", "Tax maths", PASS)]
+
+
+def _tax_rows(inv) -> list[RuleResult]:  # noqa: ANN001
+    """Several printed taxes (e.g. GST 5 % and QST 9.975 % on the same subtotal): each row with a printed rate."""
+    sub = inv.subtotal.value
+    checked, bad = 0, []
+    for t in inv.taxes:
+        rate, tax = t.rate.value, t.amount.value
+        if rate is None or sub is None or tax is None:
+            continue
+        checked += 1
+        expected = q(Decimal(sub) * Decimal(rate) / 100)
+        if abs(expected - Decimal(tax)) > _tol(None):
+            bad.append(f"{t.label.value or 'tax'}: {sub} x {rate}% = {expected}, invoice shows {tax}")
+    if bad:
+        return [result("C4", "Tax maths", FAIL, "; ".join(bad), "tax_amount")]
+    if not checked:
+        return [result("C4", "Tax maths", SKIP, "no printed tax rate")]
+    return [result("C4", "Tax maths", PASS, f"{checked} tax row(s) checked")]
 
 
 @rule("C5", "Grand total")

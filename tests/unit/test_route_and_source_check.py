@@ -41,11 +41,11 @@ def test_route_scanned_and_cid():
 
 
 def _extracted(**over) -> ExtractedInvoice:
-    base = {k: None for k in ExtractedInvoice.model_fields if k != "lines"}
+    base = {k: None for k in ExtractedInvoice.model_fields if k not in ("lines", "taxes")}
     base.update(vendor_name="NORTHWIND IT SUPPLIES INC.", invoice_number="NW-INV-20457", invoice_date="12-Sep-2026",
                 total="$14,904.00", vendor_tax_id="84-1234567", po_number="4500123")
     base.update(over)
-    return ExtractedInvoice(lines=[], **base)
+    return ExtractedInvoice(lines=[], taxes=[], **base)
 
 
 def test_source_check_finds_values_and_flags_inventions():
@@ -64,3 +64,15 @@ def test_source_check_image_only_uses_evidence():
     source_check(src, [page], [{"field": "invoice_number", "page": 1, "bbox": [1000, 200, 1300, 240]}])
     assert Flag.unverified_image_only in src.invoice_number.flags
     assert src.invoice_number.bbox == [360.0, 72.0, 468.0, 86.4]
+
+
+def test_source_check_percent_needs_the_percent_sign():
+    text = "Paiement recu le 12 FE 2025\nSales tax 8 % 21.57"
+    page = PageInput(page_no=1, kind="pdf", route=TEXT_AND_IMAGE, text=text, words=_words(text), image_png=None)
+    src = SourceInvoice.from_extracted(_extracted(tax_rate="12%", tax_label="Sales tax 8 %"))
+    source_check(src, [page], [])
+    assert Flag.not_found_in_source in src.tax_rate.flags          # only a bare "12" is printed
+    assert Flag.not_found_in_source not in src.tax_label.flags
+    src = SourceInvoice.from_extracted(_extracted(tax_rate="8%"))
+    source_check(src, [page], [])
+    assert Flag.not_found_in_source not in src.tax_rate.flags

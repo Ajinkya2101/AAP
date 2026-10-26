@@ -151,12 +151,12 @@ Code: `agents/nodes/triage.py`. No model. No EBS access.
 
 | Order | Condition | Reason code | Route | Suggested action |
 |---|---|---|---|---|
-| 1 | C11 failed (bank account differs from the supplier master) or flag `unknown_sender` | `BANK_CHANGE`, `UNKNOWN_SENDER` | `review` | `verify_bank_details_by_phone` |
+| 1 | C11 failed (bank account differs from the supplier master, or the invoice announces new bank details) or flag `unknown_sender` | `BANK_CHANGE`, `UNKNOWN_SENDER` | `review` | `verify_bank_details_by_phone` |
 | 2 | C10 failed | `DUPLICATE` | `review` | `reject_as_duplicate` |
 | 3 | C8 failed | `SUPPLIER_INACTIVE` | `review` | `correct_supplier_site` |
 | 4 | V-PO failed | `PO_NOT_OPEN` | `review` | `contact_buyer_to_reopen_po_or_reject` |
 | 5 | Any of C2, C3, C4, C5 failed, and the supplier is mapped | `INVOICE_MATH` | `exception` | – (vendor email) |
-| 6 | Any other fail | `DATA_MISSING` if C1 or V-05 failed, otherwise `VALIDATION_FAILED` | `review` | `correct_invoice_data` |
+| 6 | Any other fail (for example C13, a credit memo with a positive total) | `DATA_MISSING` if C1 or V-05 failed, otherwise `VALIDATION_FAILED` | `review` | `correct_invoice_data` |
 | 7 | No fails | – | `po` or `non_po` | – |
 
 - **Why the order matters.** Fraud signals and duplicates come first, so a suspicious invoice never causes an email to the vendor. A changed bank account must be confirmed by phone on a number already on file.

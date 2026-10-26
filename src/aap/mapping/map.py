@@ -17,7 +17,7 @@ from rapidfuzz import fuzz, process
 from sqlalchemy.orm import Session
 
 from aap.common.text import email_domain, name_key, text_key
-from aap.db.models import Document, RefSupplier, RefSupplierSite
+from aap.db.models import Document, RefSupplier, RefSupplierSite, RefTerms
 from aap.llm import LlmClient
 from aap.schemas.canonical import CanonicalInvoice, CanonicalLine
 from aap.schemas.fields import Field, Flag, Method
@@ -220,53 +220,100 @@ TERMS_NET = re.compile(r"(?i)(?:net|netto|within|in|due|zahlbar|payable)\D{0,20}
                        r"\bn\s?(\d{1,3})\b")
 
 
-def map_terms(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | None,
-              site: RefSupplierSite | None) -> None:
-    ref = ctx.ref
-    src = inv.terms_name
-    printed = src.value
+def _plain_terms(ref: Reference, days: int) -> RefTerms | None:
+    """The single-installment term without discount that is due `days` after the invoice date."""
+    plain = [t for t in ref.terms.values() if t.enabled and t.due_days == days and t.installments == 1
+             and not t.discount_percent and not t.due_day_of_month]
+    plain.sort(key=lambda t: (t.name != f"{days} NET", t.name))
+    return plain[0] if plain else None
+
+
+def _parse_terms(ref: Reference, printed: str, vendor_id: int | None) -> tuple[RefTerms, Method, str | None] | None:
+    """Printed terms text -> payment term, by value map, exact name or the usual wordings."""
     terms_by_name = {t.name.upper(): t for t in ref.terms.values() if t.enabled}
-
-    def set_terms(term, method: Method, *flags: str, note: str | None = None) -> None:  # noqa: ANN001
-        inv.terms_id = _like(src, term.term_id, method, *flags, note=note)
-        inv.terms_name = _like(src, term.name, method, *flags, note=note)
-
-    if not printed:
-        default_id = (site.terms_id if site else None) or (supplier.terms_id if supplier else None)
-        if default_id and default_id in ref.terms:
-            set_terms(ref.terms[default_id], Method.default, note="no terms printed: supplier site default")
-        return
-    vm = ref.value_map("terms", printed, supplier.vendor_id if supplier else None)
+    vm = ref.value_map("terms", printed, vendor_id)
     if vm and vm.oracle_value.upper() in terms_by_name:
-        set_terms(terms_by_name[vm.oracle_value.upper()], Method.value_map)
-        return
+        return terms_by_name[vm.oracle_value.upper()], Method.value_map, None
     if printed.upper() in terms_by_name:
-        set_terms(terms_by_name[printed.upper()], Method.exact)
-        return
+        return terms_by_name[printed.upper()], Method.exact, None
     if TERMS_IMMEDIATE.search(printed) and "IMMEDIATE" in terms_by_name:
-        set_terms(terms_by_name["IMMEDIATE"], Method.normalized, note="parsed: due immediately")
-        return
+        return terms_by_name["IMMEDIATE"], Method.normalized, "parsed: due immediately"
     m = TERMS_DISCOUNT.search(printed)
     if m:
         pct, days, net = Decimal(m.group(1)), int(m.group(2)), int(m.group(3))
         for t in ref.terms.values():
             if t.enabled and t.discount_percent == pct and t.discount_days == days and t.due_days == net:
-                set_terms(t, Method.normalized, note=f"parsed: {pct}% {days} days, net {net}")
-                return
+                return t, Method.normalized, f"parsed: {pct}% {days} days, net {net}"
     if re.search(r"(?i)\b(eom|end of (the )?month)\b", printed):
         eom = [t for t in ref.terms.values() if t.enabled and t.due_day_of_month]
         if len(eom) == 1:
-            set_terms(eom[0], Method.normalized, note="parsed: end of month")
-            return
+            return eom[0], Method.normalized, "parsed: end of month"
     m = TERMS_NET.search(printed)
     if m:
         days = int(next(g for g in m.groups() if g))
-        plain = [t for t in ref.terms.values() if t.enabled and t.due_days == days and t.installments == 1
-                 and not t.discount_percent and not t.due_day_of_month]
-        if plain:
-            plain.sort(key=lambda t: (t.name != f"{days} NET", t.name))
-            set_terms(plain[0], Method.normalized, note=f"parsed: net {days} days")
+        t = _plain_terms(ref, days)
+        if t:
+            return t, Method.normalized, f"parsed: net {days} days"
+    return None
+
+
+def _due_days(inv: CanonicalInvoice) -> int | None:
+    """Days from invoice date to the printed due date (None when either is missing or not on the page)."""
+    d, due = inv.invoice_date.value, inv.due_date.value
+    if d is None or due is None or Flag.not_found_in_source in inv.due_date.flags:
+        return None
+    days = (due - d).days
+    return days if 0 <= days <= 366 else None
+
+
+def map_terms(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | None,
+              site: RefSupplierSite | None) -> None:
+    """1. printed terms that parse; 2. the due date (invoices often print only "Due date" or
+    "Payment due"); 3. supplier site default; 4. the model chooses for unparsed text.
+    Printed terms the source check did not find on the page give way to a printed due date."""
+    ref = ctx.ref
+    src = inv.terms_name
+    printed = src.value
+    due_days = _due_days(inv)
+    default_id = (site.terms_id if site else None) or (supplier.terms_id if supplier else None)
+    default = ref.terms.get(default_id) if default_id else None
+
+    def set_terms(term, method: Method, *flags: str, note: str | None = None,  # noqa: ANN001
+                  source: Field | None = None) -> None:
+        base = source or src
+        inv.terms_id = _like(base, term.term_id, method, *flags, note=note)
+        inv.terms_name = _like(base, term.name, method, *flags, note=note)
+
+    unverified = Flag.not_found_in_source in src.flags and due_days is not None
+    if printed and not unverified:
+        parsed = _parse_terms(ref, printed, supplier.vendor_id if supplier else None)
+        if parsed:
+            term, method, note = parsed
+            if due_days is not None and term.due_days is not None and not term.due_day_of_month \
+                    and abs(term.due_days - due_days) > 1:
+                set_terms(term, method, Flag.terms_due_date_conflict,
+                          note=f"printed terms {term.name}, but the due date is {due_days} days after the invoice date")
+            else:
+                set_terms(term, method, note=note)
             return
+    if due_days is not None:
+        why = f"due date {inv.due_date.value} - invoice date = {due_days} days"
+        if unverified:
+            why += f"; printed terms {printed!r} not found on the page"
+        term = _plain_terms(ref, due_days)
+        if term:
+            set_terms(term, Method.derived, note=why, source=inv.due_date)
+        elif default:
+            set_terms(default, Method.default, Flag.check_map, source=inv.due_date,
+                      note=f"{why}: no payment term has {due_days} days, supplier site default used")
+        else:
+            inv.terms_id = _like(inv.due_date, None, Method.derived, Flag.no_map,
+                                 note=f"{why}: no payment term has {due_days} days")
+        return
+    if not printed:
+        if default:
+            set_terms(default, Method.default, note="no terms printed: supplier site default")
+        return
     labels = {t.term_id: f"{t.name} {t.description or ''}" for t in ref.terms.values() if t.enabled}
     top = process.extract(text_key(printed), labels, scorer=fuzz.token_set_ratio, limit=5)
     candidates = [{"id": str(tid), "label": f"{ref.terms[tid].name} ({ref.terms[tid].description})", "score": round(sc)}
@@ -327,9 +374,12 @@ def _map_category(ctx: MapContext, line: CanonicalLine, supplier: RefSupplier) -
     line.category_id = Field(value=cat.category_id, method=Method.derived)
 
 
-def _tax_code(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | None) -> tuple[str | None, Decimal | None]:
-    rate = inv.tax_rate.value
-    sub, tax = inv.subtotal.value, inv.tax_amount.value
+def _tax_code(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | None,
+              rate: Decimal | None = None, tax: Decimal | None = None) -> tuple[str | None, Decimal | None]:
+    """Tax rate code for the invoice's tax (or one printed tax row when rate / tax are given)."""
+    if tax is None:
+        rate, tax = inv.tax_rate.value, inv.tax_amount.value
+    sub = inv.subtotal.value
     if rate is None and sub and tax:
         rate = (tax / sub * 100).quantize(Decimal("0.001"))
     if rate is None:
@@ -349,39 +399,72 @@ def _tax_code(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | No
 
 
 def map_lines(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | None) -> None:
+    """Printed lines (items and printed freight rows) keep their order; the header tax (one TAX line
+    per printed tax row) and header freight become extra lines (printed=False)."""
     vendor_id = supplier.vendor_id if supplier else None
-    items = [ln for ln in inv.lines if ln.line_type == "ITEM"]
-    for ln in items:
+    printed = [ln for ln in inv.lines if ln.printed and ln.line_type != "TAX"]
+    for ln in printed:
+        if ln.line_type != "ITEM":
+            continue
         _map_uom(ctx, ln, vendor_id)
         if inv.po_number.value:
             ln.po_number = Field(value=inv.po_number.value, method=Method.derived)
         elif supplier is not None:
             _map_category(ctx, ln, supplier)
-    next_no = max((ln.line_number for ln in items), default=0) + 1
+    next_no = max((ln.line_number for ln in printed), default=0) + 1
     extra: list[CanonicalLine] = []
-    if inv.tax_amount.value:
-        code, rate = _tax_code(ctx, inv, supplier)
-        tax_line = CanonicalLine(line_number=next_no, line_type="TAX")
-        tax_line.amount = Field(value=inv.tax_amount.value, source_value=inv.tax_amount.source_value,
-                                page=inv.tax_amount.page, bbox=inv.tax_amount.bbox, method=Method.derived)
-        tax_line.tax_rate = Field(value=rate, method=Method.derived)
-        tax_line.tax_rate_code = Field(value=code, method=Method.exact if code else Method.derived,
-                                       flags=[] if code else [Flag.no_map])
-        tax_line.description = Field(value=f"Tax {code or ''}".strip(), method=Method.derived)
-        extra.append(tax_line)
+
+    def tax_line(amount: Field, rate: Decimal | None, label: str | None) -> None:
+        nonlocal next_no
+        code, rate = _tax_code(ctx, inv, supplier, rate, amount.value)
+        ln = CanonicalLine(line_number=next_no, line_type="TAX", printed=False)
+        ln.amount = Field(value=amount.value, source_value=amount.source_value, page=amount.page, bbox=amount.bbox,
+                          method=Method.derived)
+        ln.tax_rate = Field(value=rate, method=Method.derived)
+        ln.tax_rate_code = Field(value=code, method=Method.exact if code else Method.derived,
+                                 flags=[] if code else [Flag.no_map])
+        ln.description = Field(value=f"Tax {code or label or ''}".strip(), method=Method.derived)
+        extra.append(ln)
         next_no += 1
-    if inv.freight_amount.value:
-        fr = CanonicalLine(line_number=next_no, line_type="FREIGHT")
+
+    parts = [t for t in inv.taxes if t.amount.value]
+    if len(parts) > 1 and sum(t.amount.value for t in parts) == inv.tax_amount.value:
+        for t in parts:
+            tax_line(t.amount, t.rate.value, t.label.value)
+    elif inv.tax_amount.value:
+        tax_line(inv.tax_amount, None, None)
+    printed_freight = sum((ln.amount.value or Decimal(0) for ln in printed if ln.line_type == "FREIGHT"), Decimal(0))
+    if inv.freight_amount.value and inv.freight_amount.value != printed_freight:
+        fr = CanonicalLine(line_number=next_no, line_type="FREIGHT", printed=False)
         fr.amount = Field(value=inv.freight_amount.value, source_value=inv.freight_amount.source_value,
                           method=Method.derived)
         fr.description = Field(value="Freight", method=Method.derived)
         extra.append(fr)
-    inv.lines = items + extra
+    inv.lines = printed + extra
+
+
+def map_location(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | None) -> None:
+    """Printed store / location -> GL cost center, through value maps (map_type "location"; the
+    functional team's store <-> cost-center table). No map: the cost center stays empty and GL
+    coding works as before."""
+    printed = inv.location_ref.value
+    if not printed:
+        return
+    vm = ctx.ref.value_map("location", printed, supplier.vendor_id if supplier else None)
+    if vm is None:
+        m = re.search(r"\d{2,}", printed)     # "STORE 316", "KRS 51", "#0368" -> by the number alone
+        vm = ctx.ref.value_map("location", m.group(0).lstrip("0") or "0", None) if m else None
+    if vm:
+        inv.cost_center = _like(inv.location_ref, vm.oracle_value, Method.value_map,
+                                note=f"location {printed!r}")
 
 
 def _gl_date(ctx: MapContext, inv: CanonicalInvoice) -> None:
-    """GL date = invoice date when its AP period is open; otherwise today (AP practice)."""
+    """GL_DATE_POLICY=invoice_date: the invoice date when its AP period is open, otherwise today.
+    GL_DATE_POLICY=today: always today (the EBS Invoice Workbench default)."""
     from datetime import date as _date
+
+    from aap.config import get_settings
 
     ou = ctx.ref.operating_units.get(inv.org_id.value) if inv.org_id.value else None
     d = inv.invoice_date.value
@@ -392,13 +475,15 @@ def _gl_date(ctx: MapContext, inv: CanonicalInvoice) -> None:
         p = next((p for p in ctx.ref.periods if p.ledger_id == ou.ledger_id and p.start_date <= day <= p.end_date), None)
         return p.closing_status if p else None
 
-    if status(d) in ("O", "F"):
+    by_invoice_date = get_settings().gl_date_policy == "invoice_date"
+    if by_invoice_date and status(d) in ("O", "F"):
         inv.gl_date = Field(value=d, method=Method.derived, note="invoice date")
         return
     today = _date.today()
     if status(today) in ("O", "F"):
-        inv.gl_date = Field(value=today, method=Method.derived,
-                            note=f"period of invoice date {d} is not open: GL date set to today")
+        note = (f"period of invoice date {d} is not open: GL date set to today" if by_invoice_date
+                else "GL date policy: today")
+        inv.gl_date = Field(value=today, method=Method.derived, note=note)
 
 
 # ==================================================================== entry
@@ -412,6 +497,7 @@ def map_invoice(ctx: MapContext, normalized: CanonicalInvoice) -> CanonicalInvoi
     map_org_currency(ctx, inv, supplier, site)
     map_terms(ctx, inv, supplier, site)
     map_lines(ctx, inv, supplier)
+    map_location(ctx, inv, supplier)
     if inv.due_date.value is None and inv.invoice_date.value and inv.terms_id.value in ctx.ref.terms:
         t = ctx.ref.terms[inv.terms_id.value]
         if t.due_days is not None:

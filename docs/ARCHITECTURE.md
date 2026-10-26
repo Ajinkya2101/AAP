@@ -242,7 +242,7 @@ flowchart LR
 - The LLM can select only from the candidate list. The JSON schema for step 3 is an `enum` of the candidates and `none`. The LLM cannot invent an Oracle value.
 - The candidates come from the local copy of the Oracle reference data (Section 9.3).
 - Supplier values map first. Supplier site values use the selected supplier as a filter.
-- Fixed values (for example `INVOICE_TYPE_LOOKUP_CODE = STANDARD` and `SOURCE`) come from the configuration. Their method is `default`.
+- Fixed values (for example `SOURCE`) come from the configuration. Their method is `default`. `INVOICE_TYPE_LOOKUP_CODE` is `STANDARD` by default. If the document title shows a credit memo, the type is `CREDIT` and the amounts are negative (as built, 2026-10-26: HOW-IT-WORKS.md §8.1).
 
 **Value map feedback.** If the user corrects a mapped value on the review screen, the application makes a proposed value map entry. The AP supervisor approves or rejects the proposal. An approved entry becomes a step 1 exact match for the next invoice. Thus the application improves without fine-tuning.
 

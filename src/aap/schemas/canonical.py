@@ -23,6 +23,7 @@ def _f(t: Any) -> Any:
 class CanonicalLine(BaseModel):
     line_number: int
     line_type: str = "ITEM"                 # ITEM | TAX | FREIGHT | MISCELLANEOUS
+    printed: bool = True                    # False: built at stage 7 from a header amount (tax, freight)
     description: Field[str] = _f(str)
     item_code: Field[str] = _f(str)
     quantity: Field[Decimal] = _f(Decimal)
@@ -36,6 +37,14 @@ class CanonicalLine(BaseModel):
     po_number: Field[str] = _f(str)
     po_line_number: Field[int] = _f(int)
     dist_account: Field[str] = _f(str)      # GL account (concatenated segments) for non-PO lines
+
+
+class CanonicalTax(BaseModel):
+    """One printed tax row (e.g. GST and QST on a Quebec invoice). tax_amount is their sum."""
+    tax_no: int
+    label: Field[str] = _f(str)
+    rate: Field[Decimal] = _f(Decimal)
+    amount: Field[Decimal] = _f(Decimal)
 
 
 class CanonicalInvoice(BaseModel):
@@ -55,6 +64,9 @@ class CanonicalInvoice(BaseModel):
     vendor_tax_id: Field[str] = _f(str)
     vendor_email: Field[str] = _f(str)
     vendor_address: Field[str] = _f(str)
+    # customer location (store / branch) and the GL cost center it maps to
+    location_ref: Field[str] = _f(str)
+    cost_center: Field[str] = _f(str)
     # header
     invoice_num: Field[str] = _f(str)
     invoice_date: Field[date] = _f(date)
@@ -70,12 +82,14 @@ class CanonicalInvoice(BaseModel):
     subtotal: Field[Decimal] = _f(Decimal)
     tax_rate: Field[Decimal] = _f(Decimal)
     tax_amount: Field[Decimal] = _f(Decimal)
+    taxes: list[CanonicalTax] = PydField(default_factory=list)
     freight_amount: Field[Decimal] = _f(Decimal)
     invoice_amount: Field[Decimal] = _f(Decimal)
     # payment
     bank_account: Field[str] = _f(str)
     bank_routing: Field[str] = _f(str)
     iban: Field[str] = _f(str)
+    bank_change_notice: Field[str] = _f(str)
     # lines and document-level flags
     lines: list[CanonicalLine] = PydField(default_factory=list)
     flags: list[str] = PydField(default_factory=list)
@@ -94,6 +108,9 @@ class CanonicalInvoice(BaseModel):
             v = getattr(self, name)
             if isinstance(v, Field):
                 yield name, v
+        for t in self.taxes:
+            for name in ("label", "rate", "amount"):
+                yield f"taxes[{t.tax_no}].{name}", getattr(t, name)
         for ln in self.lines:
             for name in CanonicalLine.model_fields:
                 v = getattr(ln, name)

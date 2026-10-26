@@ -50,13 +50,15 @@ STATUS_ORDER = ["IN_REVIEW", "ON_HOLD", "ORACLE_ERROR", "FAILED", "APPROVED", "S
                 "CREATED", "REJECTED", "AGENTS_RUNNING", "VALIDATED", "RECEIVED", "PARSED", "ROUTED", "EXTRACTED",
                 "NORMALIZED", "MAPPED", "NOT_INVOICE", "DUPLICATE"]
 # The correction form: printed values (SourceInvoice), in reading order.
-SOURCE_HEADER = ["vendor_name", "vendor_tax_id", "vendor_email", "vendor_address", "invoice_number", "invoice_date",
-                 "due_date", "po_number", "payment_terms", "currency", "subtotal", "tax_label", "tax_rate",
-                 "tax_amount", "freight_amount", "total", "bank_account", "bank_routing", "iban"]
+SOURCE_HEADER = ["document_type", "vendor_name", "vendor_tax_id", "vendor_email", "vendor_address", "location_ref",
+                 "invoice_number", "invoice_date", "due_date", "po_number", "payment_terms", "currency", "subtotal",
+                 "tax_label", "tax_rate", "tax_amount", "freight_amount", "total", "bank_account", "bank_routing", "iban",
+                 "bank_change_notice"]
 SOURCE_LINE = ["description", "item_code", "quantity", "uom", "unit_price", "amount"]
-HEADER_FIELDS = ["vendor_name", "vendor_id", "vendor_site_code", "vendor_tax_id", "invoice_num", "invoice_date",
-                 "gl_date", "currency_code", "terms_name", "po_number", "subtotal", "tax_amount", "freight_amount",
-                 "invoice_amount", "bank_account", "iban", "org_id"]
+HEADER_FIELDS = ["invoice_type", "vendor_name", "vendor_id", "vendor_site_code", "vendor_tax_id", "invoice_num",
+                 "invoice_date", "due_date", "gl_date", "currency_code", "terms_name", "po_number", "location_ref",
+                 "cost_center", "subtotal", "tax_amount", "freight_amount", "invoice_amount", "bank_account",
+                 "bank_routing", "iban", "bank_change_notice", "org_id"]
 
 
 def _db() -> Session:
