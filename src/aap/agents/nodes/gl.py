@@ -1,9 +1,12 @@
 """gl_code (WORKED-EXAMPLE step 7).
 
-PO lines: the account the buyer charged on the PO distribution (EBS copies it; no model).
+PO lines: the account the buyer charged on the PO distribution (EBS copies it; no model),
+of the PO (and release) the line is paired with.
 Non-PO lines: exact history -> similar history (all top 5 agree, similarity >=
-GL_SIM_AUTO) -> LLM chooses among the accounts found, or "review". Every proposed
-combination is checked live with ccid_valid.
+GL_SIM_AUTO) -> LLM chooses among the accounts found, or "review". When the invoice's
+store / location maps to a cost center, that cost center replaces the cost-center segment
+(GL_COST_CENTER_SEGMENT) of the account: history gives the natural account, the location
+gives where the cost lands. Every proposed combination is checked live with ccid_valid.
 """
 
 from __future__ import annotations
@@ -19,7 +22,16 @@ from aap.mapping.choose import choose
 from ..context import add, decide, work
 from ..state import AgentState, Reason
 from ..tools.gl import account_description, exact_history, majority, similar_history, template_ccid
-from .matching import _load_po
+from .matching import load_pos
+
+
+def with_cost_center(account: str, cost_center: str, segment: int, separator: str) -> str | None:
+    """The account with its cost-center segment replaced; None when the account has no such segment."""
+    parts = account.split(separator)
+    if not 1 <= segment <= len(parts):
+        return None
+    parts[segment - 1] = cost_center
+    return separator.join(parts)
 
 
 def gl_code(state: AgentState) -> dict[str, Any]:
@@ -29,18 +41,26 @@ def gl_code(state: AgentState) -> dict[str, Any]:
     with work(state) as w:
         inv = w.inv
         pairs = {p["line"]: p for p in state.get("pairs") or []}
-        po = _load_po(state, inv.org_id.value) if pairs else None
-        po_lines = {pl.line_num: pl for pl in po.lines} if po else {}
+        pos = load_pos(state, inv.org_id.value) if pairs else {}
+        cost_center = inv.cost_center.value
         for ln in inv.item_lines():
             desc = ln.description.value or ""
             entry: dict[str, Any] = {"line": ln.line_number, "description": desc}
-            if ln.line_number in pairs and po is not None:
-                pl = po_lines[pairs[ln.line_number]["po_line"]]
+            p = pairs.get(ln.line_number)
+            po = pos.get(p.get("ref") or state.get("po_number")) if p else None
+            pl = next((x for x in po.lines if x.line_num == p["po_line"]), None) if po and p else None
+            if pl is not None:
                 ship = pl.shipments[0]
                 entry.update(account=ship.ccid_concatenated, method="po_distribution", auto=True, confidence=1.0,
-                             reason=f"from PO {po.po_number} line {pl.line_num} distribution")
+                             reason=f"from PO {po.reference} line {pl.line_num} distribution")
             else:
                 entry.update(_non_po(w, state, s.gl_sim_auto, inv.vendor_id.value, desc, ln.line_number))
+                moved = with_cost_center(entry["account"], cost_center, s.gl_cost_center_segment,
+                                         s.gl_segment_separator) if cost_center and entry.get("account") else None
+                if moved and moved != entry["account"]:
+                    entry.update(history_account=entry["account"], account=moved,
+                                 reason=f"{entry.get('reason')}; cost center {cost_center} from location "
+                                        f"{inv.location_ref.value!r}")
             if entry.get("account"):
                 check = adapter.ccid_valid(entry["account"], inv.gl_date.value or inv.invoice_date.value)
                 entry["ccid"] = check.ccid

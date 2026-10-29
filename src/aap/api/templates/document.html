@@ -10,7 +10,12 @@
 <form method="post" action="/ui/documents/{{ doc.id }}/delete"
       data-confirm="Delete this record? The file, the extracted data and its history are removed and cannot be restored. An invoice already posted to Oracle stays in Oracle."
       onsubmit="return confirm(this.dataset.confirm)">
-  <p><a href="/ui#records">Back to the records</a> · <button class="danger">Delete record</button></p>
+  <p><a href="/ui#records">Back to the records</a> ·
+    <a href="/api/documents/{{ doc.id }}/export.zip" download
+       title="The invoice CSV and the raw JSON: invoice, validation runs, extraction runs and what the model returned">Download everything (ZIP)</a>
+    · <a href="/api/documents/{{ doc.id }}/invoice.csv" download>invoice CSV</a>
+    {% if inv %}· <a href="/api/documents/{{ doc.id }}/invoice.json">invoice JSON</a>{% endif %}
+    · <button class="danger">Delete record</button></p>
 </form>
 
 <div class="grid">
@@ -27,12 +32,14 @@
       <b>Decision</b>
       <table>
         <thead><tr><th>#</th><th>Line</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th>
-          <th>PO line</th><th>GL account (non-PO)</th></tr></thead>
+          <th>PO</th><th>PO line</th><th>GL account (non-PO)</th></tr></thead>
         <tbody>
         {% for ln in preview.lines if ln.line_type == 'ITEM' %}
           <tr><td>{{ ln.line_number }}</td><td>{{ ln.description.value }}</td>
             <td class="num">{{ ln.quantity.value or '' }}</td><td class="num">{{ ln.unit_price.value or '' }}</td>
             <td class="num">{{ ln.amount.value or '' }}</td>
+            <td><input class="po" type="text" name="po_{{ ln.line_number }}" placeholder="4500123"
+                       value="{{ ln.po_number.value or '' }}{% if ln.po_number.value and ln.po_release_num.value is not none %}-{{ ln.po_release_num.value }}{% endif %}"></td>
             <td><input class="small" type="text" name="po_line_{{ ln.line_number }}" value="{{ ln.po_line_number.value or '' }}"></td>
             <td><input class="acct" type="text" name="account_{{ ln.line_number }}" value="{{ ln.dist_account.value or '' }}"
                        placeholder="01-510-6420-0000"></td></tr>

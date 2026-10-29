@@ -309,6 +309,9 @@ def map_terms(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | No
         else:
             inv.terms_id = _like(inv.due_date, None, Method.derived, Flag.no_map,
                                  note=f"{why}: no payment term has {due_days} days")
+            if unverified:     # terms text not on the page (Mspark sample: invented "Net 30"): not a terms name
+                inv.terms_name = _like(src, None, Method.derived, Flag.no_map,
+                                       note=f"{why}: no payment term has {due_days} days")
         return
     if not printed:
         if default:
@@ -398,18 +401,40 @@ def _tax_code(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | No
     return (best[1].tax_rate_code, rate) if best else (None, rate)
 
 
+def _map_po_refs(inv: CanonicalInvoice, printed: list[CanonicalLine]) -> None:
+    """A PO printed on a line wins for that line; the other item lines take the header PO. When no
+    header PO is printed and every line names the same one, it becomes the header PO. Lines on
+    several POs leave the header PO empty (each line carries its own)."""
+    items = [ln for ln in printed if ln.line_type == "ITEM"]
+    own = {(ln.po_number.value, ln.po_release_num.value) for ln in items if ln.po_number.value}
+    if not inv.po_number.value and len(own) == 1 and all(ln.po_number.value for ln in items):
+        po, release = own.pop()
+        src = next(ln for ln in items if ln.po_number.value)
+        inv.po_number = Field(value=po, source_value=src.po_number.source_value, method=Method.derived,
+                              note="every line names this PO")
+        inv.po_release_num = Field(value=release, method=Method.derived) if release is not None else inv.po_release_num
+    for ln in items:
+        if ln.po_number.value:
+            if ln.po_release_num.value is None and ln.po_number.value == inv.po_number.value:
+                ln.po_release_num = inv.po_release_num.model_copy()
+            continue
+        if inv.po_number.value:
+            ln.po_number = Field(value=inv.po_number.value, method=Method.derived, note="header PO")
+            ln.po_release_num = inv.po_release_num.model_copy() if inv.po_release_num.value is not None \
+                else Field(value=None, method=Method.derived)
+
+
 def map_lines(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | None) -> None:
     """Printed lines (items and printed freight rows) keep their order; the header tax (one TAX line
     per printed tax row) and header freight become extra lines (printed=False)."""
     vendor_id = supplier.vendor_id if supplier else None
     printed = [ln for ln in inv.lines if ln.printed and ln.line_type != "TAX"]
+    _map_po_refs(inv, printed)
     for ln in printed:
         if ln.line_type != "ITEM":
             continue
         _map_uom(ctx, ln, vendor_id)
-        if inv.po_number.value:
-            ln.po_number = Field(value=inv.po_number.value, method=Method.derived)
-        elif supplier is not None:
+        if not ln.po_number.value and supplier is not None:
             _map_category(ctx, ln, supplier)
     next_no = max((ln.line_number for ln in printed), default=0) + 1
     extra: list[CanonicalLine] = []

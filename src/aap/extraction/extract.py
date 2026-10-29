@@ -2,19 +2,23 @@
 
 One request per invoice with up to LLM_MAX_IMAGES page images. Longer invoices:
 the first chunk gives header + lines, later chunks give lines only; the lines
-are joined and the invoice is flagged `multi_request`.
+are joined and the invoice is flagged `multi_request`. When the tax rows read do
+not add up, one more request reads only the tax rows (`tax_reread` when used).
 """
 
 from __future__ import annotations
 
 import base64
+import re
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any
 
 from aap.config import get_settings
 from aap.llm import LlmClient, LlmRequest
+from aap.normalize.amounts import parse_amount
 from aap.schemas.fields import Flag
-from aap.schemas.source import ExtractedInvoice, ExtractedInvoiceGrounded, ExtractedLine
+from aap.schemas.source import ExtractedInvoice, ExtractedInvoiceGrounded, ExtractedLine, ExtractedTaxes
 
 from .prompts import CURRENT_VERSION, load_prompt
 
@@ -116,8 +120,57 @@ def extract(pages: list[PageInput], llm: LlmClient, *, sha256: str | None = None
     merged = ExtractedInvoice.model_validate({**header.model_dump(exclude={"evidence"}),
                                               "lines": [ln.model_dump() for ln in lines]})
     flags = [Flag.multi_request] if len(chunks) > 1 else []
+    requests = len(chunks)
+    # A "freight" amount printed on a tax row is a tax the model filed as freight (Énergir sample: QST
+    # 43,04 $ as freight_amount, so the sums looked right): check the taxes without it.
+    check = merged.model_copy(update={"freight_amount": None}) \
+        if freight_on_tax_row(merged, [p.text for p in pages]) else merged
+    if tax_gap(check) is not None:
+        # The tax rows do not make subtotal + taxes + freight = total: one more look at the tax rows
+        # only (the Énergir sample prints GST and QST; only one was read). Taxes are near the totals,
+        # so the last chunk's pages.
+        resp = llm.ask(LlmRequest(task="extract_taxes", system=load_prompt("extract_taxes"),
+                                  content=_content(chunks[-1]), schema=ExtractedTaxes.model_json_schema(),
+                                  max_tokens=1024, context={"sha256": sha256,
+                                                            "page_texts": [p.text for p in chunks[-1]]}))
+        reread = ExtractedTaxes.model_validate(resp.data)
+        raw.append({"chunk": "taxes", "pages": [p.page_no for p in chunks[-1]], "model": resp.model,
+                    "duration_ms": resp.duration_ms, "output": resp.data, "usage": resp.usage})
+        duration += resp.duration_ms
+        requests += 1
+        candidate = check.model_copy(update={"taxes": reread.taxes})
+        if reread.taxes and tax_gap(candidate) is None:
+            merged = candidate
+            flags.append(Flag.tax_reread)
     return ExtractionOutput(extracted=merged, evidence=evidence, raw=raw, model=model, backend=backend,
-                            requests=len(chunks), duration_ms=duration, flags=flags)
+                            requests=requests, duration_ms=duration, flags=flags)
+
+
+TAX_ROW = re.compile(r"(?i)\b(tax|taxe|tva|tvq|tps|qst|gst|hst|pst|vat|mwst|ust|iva|igst|cgst|sgst)\b")
+FREIGHT_ROW = re.compile(r"(?i)\b(freight|shipping|delivery|carriage|transport|livraison|fracht|versand)")
+NUMBER = re.compile(r"\d[\d.,]*\d|\d")
+
+
+def freight_on_tax_row(ex: ExtractedInvoice, page_texts: list[str]) -> bool:
+    """The freight amount read is printed on a row with a tax label and no freight word."""
+    amount = parse_amount(ex.freight_amount)
+    if not amount:
+        return False
+    return any(TAX_ROW.search(row) and not FREIGHT_ROW.search(row)
+               and any(parse_amount(n) == amount for n in NUMBER.findall(row))
+               for text in page_texts for row in (text or "").splitlines())
+
+
+def tax_gap(ex: ExtractedInvoice) -> Decimal | None:
+    """total - (subtotal + taxes + freight) as printed, when tax was read and it does not add up
+    (beyond AMOUNT_TOLERANCE). None when it adds up or cannot be told (no subtotal, total or tax)."""
+    sub, total = parse_amount(ex.subtotal), parse_amount(ex.total)
+    rows = [a for a in (parse_amount(t.amount) for t in ex.taxes) if a is not None]
+    tax = sum(rows, Decimal(0)) if rows else parse_amount(ex.tax_amount)
+    if sub is None or total is None or tax is None:
+        return None
+    gap = abs(total) - (abs(sub) + abs(tax) + abs(parse_amount(ex.freight_amount) or Decimal(0)))
+    return gap if abs(gap) > get_settings().amount_tolerance else None
 
 
 PROMPT_VERSION = CURRENT_VERSION

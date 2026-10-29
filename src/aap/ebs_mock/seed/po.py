@@ -109,7 +109,7 @@ def create_po(
                                     dist_id=None, ccid=None, receipts=[])
         po["lines"].append(line)
         if po_type != "STANDARD":
-            continue  # blanket agreements have no shipments (releases are not modelled)
+            continue  # a blanket agreement ships through its releases (generate_releases)
 
         ll_id = ctx.next_id("po.po_line_locations_s")
         need_by = po_date + timedelta(days=rnd.randint(10, 45))
@@ -268,3 +268,68 @@ def generate(ctx: SeedContext) -> None:
                 if qtys.get(ln["line_num"], 0) > 1:
                     returns[ln["line_num"]] = Decimal(1)
             receive(ctx, po, qtys, first, returns)
+
+
+def create_release(ctx: SeedContext, po: dict[str, Any], quantities: dict[int, Decimal], when: date,
+                   release_num: int) -> dict[str, Any]:
+    """One release of a blanket agreement: PO_RELEASES_ALL plus a shipment and a distribution per
+    released line (quantities maps line_num -> quantity). Returns a PO-shaped dict whose lines are
+    the release's shipments, so receive() works on it."""
+    org_id = po["org_id"]
+    release_id = ctx.next_id("po.po_releases_s")
+    ctx.add("po.po_releases_all", po_release_id=release_id, po_header_id=po["po_header_id"], release_num=release_num,
+            agent_id=po["header"]["agent_id"], release_date=ctx.ts(when), release_type="BLANKET",
+            authorization_status="APPROVED", approved_flag="Y", approved_date=ctx.ts(when), closed_code="OPEN",
+            cancel_flag="N", org_id=org_id, creation_date=ctx.ts(when), last_update_date=ctx.ts(when))
+    company = company_for(ctx, org_id)
+    lines: list[dict[str, Any] | None] = [None] * len(po["lines"])
+    for line_num, qty in sorted(quantities.items()):
+        base = po["lines"][line_num - 1]
+        ll_id = ctx.next_id("po.po_line_locations_s")
+        need_by = when + timedelta(days=ctx.rnd.randint(7, 30))
+        ll = ctx.add("po.po_line_locations_all", line_location_id=ll_id, po_header_id=po["po_header_id"],
+                     po_line_id=base["po_line_id"], po_release_id=release_id, shipment_num=1, shipment_type="BLANKET",
+                     quantity=qty, quantity_received=Decimal(0), quantity_accepted=Decimal(0),
+                     quantity_rejected=Decimal(0), quantity_billed=Decimal(0), quantity_cancelled=Decimal(0),
+                     price_override=base["price"], need_by_date=ctx.ts(need_by), promised_date=ctx.ts(need_by),
+                     ship_to_location_id=po["header"]["ship_to_location_id"],
+                     ship_to_organization_id=ctx.ref["inv_org_by_ou"][org_id],
+                     receipt_required_flag="Y" if base["goods"] else "N", inspection_required_flag="N",
+                     match_option=po["site"].get("match_option") or "P", qty_rcv_tolerance=0,
+                     invoice_close_tolerance=0, receive_close_tolerance=0, taxable_flag="Y", closed_code="OPEN",
+                     approved_flag="Y", cancel_flag="N", org_id=org_id, creation_date=ctx.ts(when))
+        ccid = charge_account(ctx, org_id, base["item"], None, company)
+        dist_id = ctx.next_id("po.po_distributions_s")
+        dist = ctx.add("po.po_distributions_all", po_distribution_id=dist_id, po_header_id=po["po_header_id"],
+                       po_line_id=base["po_line_id"], line_location_id=ll_id, po_release_id=release_id,
+                       distribution_num=1, set_of_books_id=po["ledger"], code_combination_id=ccid,
+                       accrual_account_id=ensure_usable_ccid(ctx, company, "000", "2230"),
+                       variance_account_id=ensure_usable_ccid(ctx, company, "000", "5040"),
+                       budget_account_id=ccid, quantity_ordered=qty, quantity_delivered=Decimal(0),
+                       quantity_billed=Decimal(0), quantity_cancelled=Decimal(0), amount_billed=Decimal(0),
+                       destination_type_code="EXPENSE", deliver_to_location_id=po["header"]["ship_to_location_id"],
+                       deliver_to_person_id=ctx.rnd.choice(ctx.ref["requesters"][org_id]),
+                       accrue_on_receipt_flag="Y" if base["goods"] else "N", org_id=org_id,
+                       creation_date=ctx.ts(when))
+        lines[line_num - 1] = dict(base, qty=qty, received=Decimal(0), ll_id=ll_id, dist_id=dist_id, ccid=ccid,
+                                   ll_row=ll, dist_row=dist, need_by=need_by, receipts=[])
+    release = dict(po, po_release_id=release_id, release_num=release_num, lines=lines)
+    po.setdefault("releases", []).append(release)
+    return release
+
+
+def generate_releases(ctx: SeedContext) -> None:
+    """1-3 releases per open blanket agreement, most of them received. Runs after every other
+    generator, so the ids and random draws of the rest of the seed do not move."""
+    rnd = ctx.rnd
+    for po in [p for p in ctx.ref.get("pos", []) if p["type"] == "BLANKET" and not p["cancel"]]:
+        when = po["po_date"]
+        for release_num in range(1, rnd.randint(1, 3) + 1):
+            when = min(when + timedelta(days=rnd.randint(15, 90)), ctx.anchor - timedelta(days=5))
+            chosen = rnd.sample(po["lines"], rnd.randint(1, len(po["lines"])))
+            qtys = {ln["line_num"]: max(Decimal(1), (ln["qty"] * Decimal(str(rnd.uniform(0.3, 1.0))))
+                                        .to_integral_value()) for ln in chosen}
+            release = create_release(ctx, po, qtys, when, release_num)
+            goods = {n: q for n, q in qtys.items() if po["lines"][n - 1]["goods"]}
+            if goods and rnd.random() < 0.8:
+                receive(ctx, release, goods, when + timedelta(days=rnd.randint(5, 20)))

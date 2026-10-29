@@ -50,22 +50,31 @@ def approved_invoice(session: Session, doc: Document) -> tuple[CanonicalInvoice,
     pairs = {p["line"]: p for p in outcome.get("pairs") or []}
     gl = {g["line"]: g for g in outcome.get("gl_lines") or []}
     po_number = outcome.get("po_number")
-    if po_number and not inv.po_number.value:
+    if po_number and not inv.po_number.value and outcome.get("po_source") != "invoice" \
+            and len(outcome.get("po_refs") or [None]) == 1:
         inv.po_number = Field(value=po_number, method=Method.derived, note="PO found by the agents")
     for ln in inv.item_lines():
-        if ln.line_number in pairs and po_number:
-            ln.po_number = Field(value=po_number, method=Method.derived)
-            ln.po_line_number = Field(value=pairs[ln.line_number]["po_line"], method=Method.derived,
-                                      note=f"paired by the agents ({pairs[ln.line_number]['method']})")
+        p = pairs.get(ln.line_number)
+        if p and (p.get("po") or po_number):
+            ln.po_number = Field(value=p.get("po") or po_number, method=Method.derived)
+            ln.po_release_num = Field(value=p.get("release"), method=Method.derived)
+            ln.po_line_number = Field(value=p["po_line"], method=Method.derived,
+                                      note=f"paired by the agents ({p['method']})")
         elif gl.get(ln.line_number, {}).get("account") and not ln.dist_account.value:
             g = gl[ln.line_number]
             ln.dist_account = Field(value=g["account"], method=Method.derived, note=f"GL agent ({g['method']})")
+    refs = outcome.get("po_refs") or []
+    if len(refs) == 1 and refs[0]["po"] == inv.po_number.value and refs[0].get("release") is not None \
+            and inv.po_release_num.value is None:
+        inv.po_release_num = Field(value=refs[0]["release"], method=Method.derived,
+                                   note="the agreement's only open release")
     return inv, base, gl
 
 
 def apply_corrections(inv: CanonicalInvoice, corrections: dict[str, Any] | None, by: str) -> None:
-    """Clerk corrections from the review screen: {"po_number": ..., "lines": {"<n>": {"po_line_number": ..,
-    "dist_account": ..}}}. They win over the agents' proposals (method=user)."""
+    """Clerk corrections from the review screen: {"po_number": ..., "lines": {"<n>": {"po_number": ..,
+    "po_line_number": .., "dist_account": ..}}}. They win over the agents' proposals (method=user).
+    A line's PO is "4500123" or, for a blanket release, "4500210-2"."""
     if not corrections:
         return
     if corrections.get("po_number"):
@@ -75,9 +84,19 @@ def apply_corrections(inv: CanonicalInvoice, corrections: dict[str, Any] | None,
         ln = lines.get(int(key))
         if ln is None:
             raise DecisionError(f"invoice has no line {key}")
+        if change.get("po_number"):
+            po, _, release = str(change["po_number"]).strip().partition("-")
+            if not po or (release and not release.isdigit()):
+                raise DecisionError(f"line {key}: PO {change['po_number']!r} is not a PO number (4500123 or 4500210-2)")
+            ln.po_number = Field(value=po, method=Method.user, note=f"set by {by}")
+            ln.po_release_num = Field(value=int(release) if release else None, method=Method.user)
         if change.get("po_line_number") is not None:
             ln.po_line_number = Field(value=int(change["po_line_number"]), method=Method.user, note=f"set by {by}")
-            ln.po_number = Field(value=inv.po_number.value, method=Method.derived)
+            if not ln.po_number.value:
+                ln.po_number = Field(value=inv.po_number.value, method=Method.derived)
+                ln.po_release_num = inv.po_release_num.model_copy()
+            if not ln.po_number.value:
+                raise DecisionError(f"line {key} has a PO line but no PO number")
             ln.dist_account = Field(value=None, method=Method.derived)
         if change.get("dist_account"):
             ln.dist_account = Field(value=str(change["dist_account"]), method=Method.user, note=f"set by {by}")

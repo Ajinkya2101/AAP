@@ -37,6 +37,7 @@ class Candidate:
     price: float
     qty: float
     text: float
+    col: int = 0          # index into the PO lines scored (lines of several POs can share a line number)
 
 
 def price_score(inv: Decimal | None, po: Decimal) -> float:
@@ -60,11 +61,11 @@ def score_matrix(inv_lines: list[InvLine], po_lines: list[PoLine]) -> list[list[
     rows = []
     for il in inv_lines:
         row = []
-        for pl in po_lines:
+        for j, pl in enumerate(po_lines):
             p = price_score(il.unit_price, pl.unit_price)
             qf = qty_fits(il.quantity, pl)
             t = text_sim(il.description, pl.item_description or "")
-            row.append(Candidate(pl.line_num, round(W_PRICE * p + W_QTY * qf + W_TEXT * t, 3), p, qf, round(t, 3)))
+            row.append(Candidate(pl.line_num, round(W_PRICE * p + W_QTY * qf + W_TEXT * t, 3), p, qf, round(t, 3), j))
         rows.append(row)
     return rows
 

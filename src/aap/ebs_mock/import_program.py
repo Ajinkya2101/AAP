@@ -253,6 +253,18 @@ def _import_one(conn: psycopg.Connection, hdr: dict[str, Any], *, default_org: i
                 po = None
         elif header_po and ltype == "ITEM" and (ln["po_line_number"] or ln["po_line_id"]):
             po = header_po if _po_open_for_invoice(header_po) else None
+        release_id = None
+        if po and ltype == "ITEM" and po["type_lookup_code"] == "BLANKET":
+            # A blanket agreement is matched through a release (RELEASE_NUM or PO_RELEASE_ID).
+            rel = _one(conn, """SELECT * FROM po.po_releases_all WHERE po_header_id = %(h)s
+                                AND ((%(id)s::bigint IS NOT NULL AND po_release_id = %(id)s)
+                                     OR (%(id)s::bigint IS NULL AND release_num = %(n)s))""",
+                       {"h": po["po_header_id"], "id": ln["po_release_id"], "n": ln["release_num"]})
+            if not rel or not _po_open_for_invoice(rel):
+                rejects.append(_Reject("INVALID RELEASE NUM", "AP_INVOICE_LINES_INTERFACE", ln["invoice_line_id"]))
+                po = None
+            else:
+                release_id = rel["po_release_id"]
         if po and ltype == "ITEM":
             match = _one(conn, """
                 SELECT l.po_line_id, l.line_num, ll.line_location_id, d.po_distribution_id, d.code_combination_id,
@@ -266,13 +278,14 @@ def _import_one(conn: psycopg.Connection, hdr: dict[str, Any], *, default_org: i
                   AND ((%(lid)s::bigint IS NOT NULL AND l.po_line_id = %(lid)s)
                        OR (%(lid)s::bigint IS NULL AND l.line_num = %(ln)s))
                   AND (%(ship)s::int IS NULL OR ll.shipment_num = %(ship)s)
+                  AND ll.po_release_id IS NOT DISTINCT FROM %(rel)s::bigint
                 ORDER BY ll.shipment_num, d.distribution_num LIMIT 1""",
                          {"h": po["po_header_id"], "lid": ln["po_line_id"], "ln": ln["po_line_number"],
-                          "ship": ln["po_shipment_num"]})
+                          "ship": ln["po_shipment_num"], "rel": release_id})
             if not match:
                 rejects.append(_Reject("INVALID PO LINE NUM", "AP_INVOICE_LINES_INTERFACE", ln["invoice_line_id"]))
             else:
-                plan.update(po=po, match=match, ccid=match["code_combination_id"])
+                plan.update(po=po, match=match, ccid=match["code_combination_id"], release_id=release_id)
         if ltype == "ITEM" and "ccid" not in plan:
             ccid = ln["dist_code_combination_id"]
             if not ccid and ln["dist_code_concatenated"]:
@@ -352,15 +365,15 @@ def _import_one(conn: psycopg.Connection, hdr: dict[str, Any], *, default_org: i
             INSERT INTO ap.ap_invoice_lines_all (
                 invoice_id, line_number, line_type_lookup_code, line_source, org_id, description, amount,
                 base_amount, quantity_invoiced, unit_price, unit_meas_lookup_code, inventory_item_id,
-                item_description, po_header_id, po_line_id, po_line_location_id, po_distribution_id,
+                item_description, po_header_id, po_line_id, po_release_id, po_line_location_id, po_distribution_id,
                 rcv_transaction_id, match_type, accounting_date, period_name, default_dist_ccid,
                 tax_classification_code, tax_rate_code, set_of_books_id, created_by, last_updated_by)
             VALUES (%s, %s, %s, 'IMPORTED', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, 1318, 1318)""",
+                    %s, %s, %s, %s, 1318, 1318)""",
                      (invoice_id, p["line_number"], p["type"], org_id, ln["description"], p["amount"],
                       base(p["amount"]), qty, price, ln["unit_of_meas_lookup_code"] or (m or {}).get("unit_meas_lookup_code"),
                       (m or {}).get("item_id") or ln["inventory_item_id"], (m or {}).get("item_description"),
-                      p["po"]["po_header_id"] if m else None, m["po_line_id"] if m else None,
+                      p["po"]["po_header_id"] if m else None, m["po_line_id"] if m else None, p.get("release_id"),
                       m["line_location_id"] if m else None, m["po_distribution_id"] if m else None,
                       ln["rcv_transaction_id"], ("ITEM_TO_RECEIPT" if ln["rcv_transaction_id"] else "ITEM_TO_PO") if m else "NOT_MATCHED",
                       p["accounting_date"], per["period_name"] if per else None, p["ccid"],
@@ -395,8 +408,10 @@ def _import_one(conn: psycopg.Connection, hdr: dict[str, Any], *, default_org: i
 
 
 def _find_po(conn: psycopg.Connection, number: str, org_id: int) -> dict[str, Any] | None:
+    """A standard PO, else a blanket agreement of that number (its lines match through a release)."""
     return _one(conn, """SELECT * FROM po.po_headers_all
-                         WHERE segment1 = %s AND org_id = %s AND type_lookup_code = 'STANDARD'""", (number, org_id))
+                         WHERE segment1 = %s AND org_id = %s AND type_lookup_code IN ('STANDARD', 'BLANKET')
+                         ORDER BY type_lookup_code DESC LIMIT 1""", (number, org_id))
 
 
 def _po_open_for_invoice(po: dict[str, Any]) -> bool:

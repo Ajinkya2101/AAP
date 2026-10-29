@@ -50,6 +50,8 @@ class PoShipment(BaseModel):
     po_distribution_id: int | None
     ccid: int | None
     ccid_concatenated: str | None
+    po_release_id: int | None = None          # blanket release shipment
+    release_num: int | None = None
 
 
 class PoLine(BaseModel):
@@ -79,6 +81,19 @@ class PoLine(BaseModel):
         return sum((s.quantity_billed for s in self.shipments), Decimal(0))
 
 
+class PoRelease(BaseModel):
+    po_release_id: int
+    release_num: int
+    authorization_status: str | None
+    closed_code: str | None
+    cancelled: bool
+
+    @property
+    def open_for_invoice(self) -> bool:
+        return (self.authorization_status == "APPROVED" and not self.cancelled
+                and (self.closed_code or "OPEN") not in ("CLOSED FOR INVOICE", "FINALLY CLOSED", "CLOSED"))
+
+
 class PoDetail(BaseModel):
     po_header_id: int
     po_number: str
@@ -93,11 +108,38 @@ class PoDetail(BaseModel):
     buyer_name: str | None = None
     buyer_email: str | None = None
     lines: list[PoLine] = PydField(default_factory=list)
+    releases: list[PoRelease] = PydField(default_factory=list)      # blanket agreements
+    release_num: int | None = None                                   # set by for_release()
+
+    @property
+    def blanket(self) -> bool:
+        return self.type == "BLANKET"
+
+    @property
+    def reference(self) -> str:
+        """How EBS prints a release: 4500210-2."""
+        return f"{self.po_number}-{self.release_num}" if self.release_num is not None else self.po_number
+
+    def release(self, release_num: int) -> PoRelease | None:
+        return next((r for r in self.releases if r.release_num == release_num), None)
+
+    def for_release(self, release_num: int) -> PoDetail:
+        """The agreement seen through one release: each line keeps only that release's shipments
+        (lines the release does not ship are left out), so ordered / received / billed are the release's."""
+        lines = []
+        for ln in self.lines:
+            ships = [s for s in ln.shipments if s.release_num == release_num]
+            if ships:
+                lines.append(ln.model_copy(update={"shipments": ships}))
+        return self.model_copy(update={"lines": lines, "release_num": release_num})
 
     @property
     def open_for_invoice(self) -> bool:
-        return (self.authorization_status == "APPROVED" and not self.cancelled
-                and (self.closed_code or "OPEN") not in ("CLOSED FOR INVOICE", "FINALLY CLOSED", "CLOSED"))
+        if not (self.authorization_status == "APPROVED" and not self.cancelled
+                and (self.closed_code or "OPEN") not in ("CLOSED FOR INVOICE", "FINALLY CLOSED", "CLOSED")):
+            return False
+        rel = self.release(self.release_num) if self.release_num is not None else None
+        return rel is None or rel.open_for_invoice
 
     @property
     def open_amount(self) -> Decimal:
@@ -209,6 +251,7 @@ class InterfaceLine(BaseModel):
     unit_price: Decimal | None = None
     unit_of_meas_lookup_code: str | None = None
     po_number: str | None = None
+    release_num: int | None = None
     po_line_number: int | None = None
     dist_code_concatenated: str | None = None
     tax_rate_code: str | None = None

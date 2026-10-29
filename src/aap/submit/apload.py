@@ -78,9 +78,15 @@ def invoice_rows(inv: CanonicalInvoice, source: str | None = None) -> list[str]:
         raise AploadError("cannot write APLOAD rows, missing: " + ", ".join(missing))
     num, vendor, site = inv.invoice_num.value, inv.vendor_number.value, inv.vendor_site_code.value
     lines = [ln for ln in inv.lines if ln.line_type != "TAX"]
-    paired = any(ln.po_line_number.value is not None for ln in lines if ln.line_type == "ITEM")
+    paired = [ln for ln in lines if ln.line_type == "ITEM" and ln.po_line_number.value is not None]
+    pos = {(ln.po_number.value or inv.po_number.value, ln.po_release_num.value) for ln in paired}
+    if len(pos) > 1:
+        raise AploadError(f"invoice {num}: its lines are on {len(pos)} POs ("
+                          + ", ".join(sorted(f"{p}-{r}" if r is not None else str(p) for p, r in pos))
+                          + "); APLOAD has one PONumber per invoice: submit it through the open interface")
+    po, release = pos.pop() if pos else ("", None)
     tax = sum((ln.amount.value or Decimal(0) for ln in inv.lines if ln.line_type == "TAX"), Decimal(0))
-    rows = [_row("H", [num, vendor, site, (inv.po_number.value or "") if paired else "", "",
+    rows = [_row("H", [num, vendor, site, po or "", str(release) if release is not None else "",
                        f"{inv.invoice_date.value:%m%d%Y}", _amount5(inv.invoice_amount.value),
                        source or get_settings().invoice_source, _amount5(tax)])]
     for n, ln in enumerate(lines, start=1):

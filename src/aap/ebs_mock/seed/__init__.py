@@ -38,6 +38,7 @@ def build(seed: int = 42, scale: str = "default", anchor: date = DEFAULT_ANCHOR)
     scenarios.generate(ctx)
     po.generate(ctx)
     invoices.generate(ctx)
+    po.generate_releases(ctx)
     return ctx
 
 

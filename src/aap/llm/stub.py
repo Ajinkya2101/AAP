@@ -3,6 +3,7 @@
 - extract:      returns the invoice generator's ground truth from
                 <TRUTH_DIR>/<sha256>.truth.json; without a sidecar it falls back to a
                 small regex extractor over the page text (header fields only).
+- extract_taxes: the truth file's tax rows.
 - choose:       picks the first real candidate of the enum (plan section 7).
 """
 
@@ -59,6 +60,11 @@ class StubClient:
             data["evidence"] = []
         return _fill_missing(data, req.schema)
 
+    def _extract_taxes(self, req: LlmRequest) -> dict[str, Any]:
+        """The tax rows of the truth file (none without one: the re-read finds nothing new)."""
+        truth = load_truth(self.settings.truth_path, req.context.get("sha256"))
+        return _fill_missing({"taxes": list((truth or {}).get("source", {}).get("taxes") or [])}, req.schema)
+
     # ------------------------------------------------------------ choose
     def _choose(self, req: LlmRequest) -> dict[str, Any]:
         out: dict[str, Any] = {}
@@ -76,11 +82,19 @@ class StubClient:
         raise LlmError(f"stub backend has no handler for task {req.task!r}")
 
 
-def _fill_missing(data: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+def _fill_missing(data: dict[str, Any], schema: dict[str, Any], root: dict[str, Any] | None = None) -> dict[str, Any]:
     """Truth files and the regex fallback predate newer schema keys: answer those with null
-    (an empty list for list keys), as the model does for a value that is not printed."""
+    (an empty list for list keys), as the model does for a value that is not printed. Also inside
+    the items of a list (a line's po_number)."""
+    root = root or schema
     for key, sub in schema.get("properties", {}).items():
         data.setdefault(key, [] if sub.get("type") == "array" else None)
+        ref = (sub.get("items") or {}).get("$ref")
+        if ref and isinstance(data[key], list):
+            item_schema = root.get("$defs", {}).get(ref.rsplit("/", 1)[-1], {})
+            for item in data[key]:
+                if isinstance(item, dict):
+                    _fill_missing(item, item_schema, root)
     return data
 
 

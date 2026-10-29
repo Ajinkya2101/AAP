@@ -81,9 +81,28 @@ status change, agent decision, approval and Oracle submission is traceable.
 
 `POST /api/documents/{id}/decision` with `{"action": "approve", "by": "me"}` freezes an `approved`
 version and submits it through the Payables Open Interface; the document goes APPROVED -> SUBMITTED ->
-CREATED (or ORACLE_ERROR with the reject codes). Optional `corrections` set a PO line or GL account per
-line: `{"lines": {"1": {"po_line_number": 1}, "2": {"dist_account": "01-510-6420-0000"}}}`.
+CREATED (or ORACLE_ERROR with the reject codes). Optional `corrections` set a PO, PO line or GL account per
+line: `{"lines": {"1": {"po_number": "4500210-2", "po_line_number": 1}, "2": {"dist_account": "01-510-6420-0000"}}}`
+(`4500210-2` = release 2 of blanket agreement 4500210; without `po_number` a line keeps its own PO or the
+header PO). An invoice can be on several POs: each line is paired only with lines of the PO printed on it.
 `GET /api/documents/{id}/submissions` shows the Oracle request, invoice id and holds.
+
+### Download the extracted and validated data
+
+- **One invoice, CSV:** "invoice CSV" on the invoice page, or `GET /api/documents/{id}/invoice.csv`. One
+  standard layout for every invoice: one row per line, with the document, header (every field),
+  validation (result, failed and warning checks, messages), review reasons, errors, flags and notes
+  repeated on each row; an invoice without lines is one row. Dates `YYYY-MM-DD`, plain decimal amounts,
+  lists separated by `; `. The columns never vary, so files can be appended. "Payment terms" and
+  "Due date" are what Oracle gets (one derived from the other when only one is printed); "Payment terms
+  on invoice" and "Due date on invoice" hold only what the invoice prints.
+- **One invoice, everything:** "Download everything (ZIP)", or `GET /api/documents/{id}/export.zip`: that
+  `invoice.csv` plus the stored JSON (`invoice.json`, `validation.json` every run, `extraction_runs.json`
+  every run, `model_output/` exactly what the model returned per request).
+- **Several invoices:** "Download selected" or "Download all / this filter" under Records, or
+  `GET /api/export.zip?status=IN_REVIEW&q=...` (or `?ids=<id>&ids=<id>`). The same per invoice under
+  `documents/`, plus `invoices.csv`: all their rows under one header.
+- **Invoice JSON only:** `GET /api/documents/{id}/invoice.json` (newest version, the approved one after approval).
 
 ### APLOAD file (the customer's AP interface format)
 
@@ -98,7 +117,20 @@ docker compose exec worker python -m aap.submit.apload --out /data/filestore/apl
 ```
 
 Approval still posts through the open interface; whether the APLOAD file replaces that is open
-(docs/PLAN-REAL-INVOICES.md, R2.4).
+(docs/PLAN-REAL-INVOICES.md, R2.4). A blanket release goes into `ReleaseNumber`. APLOAD has one
+`PONumber` per invoice, so an invoice whose lines are on several POs is refused there (R2.8).
+
+### Store / location -> cost center
+
+Non-PO lines take the natural account from history and the cost center from the invoice's store or
+location, once the functional team's table is loaded (`GL_COST_CENTER_SEGMENT`, `GL_SEGMENT_SEPARATOR`):
+
+```bat
+:: header row with a location column (location / store) and a cost-center column (cost_center / cc / segment3)
+docker compose cp stores.csv worker:/tmp/stores.csv
+docker compose exec worker python -m aap.mapping.locations /tmp/stores.csv --dry-run
+docker compose exec worker python -m aap.mapping.locations /tmp/stores.csv
+```
 
 ### Corrections and training data
 

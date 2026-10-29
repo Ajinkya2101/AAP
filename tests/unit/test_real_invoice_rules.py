@@ -25,7 +25,7 @@ def _source(lines=(), taxes=(), **header) -> SourceInvoice:
     base = {k: None for k in ExtractedInvoice.model_fields if k not in ("lines", "taxes")}
     base.update(header)
     line = dict(description=None, item_code=None, quantity=None, uom=None, unit_price=None, amount=None,
-                tax_rate=None, po_line_ref=None)
+                tax_rate=None, po_number=None, po_line_ref=None)
     return SourceInvoice.from_extracted(ExtractedInvoice.model_validate(
         {**base, "lines": [{**line, **ln} for ln in lines],
          "taxes": [{"label": None, "rate": None, "amount": None, **t} for t in taxes]}))
@@ -95,6 +95,11 @@ def test_due_date_without_matching_term_uses_supplier_default():  # Mspark: 17 d
     inv = _terms_inv(invoice=date(2021, 7, 6), due=date(2021, 7, 23))
     map_terms(_ctx(_ref()), inv, None, None)
     assert inv.terms_id.value is None and Flag.no_map in inv.terms_id.flags
+    # the model's "Net 30" is not on the page and no term fits: it does not stay as the terms name
+    inv = _terms_inv(printed="Net 30", printed_flags=[Flag.not_found_in_source], invoice=date(2021, 7, 6),
+                     due=date(2021, 7, 23))
+    map_terms(_ctx(_ref()), inv, None, None)
+    assert inv.terms_name.value is None and inv.terms_name.source_value == "Net 30"
 
 
 def test_printed_terms_win_but_conflict_is_flagged():
@@ -120,6 +125,24 @@ def test_price_per_thousand_and_cents():
     assert b.unit_price.value == D("0.1599491") and "cents" in b.unit_price.note
     assert c.unit_price.value == D("1.384480") and "inferred" in c.unit_price.note
     assert d.unit_price.value == D("2.50") and Flag.price_basis not in d.unit_price.flags
+
+
+def test_subtotal_that_is_a_line_amount_gives_way_to_the_lines():  # Mspark, prompt v5: no subtotal row
+    lines = [{"description": "TNB01818: NC-HVL/28792", "amount": "$922.29"},
+             {"description": "TNB01818: NC-HVL/28791", "amount": "$380.32"}]
+    inv = normalize(_source(lines=lines, subtotal="$922.29", tax_amount="$12.91", total="$1,315.52"))
+    assert inv.subtotal.value == D("1302.61") and Flag.implausible_value in inv.subtotal.flags
+    assert inv.subtotal.source_value == "$922.29"
+    # a printed subtotal that fits stays, also when the lines do not add up to it (C3 reports that)
+    inv = normalize(_source(lines=lines, subtotal="$1,302.61", tax_amount="$12.91", total="$1,315.52"))
+    assert inv.subtotal.method == Method.normalized
+    inv = normalize(_source(lines=lines, subtotal="$1,300.00", tax_amount="$15.52", total="$1,315.52"))
+    assert inv.subtotal.value == D("1300.00")
+    # a carrier's invoice is all freight rows: they are in the subtotal (eval dev-55, R0017_30136)
+    freight = [{"description": "Parcel Freight Tier 2", "amount": "1,307.73"},
+               {"description": "Express Freight Standard", "amount": "1,281.68"}]
+    inv = normalize(_source(lines=freight, subtotal="2,589.41", total="2,589.41"))
+    assert inv.subtotal.value == D("2589.41") and Flag.implausible_value not in inv.subtotal.flags
 
 
 def test_several_taxes_add_up():                                   # Énergir: GST + QST

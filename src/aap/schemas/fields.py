@@ -45,6 +45,7 @@ class Flag:
     sign_from_document_type = "sign_from_document_type"   # credit memo printed with positive amounts
     price_basis = "price_basis"                           # unit price printed per 100 / per 1000 units
     implausible_value = "implausible_value"               # read, but cannot be real (e.g. bank account 000)
+    tax_reread = "tax_reread"                             # tax rows read again: the first ones did not add up
 
 
 class Field(BaseModel, Generic[T]):

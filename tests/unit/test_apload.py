@@ -84,3 +84,20 @@ def test_missing_supplier_number_is_an_error():
     inv.vendor_number = Field()
     with pytest.raises(AploadError, match="supplier number"):
         apload_text([inv])
+
+
+def test_blanket_release_goes_into_release_number():
+    inv = _invoice_from_sample()
+    inv.po_number, inv.po_release_num = Field(value="4500210"), Field(value=2)
+    inv.lines[0].po_number, inv.lines[0].po_release_num = Field(value="4500210"), Field(value=2)
+    inv.lines[0].po_line_number = Field(value=1)
+    h = apload_text([inv], source="X").splitlines()[2].split("|")
+    assert (h[4], h[5]) == ("4500210", "2")
+
+
+def test_lines_on_several_pos_are_refused():
+    inv = _invoice_from_sample()
+    for ln, po in zip(inv.lines[:2], ("4500123", "4500124"), strict=True):
+        ln.po_number, ln.po_line_number = Field(value=po), Field(value=1)
+    with pytest.raises(AploadError, match="2 POs"):
+        apload_text([inv])
