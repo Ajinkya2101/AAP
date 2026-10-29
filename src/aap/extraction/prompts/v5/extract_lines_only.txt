@@ -1,0 +1,1 @@
+These pages continue an invoice whose header was already read. Extract only the line items printed on these pages into "lines", copying values exactly. Return null for every header field and an empty "taxes" list.

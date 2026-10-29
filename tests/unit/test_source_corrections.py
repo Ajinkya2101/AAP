@@ -15,7 +15,7 @@ def _source() -> SourceInvoice:
     header.update(vendor_name="Northwind IT Supplies Inc.", invoice_number="ALL28916", payment_terms="Terms",
                   total="150.00")
     line = dict(description=None, item_code=None, quantity=None, uom=None, unit_price=None, amount=None,
-                tax_rate=None, po_line_ref=None)
+                tax_rate=None, po_number=None, po_line_ref=None)
     lines = [{**line, "description": "Laptop", "amount": "100.00"}, {**line, "description": "Subtotal"},
              {**line, "description": "Dock", "amount": "50.00"}]
     return SourceInvoice.from_extracted(ExtractedInvoice.model_validate({**header, "taxes": [], "lines": lines}))

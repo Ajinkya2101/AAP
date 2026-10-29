@@ -54,11 +54,11 @@ SOURCE_HEADER = ["document_type", "vendor_name", "vendor_tax_id", "vendor_email"
                  "invoice_number", "invoice_date", "due_date", "po_number", "payment_terms", "currency", "subtotal",
                  "tax_label", "tax_rate", "tax_amount", "freight_amount", "total", "bank_account", "bank_routing", "iban",
                  "bank_change_notice"]
-SOURCE_LINE = ["description", "item_code", "quantity", "uom", "unit_price", "amount"]
+SOURCE_LINE = ["description", "item_code", "quantity", "uom", "unit_price", "amount", "po_number"]
 HEADER_FIELDS = ["invoice_type", "vendor_name", "vendor_id", "vendor_site_code", "vendor_tax_id", "invoice_num",
-                 "invoice_date", "due_date", "gl_date", "currency_code", "terms_name", "po_number", "location_ref",
-                 "cost_center", "subtotal", "tax_amount", "freight_amount", "invoice_amount", "bank_account",
-                 "bank_routing", "iban", "bank_change_notice", "org_id"]
+                 "invoice_date", "due_date", "gl_date", "currency_code", "terms_name", "po_number", "po_release_num",
+                 "location_ref", "cost_center", "subtotal", "tax_amount", "freight_amount", "invoice_amount",
+                 "bank_account", "bank_routing", "iban", "bank_change_notice", "org_id"]
 
 
 def _db() -> Session:
@@ -120,9 +120,9 @@ def _latest_versions():  # noqa: ANN202
             .group_by(InvoiceVersion.document_id).subquery())
 
 
-def _records(session: Session, status: str | None, q: str | None, page: int) -> dict[str, Any]:
-    """One page of the records: filtered by status, searched by invoice number, supplier or file name."""
-    counts = _status_counts(session)
+def records_query(status: str | None, q: str | None):  # noqa: ANN201
+    """(Document, newest canonical invoice) of the records: filtered by status, searched by invoice
+    number, supplier or file name. Also selects what the bulk export downloads."""
     sub = _latest_versions()
     inv = InvoiceVersion.canonical_invoice
     rows_q = (select(Document, inv)
@@ -137,6 +137,14 @@ def _records(session: Session, status: str | None, q: str | None, page: int) -> 
         like = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         rows_q = rows_q.where(or_(*(col.ilike(like, escape="\\") for col in (
             Document.filename, inv["invoice_num"]["value"].astext, inv["vendor_name"]["value"].astext))))
+    return rows_q
+
+
+def _records(session: Session, status: str | None, q: str | None, page: int) -> dict[str, Any]:
+    """One page of the records: filtered by status, searched by invoice number, supplier or file name."""
+    counts = _status_counts(session)
+    q = (q or "").strip()
+    rows_q = records_query(status, q)
     matching = session.scalar(select(func.count()).select_from(rows_q.with_only_columns(Document.id).subquery())) or 0
     pages = max(1, -(-matching // PAGE_SIZE))
     page = min(max(page, 1), pages)       # a delete can empty the last page
@@ -375,9 +383,11 @@ async def decide(request: Request, document_id: uuid.UUID) -> RedirectResponse:
     for key, value in form.items():
         value = str(value).strip()
         kind, _, n = key.rpartition("_")
-        if kind in ("po_line", "account") and n.isdigit():
+        if kind in ("po", "po_line", "account") and n.isdigit():
             corrections["lines"].setdefault(n, {})
-            if kind == "po_line" and value:
+            if kind == "po" and value:
+                corrections["lines"][n]["po_number"] = value
+            elif kind == "po_line" and value:
                 if not value.isdigit():
                     return _back(url, f"PO line for line {n} must be a number", "error")
                 corrections["lines"][n]["po_line_number"] = int(value)
@@ -452,12 +462,20 @@ async def correct(request: Request, document_id: uuid.UUID) -> RedirectResponse:
     return _back(url, f"{changed} value(s) corrected: checking the invoice again")
 
 
+def po_reference(ln: Any) -> str:
+    """A line's PO as the clerk types it: 4500123, or 4500210-2 for release 2 of a blanket agreement."""
+    po, release = ln.po_number.value, ln.po_release_num.value
+    return f"{po}-{release}" if po and release is not None else (po or "")
+
+
 def _keep_changes_only(corrections: dict[str, Any], proposal: CanonicalInvoice) -> None:
     """The form posts the agents' proposal back; only what the clerk changed is a correction."""
     lines = {ln.line_number: ln for ln in proposal.lines}
     for n in list(corrections["lines"]):
         change, ln = corrections["lines"][n], lines.get(int(n))
         if ln is not None:
+            if change.get("po_number") == po_reference(ln):
+                change.pop("po_number", None)
             if change.get("po_line_number") == ln.po_line_number.value:
                 change.pop("po_line_number", None)
             if change.get("dist_account") and change["dist_account"] == ln.dist_account.value:

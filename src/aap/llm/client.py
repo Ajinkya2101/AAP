@@ -82,7 +82,7 @@ class VllmClient:
                               timeout=settings.llm_timeout_seconds, max_retries=0)
 
     def ask(self, req: LlmRequest) -> LlmResponse:
-        model = req.model or (self.settings.extract_model if req.task == "extract"
+        model = req.model or (self.settings.extract_model if req.task.startswith("extract")
                               else self.settings.choice_model)
         messages = [{"role": "system", "content": req.system}, {"role": "user", "content": req.content}]
         last_exc: Exception | None = None

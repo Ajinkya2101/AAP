@@ -6,6 +6,7 @@ CREATE SEQUENCE po.po_line_locations_s START 330000;
 CREATE SEQUENCE po.po_distributions_s START 440000;
 CREATE SEQUENCE po.po_segment1_s START 4500200;   -- PO numbers (PO_UNIQUE_IDENTIFIER_CONTROL in real EBS)
 CREATE SEQUENCE po.po_line_types_s START 1000;
+CREATE SEQUENCE po.po_releases_s START 550000;
 
 CREATE TABLE po.po_agents (
     agent_id                bigint       PRIMARY KEY,   -- = PER_ALL_PEOPLE_F.PERSON_ID
@@ -88,10 +89,31 @@ CREATE TABLE po.po_lines_all (
     UNIQUE (po_header_id, line_num)
 );
 
+-- Releases against a blanket purchase agreement (BPA). A release's shipments are
+-- PO_LINE_LOCATIONS_ALL rows with SHIPMENT_TYPE 'BLANKET' and its PO_RELEASE_ID.
+CREATE TABLE po.po_releases_all (
+    po_release_id           bigint       PRIMARY KEY,
+    po_header_id            bigint       NOT NULL REFERENCES po.po_headers_all,
+    release_num             integer      NOT NULL,
+    agent_id                bigint       NOT NULL,
+    release_date            timestamp(0) NOT NULL,
+    release_type            varchar(25)  NOT NULL,   -- BLANKET
+    authorization_status    varchar(25),
+    approved_flag           varchar(1),
+    approved_date           timestamp(0),
+    closed_code             varchar(25),
+    cancel_flag             varchar(1)   DEFAULT 'N',
+    org_id                  bigint       NOT NULL,
+    @WHO@,
+    @DFF@,
+    UNIQUE (po_header_id, release_num)
+);
+
 CREATE TABLE po.po_line_locations_all (
     line_location_id        bigint       PRIMARY KEY,
     po_header_id            bigint       NOT NULL,
     po_line_id              bigint       NOT NULL REFERENCES po.po_lines_all,
+    po_release_id           bigint,                   -- blanket release shipments
     shipment_num            integer      NOT NULL,
     shipment_type           varchar(25)  NOT NULL,   -- STANDARD / BLANKET
     quantity                numeric,
@@ -130,6 +152,7 @@ CREATE TABLE po.po_distributions_all (
     po_header_id            bigint       NOT NULL,
     po_line_id              bigint       NOT NULL,
     line_location_id        bigint       NOT NULL REFERENCES po.po_line_locations_all,
+    po_release_id           bigint,
     distribution_num        integer      NOT NULL,
     set_of_books_id         bigint       NOT NULL,
     code_combination_id     bigint       NOT NULL,

@@ -65,3 +65,21 @@ def test_reference_sync_fills_ref_tables(aap_db):
         site = s.scalar(select(RefSupplierSite).where(RefSupplierSite.vendor_id == 30418,
                                                       RefSupplierSite.vendor_site_code == "DALLAS-HQ"))
         assert "northwind.example" in site.email_domains
+
+
+def _blanket_number(adapter) -> str:
+    rows = adapter._all("""SELECT h.segment1 FROM po_headers_all h
+                           JOIN po_releases_all r ON r.po_header_id = h.po_header_id
+                           WHERE h.type_lookup_code = 'BLANKET' AND h.org_id = 204
+                           ORDER BY h.segment1 LIMIT 1""")
+    assert rows, "the seed has blanket agreements with releases"
+    return rows[0]["segment1"]
+
+
+def test_get_po_reads_blanket_releases(adapter):
+    po = adapter.get_po(_blanket_number(adapter))
+    assert po is not None and po.blanket and po.releases
+    rel = po.releases[0]
+    view = po.for_release(rel.release_num)
+    assert view.lines and all(s.release_num == rel.release_num for ln in view.lines for s in ln.shipments)
+    assert all(s.ccid_concatenated for ln in view.lines for s in ln.shipments)

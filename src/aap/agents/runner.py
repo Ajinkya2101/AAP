@@ -90,7 +90,7 @@ def run_agents(document_id: uuid.UUID | str) -> str:
         s.flush()
         state = {"document_id": doc_id, "version_id": str(version.id), "run_id": str(run.id),
                  "reasons": [], "notes": [], "pairs": [], "unmatched": [], "variances": [], "gl_lines": [],
-                 "outcome": None, "suggested_action": None, "po_number": None, "po_source": None, "route": None}
+                 "outcome": None, "suggested_action": None, "po_number": None, "po_source": None, "po_refs": [], "route": None}
     get_graph().invoke(state, _config(doc_id))
     return _status(doc_id)
 

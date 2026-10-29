@@ -20,7 +20,8 @@ HEADER_FIELDS = [
     "payment_terms", "currency", "subtotal", "tax_label", "tax_rate", "tax_amount",
     "freight_amount", "total", "bank_account", "bank_routing", "iban", "remit_to", "bank_change_notice",
 ]
-LINE_FIELDS = ["description", "item_code", "quantity", "uom", "unit_price", "amount", "tax_rate", "po_line_ref"]
+LINE_FIELDS = ["description", "item_code", "quantity", "uom", "unit_price", "amount", "tax_rate", "po_number",
+               "po_line_ref"]
 TAX_FIELDS = ["label", "rate", "amount"]
 
 
@@ -35,6 +36,7 @@ class ExtractedLine(BaseModel):
     unit_price: str | None
     amount: str | None
     tax_rate: str | None
+    po_number: str | None
     po_line_ref: str | None
 
 
@@ -44,6 +46,14 @@ class ExtractedTax(BaseModel):
     label: str | None
     rate: str | None
     amount: str | None
+
+
+class ExtractedTaxes(BaseModel):
+    """Second look at the tax rows only (extract_taxes), when the first answer's rows do not add up."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    taxes: list[ExtractedTax]
 
 
 class ExtractedInvoice(BaseModel):
@@ -112,6 +122,7 @@ class SourceLine(BaseModel):
     unit_price: Field[str] = PydField(default_factory=Field[str])
     amount: Field[str] = PydField(default_factory=Field[str])
     tax_rate: Field[str] = PydField(default_factory=Field[str])
+    po_number: Field[str] = PydField(default_factory=Field[str])
     po_line_ref: Field[str] = PydField(default_factory=Field[str])
 
 

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
@@ -126,6 +126,84 @@ def get_apload(session: DB, document_id: uuid.UUID) -> PlainTextResponse:
     except Exception as exc:  # noqa: BLE001 - e.g. no invoice version yet
         raise HTTPException(409, f"no invoice to export: {exc}") from exc
     return PlainTextResponse(body, headers={"X-AAP-Approved": str(approved).lower()})
+
+
+def _export_version(session: Session, document_id: uuid.UUID):  # noqa: ANN202
+    from aap.pipeline.export import ExportError, latest_invoice
+
+    try:
+        return latest_invoice(session, document_id)
+    except ExportError as exc:  # no document: 404; no invoice version yet: 409
+        raise HTTPException(404 if "document" in str(exc) else 409, str(exc)) from exc
+
+
+def _download(filename: str) -> dict[str, str]:
+    return {"Content-Disposition": f'attachment; filename="{filename}"'}
+
+
+@app.get("/api/documents/{document_id}/invoice.json", tags=["documents"])
+def export_json(session: DB, document_id: uuid.UUID) -> JSONResponse:
+    """The newest invoice version (the approved one after approval) with every header, tax-row and
+    line field: value, as printed, page, method, flags, note."""
+    from aap.pipeline.export import export_filename, invoice_json
+
+    doc, version = _export_version(session, document_id)
+    return JSONResponse(invoice_json(doc, version), headers=_download(export_filename(doc, version, "json")))
+
+
+@app.get("/api/documents/{document_id}/invoice.csv", tags=["documents"], response_class=PlainTextResponse)
+def export_csv(session: DB, document_id: uuid.UUID) -> Response:
+    """The invoice in the standard CSV layout: one row per line, with the document, header,
+    validation and review columns on every row (the same columns for every invoice)."""
+    from aap.pipeline.export import ExportError, folder_name, invoice_csv, load_document
+
+    try:
+        data = load_document(session, document_id)
+    except ExportError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return Response(invoice_csv(data), media_type="text/csv; charset=utf-8",
+                    headers=_download(folder_name(data.doc, data.invoice) + ".csv"))
+
+
+@app.get("/api/documents/{document_id}/export.zip", tags=["documents"], response_class=Response)
+def export_document(session: DB, document_id: uuid.UUID) -> Response:
+    """Everything read and checked for this document: invoice.csv (the standard layout) and the
+    stored JSON (invoice, every validation run, every extraction run, and exactly what the model
+    returned). Contents: README.txt in the ZIP."""
+    from aap.pipeline.export import ExportError, document_zip, folder_name, load_document
+
+    try:
+        data = load_document(session, document_id)
+    except ExportError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return Response(document_zip(data), media_type="application/zip",
+                    headers=_download(folder_name(data.doc, data.invoice) + ".zip"))
+
+
+@app.get("/api/export.zip", tags=["documents"], response_class=StreamingResponse)
+def export_documents(session: DB, status: str | None = None, q: str | None = None,
+                     ids: Annotated[list[uuid.UUID] | None, Query()] = None) -> StreamingResponse:
+    """Several documents in one ZIP: the given `ids`, or every record matching the dashboard filter
+    (`status`, `WAITING` for everything that needs a person, and search `q`; neither = all).
+    One folder per document as in `…/export.zip`, plus invoices.csv: every invoice's rows in the
+    standard layout under one header."""
+    from datetime import UTC, datetime
+
+    from aap.api.ui import records_query
+    from aap.pipeline.export import bulk_zip
+
+    if not ids:
+        ids = list(session.scalars(records_query(status, q).with_only_columns(Document.id)
+                                   .order_by(Document.created_at.desc(), Document.id)))
+    out = bulk_zip(session, ids)
+
+    def chunks():  # noqa: ANN202
+        with out:
+            while block := out.read(1 << 20):
+                yield block
+
+    name = f"aap-export-{datetime.now(UTC):%Y%m%d-%H%M%S}.zip"
+    return StreamingResponse(chunks(), media_type="application/zip", headers=_download(name))
 
 
 @app.post("/api/documents/{document_id}/retry", tags=["documents"])

@@ -3,7 +3,7 @@
 | Item | Value |
 |---|---|
 | Status | Active |
-| Started | 2026-10-26 |
+| Started | 2026-10-26 (R1b: 2026-10-28) |
 | Input | EBS walkthrough with the functional team (2026-10-22); Dhivya's samples: 5 invoice PDFs and `APILOAD_20251118.csv` |
 | Builds on | IMPLEMENTATION-PLAN.md (all phases done), FINETUNING-SCOPE.md |
 
@@ -61,6 +61,26 @@ name, an 8-segment account with `.` separators. → R1.10.
 | R2.5 | Delivery tickets (Corral): one line at the total or every product | How they key them today | ⏸ |
 | R2.6 | GL date policy default | Vikram | ⏸ |
 | R2.7 | Invoice-type scope (credit / debit memos in phase 1?) | Dhivya | ⏸ |
+| R2.8 | Invoices whose lines are on several POs: one APLOAD H row per PO, or open interface only? (APLOAD has one `PONumber` per H row and none on L rows) | Dhivya | ⏸ |
+
+## 3b. Phase R1b: follow-ups from the functional-team call (2026-10-28)
+
+On the call that followed the walkthrough, Dhivya asked for a CSV whose columns are the same for every invoice, with
+the payment terms filled only when terms are printed and the due date only when a due date is printed. Vikram and
+she added that a PO can be on each line (several POs per invoice), that POs can be standard or blanket, that the AP
+team re-keys distributions on non-PO invoices today, and that the call's first action is CSVs of the sample PDFs.
+None of this waits on the functional team; where a real table is missing (stores, segments) the mechanism is built
+and the data drops in (R2.1).
+
+| # | Item | Where | Status |
+|---|---|---|---|
+| R1b.1 | Export: "Payment terms on invoice" and "Due date on invoice" columns next to the derived ones. Exactly the printed value is filled (terms printed → terms column, due date blank unless printed too); the derived "Payment terms" / "Due date" keep the value EBS gets | `pipeline/export.py` | ✅ |
+| R1b.2 | PO per line: prompt v5 reads `lines[].po_number` (a PO printed on the line or in a PO column); normalize carries it; map keeps the line's PO and falls back to the header PO (header PO derived when every line names the same one); V-PO checks every PO of the invoice; the agents pair each line only with lines of its own PO (lines without a PO: every PO of the invoice), and three-way, GL and holds use the pair's PO; approval writes each line's PO; review form gets a PO column per line; APLOAD refuses an invoice whose lines are on several POs (R2.8) | `schemas/source.py`, `extraction/prompts/v5`, `normalize`, `mapping/map.py`, `validation/rules/r10_po.py`, `agents/`, `submit/` | ✅ |
+| R1b.3 | Blanket POs: mock `PO_RELEASES_ALL` and release shipments (generated after the rest of the seed, own random stream, so existing ids stay); PO reference "4500210-2" / "Release 2" → `po_release_num`; the agents pair against the release's shipments; interface line `release_num`; Payables Import matches the release shipment; APLOAD `ReleaseNumber` | `ebs_mock/ddl/po.sql`, `ebs_mock/seed/po.py`, `adapters/`, `agents/`, `ebs_mock/import_program.py`, `submit/apload.py` | ✅ |
+| R1b.4 | Non-PO GL with the location: when the location maps to a cost center, it replaces the cost-center segment of the account found from history (`GL_COST_CENTER_SEGMENT`, `GL_SEGMENT_SEPARATOR`; mock: segment 2 of `01-510-6420-0000`; Krispy Kreme: segment 3, `.` after R2.2); the combination is checked live, invalid → review. Loader for the store ↔ cost-center table: `python -m aap.mapping.locations stores.csv` | `agents/nodes/gl.py`, `mapping/locations.py`, `config.py` | ✅ mechanism; the store table itself is R2.1 |
+| R1b.5 | Tax re-read: when the printed tax rows do not make subtotal + taxes + freight = total, one more request reads only the tax rows; its rows are used when they close the gap (flag `tax_reread`). Énergir: GST + QST | `extraction/extract.py`, `prompts/v5/extract_taxes.txt`, `llm/stub.py` | ✅ (Énergir: GST + QST read, C5 passes) |
+| R1b.6 | Sample CSVs for Dhivya: re-run the 5 samples on the real model (prompt v5), export `export.zip` (standard CSV + JSON) and the APLOAD file of the same invoices | run, `export.zip` | ✅ export ready (§7); APLOAD waits on supplier numbers (R2.3) |
+| R1b.7 | Tests for R1b.1–R1b.5; stub e2e; regression eval on `invoices-dev-55` with prompt v5 (both PLAN 4 gates) | `tests/` | ✅ (§7) |
 
 ## 4. Later phases (unchanged)
 
@@ -109,3 +129,45 @@ prices (14 invented values); both were fixed in the prompt and by a normalize gu
 
 **Found on the way:** the source check matched a percentage without its `%` sign ("12%" found in a date);
 fixed in `extraction/source_check.py`.
+
+## 7. Results R1b (2026-10-28)
+
+**Tests:** 114 unit tests (export printed columns, PO references and releases, line-PO mapping, pairing
+restriction, clerk PO corrections, cost-center segment, store-table reader, tax re-read incl. a tax read
+as freight, subtotal guard, APLOAD release / several POs); integration 10 (seed with releases passes the
+invariants, `get_po` reads releases, APXIIMPT matches a release shipment and rejects a blanket line without
+one); stub e2e S1-S15 23 passed, 3 skipped (embeddings, as before).
+
+**Regression eval, `invoices-dev-55`, real model, prompt v5** (run `prompt-v5-dev55-agents`): both gates pass.
+
+| | v4 (`prompt-v4-final-dev55-agents`) | v5 |
+|---|---|---|
+| Header accuracy (gate ≥ 97 %) | 99.3 % | 99.3 % |
+| Line F1 (gate ≥ 95 %) | 100 % | 100 % |
+| Line values not on the invoice | 2 | 0 |
+| `extract.subtotal` | 96.4 % | 98.2 % |
+| `extract.vendor_name` | 100 % | 98.2 % (74132.pdf: the bill-to "ACSE Corp" read as the supplier; supplier mapping still right, `header.vendor_id` 100 %) |
+| Extraction time, median | 10.1 s | 12.1 s (every line now answers `po_number`) |
+| Tax re-reads | – | 0 of 55 (the synthetic invoices add up) |
+
+The subtotal guard and the freight-on-tax-row check were added after this run; re-normalizing the run's 55
+stored extractions with the final code changes nothing, and none of them would get a tax re-read.
+
+**The 5 samples, real model, prompt v5** (export `export.zip`: `invoices.csv` + per document JSON):
+
+| Invoice | Changed by R1b | Still open |
+|---|---|---|
+| Énergir | GST and QST both read (tax re-read), tax 64.61, C5 passes. One run filed QST as freight (sums looked right): caught by the tax-row check | Supplier not in the mock (R2.3) |
+| Mspark | Invented "Net 30" no longer shown as the terms; subtotal 922.29 (a line amount, no subtotal row printed) replaced by the lines' 1302.61 with a flag, C3 / C5 pass. "Due date on invoice" filled, "Payment terms on invoice" empty | PO from "Insertion Order TNB01818" (V-PO) |
+| Level Access | "Payment terms" 60 NET (from the due date), "Payment terms on invoice" empty | Supplier / PO not in the mock (R2.3) |
+| N Wasserstrom | Line PO = the header PO | PO lines still read from the line-number column |
+| Corral | – | Lines unusable (R2.5) |
+
+**Run-to-run variation:** the same PDF does not always give the same answer under concurrent load on vLLM
+(Énergir: once QST as freight and an invented PO "498" from a consumption formula; once correct). Worth a
+determinism check (batch-invariant decoding or one request at a time) before the shadow run (R3).
+
+**Dev stack:** the running mock EBS got the release table and columns additively (`CREATE TABLE IF NOT
+EXISTS` / `ADD COLUMN IF NOT EXISTS`, no reseed), so its blanket agreements have no releases until the next
+`aap-mock seed --force`.
+

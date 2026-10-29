@@ -72,6 +72,11 @@ class Settings(BaseSettings):
     # GL_EXACT_MIN past lines with the same text agree (history contains miscodings, plan 3.5).
     gl_exact_auto: float = 0.90
     gl_exact_min: int = 3
+    # Chart of accounts: the segment the store / location cost center goes into (1-based) and the
+    # separator of concatenated accounts. Mock: 01-510-6420-0000 (segment 2). Krispy Kreme: segment
+    # 3 of 8, "." (R2.2).
+    gl_cost_center_segment: int = 2
+    gl_segment_separator: str = "-"
 
     # worker
     # At start, jobs left `doing` by a crashed worker go back to `todo`. Only correct with one

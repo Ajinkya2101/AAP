@@ -69,7 +69,7 @@ def normalize(src: SourceInvoice) -> CanonicalInvoice:
     inv.vendor_email = _text(src.vendor_email)
     inv.vendor_address = _text(src.vendor_address)
     inv.invoice_num = _carry(src.invoice_number, (src.invoice_number.value or "").strip() or None)
-    inv.po_number = _carry(src.po_number, _po(src.po_number.value))
+    inv.po_number, inv.po_release_num = _po_ref(src.po_number)
     inv.terms_name = _terms_text(src.payment_terms)   # free text until stage 7 maps it
     inv.description = Field(value=None, method=Method.default)
 
@@ -119,6 +119,7 @@ def normalize(src: SourceInvoice) -> CanonicalInvoice:
         cl.amount = _amount(ln.amount, sep)
         cl.uom = _text(ln.uom)
         cl.tax_rate = _carry(ln.tax_rate, parse_percent(ln.tax_rate.value))
+        cl.po_number, cl.po_release_num = _po_ref(ln.po_number)
         cl.po_line_number = _carry(ln.po_line_ref, _int(ln.po_line_ref.value))
         if cl.quantity.value is None and cl.unit_price.value is not None and cl.unit_price.value == cl.amount.value:
             # amount-only line: the model repeated the amount as the unit price (eval 2026-10-26)
@@ -135,6 +136,7 @@ def normalize(src: SourceInvoice) -> CanonicalInvoice:
     if inv.subtotal.value is None and lines and all(ln.amount.value is not None for ln in lines):
         inv.subtotal = Field(value=sum((ln.amount.value for ln in lines), Decimal(0)), method=Method.derived)
     _total_tax(inv)
+    _subtotal_from_lines(inv)
     if inv.tax_amount.value is None and not src.tax_amount.present and not inv.taxes:
         inv.tax_amount = Field(value=Decimal(0), method=Method.default, note="no tax printed")
     _apply_sign(inv)
@@ -224,6 +226,27 @@ def _total_tax(inv: CanonicalInvoice) -> None:
         inv.tax_rate = inv.taxes[0].rate.model_copy()
 
 
+def _subtotal_from_lines(inv: CanonicalInvoice) -> None:
+    """A printed subtotal that does not fit, when the lines do: lines + tax + freight = total, but
+    subtotal + tax + freight does not. The model took another amount for the subtotal (Mspark sample,
+    prompt v5: line 1's amount, with no subtotal row on the page); the lines' sum replaces it, flagged."""
+    items = [ln for ln in inv.lines if ln.line_type != "TAX"]
+    sub, total = inv.subtotal.value, inv.invoice_amount.value
+    if sub is None or total is None or len(items) < 2 or any(ln.amount.value is None for ln in items):
+        return
+    # The printed rows (freight rows too: a freight carrier's invoice is all freight) against the
+    # freight printed apart from them.
+    lines = sum((ln.amount.value for ln in items), Decimal(0))
+    freight = inv.freight_amount.value or Decimal(0)
+    tax, tol = inv.tax_amount.value or Decimal(0), get_settings().amount_tolerance
+    if abs(lines + tax + freight - total) <= tol and abs(sub + tax + freight - total) > tol and abs(sub - lines) > tol:
+        inv.subtotal = Field(value=lines, source_value=inv.subtotal.source_value, page=inv.subtotal.page,
+                             bbox=inv.subtotal.bbox, method=Method.derived,
+                             flags=[*inv.subtotal.flags, Flag.implausible_value],
+                             note=f"subtotal {sub} read, but the lines ({lines}) + tax + freight make the total: "
+                                  f"subtotal from the lines")
+
+
 def _price_basis(cl: CanonicalLine, price_text: str | None, uom_text: str | None) -> None:
     """Unit price per 1000 units or in cents -> per unit, so quantity x price = amount.
     From a printed marker ("/M", "¢") or, failing that, from quantity x price being 100x / 1000x the amount."""
@@ -279,11 +302,28 @@ def _aba_ok(d: str) -> bool:
     return (3 * (n[0] + n[3] + n[6]) + 7 * (n[1] + n[4] + n[7]) + n[2] + n[5] + n[8]) % 10 == 0
 
 
+# A blanket release as EBS prints it ("4500210-2") or with a label ("PO 4500210 Release 2", "Rel. #2").
+PO_DASH_RELEASE = re.compile(r"(\d{4,})-(\d{1,3})(?!\d)")
+RELEASE_LABEL = re.compile(r"(?i)\brel(?:ease)?\.?\s*(?:no\.?|num(?:ber)?|#)?\s*:?\s*#?(\d{1,3})(?!\d)")
+
+
 def _po(value: str | None) -> str | None:
     if not value:
         return None
     m = re.search(r"\d{4,}", value)
     return m.group(0) if m else value.strip()
+
+
+def _po_ref(src: Field[str]) -> tuple[Field[str], Field[int]]:
+    """Printed PO reference -> (PO number, blanket release number)."""
+    text = src.value or ""
+    m = PO_DASH_RELEASE.search(text)
+    if m:
+        return _carry(src, m.group(1)), _carry(src, int(m.group(2)), note_text=f"release from {text!r}")
+    rel = RELEASE_LABEL.search(text)
+    po = _po(RELEASE_LABEL.sub(" ", text)) if rel else _po(text)
+    return _carry(src, po), (_carry(src, int(rel.group(1)), note_text=f"release from {text!r}") if rel
+                             else Field(value=None, method=Method.normalized))
 
 
 def _digits(value: str | None) -> str | None:

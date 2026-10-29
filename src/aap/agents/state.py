@@ -16,6 +16,7 @@ class AgentState(TypedDict, total=False):
     suggested_action: str | None
     po_number: str | None
     po_source: str | None      # invoice | search
+    po_refs: list[dict[str, Any]]   # every PO (and blanket release) the invoice is matched against
     pairs: list[dict[str, Any]]
     unmatched: list[int]
     variances: list[dict[str, Any]]
@@ -37,6 +38,7 @@ class Reason:
     CHECK_MAPPING = "CHECK_MAPPING"
     PO_MISSING = "PO_MISSING"
     PO_SUGGESTED = "PO_SUGGESTED"
+    RELEASE_MISSING = "RELEASE_MISSING"     # blanket agreement without a release number
     LINE_NOT_ON_PO = "LINE_NOT_ON_PO"
     LINE_PAIRED_BY_MODEL = "LINE_PAIRED_BY_MODEL"
     QTY_VARIANCE = "QTY_VARIANCE"

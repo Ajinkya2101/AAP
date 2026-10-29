@@ -5,10 +5,12 @@ from __future__ import annotations
 from functools import lru_cache
 from importlib import resources
 
-CURRENT_VERSION = "v4"   # v2: bank-detail labels, no invented qty/price, close the line list
+CURRENT_VERSION = "v5"   # v2: bank-detail labels, no invented qty/price, close the line list
                          # v3: value not label, payment terms, PO labels, subtotal only when printed
                          # v4: document type, location, tax rows, bank-change notice; no computed due date
                          #     or terms, "Mark for" is not a PO, price basis kept (real samples 2026-10-23)
+                         # v5: PO per line, blanket release with the PO; extract_taxes re-reads the tax
+                         #     rows when they do not add up (functional-team call 2026-10-28)
 
 
 @lru_cache

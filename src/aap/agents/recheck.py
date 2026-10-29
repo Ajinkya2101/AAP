@@ -49,12 +49,17 @@ def changed_documents(limit: int = 200) -> list[tuple[uuid.UUID, str]]:
             held = [v for v in outcome.get("variances") or [] if v.get("hold") in RECHECK_CODES]
             if not po_number or not held:
                 continue
-            po = adapter.get_po(po_number)
-            if po is None:
-                continue
-            received = {pl.line_num: pl.received for pl in po.lines}
-            moved = [f"PO line {v['po_line']}: received {v.get('received')} -> {received.get(v['po_line'])}"
-                     for v in held if _dec(v.get("received")) != received.get(v["po_line"])]
+            received: dict[tuple[str, int], Decimal] = {}
+            for ref in {(v.get("po") or po_number, v.get("release")) for v in held}:
+                po = adapter.get_po(ref[0])
+                if po is not None:
+                    po = po.for_release(ref[1]) if po.blanket and ref[1] is not None else po
+                    received.update({(po.reference, pl.line_num): pl.received for pl in po.lines})
+            moved = []
+            for v in held:
+                key = (v.get("ref") or po_number, v["po_line"])
+                if key in received and _dec(v.get("received")) != received[key]:
+                    moved.append(f"PO {key[0]} line {v['po_line']}: received {v.get('received')} -> {received[key]}")
             if moved:
                 out.append((doc.id, "; ".join(moved)))
     return out

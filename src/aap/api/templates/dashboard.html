@@ -72,8 +72,17 @@
     const count = document.getElementById('selected-count');
     if (all) { all.checked = n > 0 && n === boxes.length; all.indeterminate = n > 0 && n < boxes.length; }
     if (button) button.disabled = n === 0;
-    if (count) count.textContent = n ? n + ' selected on this page' : 'Tick records to delete several at once.';
+    const download = document.getElementById('download-selected');
+    if (download) download.disabled = n === 0;
+    if (count) count.textContent = n ? n + ' selected on this page' : 'Tick records to delete or download several at once.';
   }
+
+  // Download selected: one ZIP with every ticked record (invoices.csv and the raw JSON).
+  list.addEventListener('click', (e) => {
+    if (e.target.id !== 'download-selected') return;
+    const ids = ticked().map((b) => 'ids=' + encodeURIComponent(b.value));
+    if (ids.length) window.location.href = '/api/export.zip?' + ids.join('&');
+  });
 
   list.addEventListener('change', (e) => {
     if (e.target.id === 'check-all') {

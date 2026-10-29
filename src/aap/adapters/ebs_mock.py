@@ -24,6 +24,7 @@ from .base import (
     InterfacePayload,
     PoDetail,
     PoLine,
+    PoRelease,
     PoShipment,
     PoSummary,
     Receipt,
@@ -123,11 +124,12 @@ SELECT h.po_header_id, h.segment1 AS po_number, h.type_lookup_code, h.org_id, h.
        l.cancel_flag AS line_cancel,
        ll.line_location_id, ll.shipment_num, ll.quantity, ll.quantity_received, ll.quantity_billed,
        ll.quantity_cancelled, ll.price_override, ll.receipt_required_flag, ll.match_option,
-       ll.closed_code AS shipment_closed_code, ll.need_by_date,
+       ll.closed_code AS shipment_closed_code, ll.need_by_date, ll.po_release_id, r.release_num,
        d.po_distribution_id, d.code_combination_id, c.concatenated_segments
 FROM   po_headers_all h
 JOIN   po_lines_all l ON l.po_header_id = h.po_header_id
 LEFT JOIN po_line_locations_all ll ON ll.po_line_id = l.po_line_id
+LEFT JOIN po_releases_all r ON r.po_release_id = ll.po_release_id
 LEFT JOIN po_distributions_all d ON d.line_location_id = ll.line_location_id AND d.distribution_num = 1
 LEFT JOIN gl_code_combinations_kfv c ON c.code_combination_id = d.code_combination_id
 LEFT JOIN mtl_system_items_b msi ON msi.inventory_item_id = l.item_id
@@ -136,7 +138,11 @@ LEFT JOIN per_all_people_f p ON p.person_id = h.agent_id
        AND localtimestamp BETWEEN p.effective_start_date AND p.effective_end_date
 WHERE  h.segment1 = %(po_number)s
   AND  (%(org_id)s::bigint IS NULL OR h.org_id = %(org_id)s)
-ORDER BY h.type_lookup_code DESC, l.line_num, ll.shipment_num"""
+ORDER BY h.type_lookup_code DESC, l.line_num, r.release_num NULLS FIRST, ll.shipment_num"""
+
+SQL_PO_RELEASES = """
+SELECT po_release_id, release_num, authorization_status, closed_code, cancel_flag
+FROM   po_releases_all WHERE po_header_id = %s ORDER BY release_num"""
 
 # Open standard POs of a vendor with enough open amount and a matching unit price
 # (WORKED-EXAMPLE 3, step 6a fallback search).
@@ -249,9 +255,9 @@ SQL_INSERT_INTF_HEADER = """
 
 SQL_INSERT_INTF_LINE = """
     INSERT INTO ap_invoice_lines_interface (invoice_id, invoice_line_id, line_number, line_type_lookup_code, amount,
-        description, quantity_invoiced, unit_price, unit_of_meas_lookup_code, po_number, po_line_number,
+        description, quantity_invoiced, unit_price, unit_of_meas_lookup_code, po_number, release_num, po_line_number,
         dist_code_concatenated, tax_rate_code, accounting_date, org_id)
-    VALUES (%s, nextval('ap.ap_invoice_lines_interface_s'), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+    VALUES (%s, nextval('ap.ap_invoice_lines_interface_s'), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
 SQL_INTF_REJECTS = """
     SELECT DISTINCT r.reject_lookup_code FROM ap_interface_rejections r
@@ -346,8 +352,14 @@ class MockEbsAdapter:
                     price_override=_dec(r["price_override"]), receipt_required=r["receipt_required_flag"] == "Y",
                     match_option=r["match_option"], closed_code=r["shipment_closed_code"],
                     need_by_date=_d(r["need_by_date"]), po_distribution_id=r["po_distribution_id"],
-                    ccid=r["code_combination_id"], ccid_concatenated=r["concatenated_segments"]))
+                    ccid=r["code_combination_id"], ccid_concatenated=r["concatenated_segments"],
+                    po_release_id=r["po_release_id"], release_num=r["release_num"]))
         po.lines = list(lines.values())
+        if po.blanket:
+            po.releases = [PoRelease(po_release_id=r["po_release_id"], release_num=r["release_num"],
+                                     authorization_status=r["authorization_status"], closed_code=r["closed_code"],
+                                     cancelled=(r["cancel_flag"] or "N") == "Y")
+                           for r in self._all(SQL_PO_RELEASES, (po.po_header_id,))]
         return po
 
     def search_open_pos(self, vendor_id: int, currency: str, min_open_amount: Decimal,
@@ -459,6 +471,7 @@ class MockEbsAdapter:
                 unit_price=ln.unit_price.value if item else None,
                 unit_of_meas_lookup_code=ln.uom.value if item else None,
                 po_number=(ln.po_number.value or inv.po_number.value) if paired else None,
+                release_num=(ln.po_release_num.value or inv.po_release_num.value) if paired else None,
                 po_line_number=ln.po_line_number.value if paired else None,
                 dist_code_concatenated=None if paired else ln.dist_account.value,
                 tax_rate_code=ln.tax_rate_code.value))
@@ -502,7 +515,7 @@ class MockEbsAdapter:
             for ln in h.lines:
                 conn.execute(SQL_INSERT_INTF_LINE, (
                     inv_id, ln.line_number, ln.line_type_lookup_code, ln.amount, ln.description,
-                    ln.quantity_invoiced, ln.unit_price, ln.unit_of_meas_lookup_code, ln.po_number,
+                    ln.quantity_invoiced, ln.unit_price, ln.unit_of_meas_lookup_code, ln.po_number, ln.release_num,
                     ln.po_line_number, ln.dist_code_concatenated, ln.tax_rate_code, ln.accounting_date, h.org_id))
             request_id = conn.execute(
                 "SELECT fnd_request_submit_request('SQLAP', 'APXIIMPT', %s, NULL, false, %s, %s, %s) AS r",

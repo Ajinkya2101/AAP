@@ -108,3 +108,55 @@ def test_import_program_creates_rejects_and_holds(seeded_ebs, env):
                                JOIN ap.ap_invoices_all i ON i.invoice_id = h.invoice_id
                                WHERE i.invoice_num = 'IMP-HOLD-1'""").fetchall()
         assert {h["hold_lookup_code"] for h in held} == {"QTY REC"}              # billed 10, received 8
+
+
+def test_import_program_matches_blanket_release_shipments(seeded_ebs, env):
+    with psycopg.connect(env["EBS_RO_DSN"], row_factory=dict_row) as ro:
+        r = ro.execute("""SELECT h.segment1, h.vendor_id, s.vendor_site_code, h.currency_code, r.release_num,
+                                 r.po_release_id, l.line_num, ll.price_override
+                          FROM po_headers_all h
+                          JOIN po_releases_all r ON r.po_header_id = h.po_header_id
+                          JOIN po_line_locations_all ll ON ll.po_release_id = r.po_release_id
+                          JOIN po_lines_all l ON l.po_line_id = ll.po_line_id
+                          JOIN ap_supplier_sites_all s ON s.vendor_site_id = h.vendor_site_id
+                          WHERE h.type_lookup_code = 'BLANKET' AND h.org_id = 204 AND s.inactive_date IS NULL
+                            AND (ll.receipt_required_flag = 'N' OR ll.quantity_received >= 1)
+                          ORDER BY h.segment1, r.release_num LIMIT 1""").fetchone()
+    assert r is not None
+    price = r["price_override"]
+
+    def invoice(conn, num, release):
+        inv_id = conn.execute("SELECT nextval('ap_invoices_interface_s')").fetchone()[0]
+        conn.execute("""INSERT INTO ap_invoices_interface (invoice_id, invoice_num, invoice_type_lookup_code,
+                            invoice_date, vendor_id, vendor_site_code, invoice_amount, invoice_currency_code,
+                            source, group_id, org_id)
+                        VALUES (%s, %s, 'STANDARD', DATE '2026-09-20', %s, %s, %s, %s, 'AAP', 'T-REL', 204)""",
+                     (inv_id, num, r["vendor_id"], r["vendor_site_code"], price, r["currency_code"]))
+        conn.execute("""INSERT INTO ap_invoice_lines_interface (invoice_id, invoice_line_id, line_number,
+                            line_type_lookup_code, amount, quantity_invoiced, unit_price, po_number, release_num,
+                            po_line_number, org_id)
+                        VALUES (%s, nextval('ap_invoice_lines_interface_s'), 1, 'ITEM', %s, 1, %s, %s, %s, %s, 204)""",
+                     (inv_id, price, price, r["segment1"], release, r["line_num"]))
+        return inv_id
+
+    with psycopg.connect(env["EBS_INTF_DSN"], autocommit=True) as conn:
+        ok = invoice(conn, "IMP-REL-1", r["release_num"])
+        no_release = invoice(conn, "IMP-REL-2", None)
+        conn.execute("SELECT fnd_request_submit_request('SQLAP', 'APXIIMPT', NULL, NULL, false, '204', 'AAP', 'T-REL')")
+    run_pending(env["EBS_OWNER_DSN"])
+
+    with psycopg.connect(env["EBS_OWNER_DSN"], row_factory=dict_row) as conn:
+        status = {row["invoice_id"]: row["status"] for row in conn.execute(
+            "SELECT invoice_id, status FROM ap.ap_invoices_interface WHERE group_id = 'T-REL'")}
+        assert (status[ok], status[no_release]) == ("PROCESSED", "REJECTED")
+        rejects = {row["reject_lookup_code"] for row in conn.execute(
+            """SELECT reject_lookup_code FROM ap.ap_interface_rejections r
+               JOIN ap.ap_invoice_lines_interface l ON l.invoice_line_id = r.parent_id
+               WHERE r.parent_table = 'AP_INVOICE_LINES_INTERFACE' AND l.invoice_id = %s""", (no_release,))}
+        assert "INVALID RELEASE NUM" in rejects
+        line = conn.execute("""SELECT l.po_release_id, ll.po_release_id AS shipment_release
+                               FROM ap.ap_invoice_lines_all l
+                               JOIN ap.ap_invoices_all i ON i.invoice_id = l.invoice_id
+                               JOIN po.po_line_locations_all ll ON ll.line_location_id = l.po_line_location_id
+                               WHERE i.invoice_num = 'IMP-REL-1'""").fetchone()
+        assert line["po_release_id"] == line["shipment_release"] == r["po_release_id"]

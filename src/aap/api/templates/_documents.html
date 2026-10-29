@@ -8,7 +8,9 @@
 <div class="bulk">
   <button id="delete-selected" class="danger" disabled hx-post="/ui/documents/delete" hx-swap="none"
           hx-include="#records-list input[name=ids]:checked" hx-disabled-elt="this">Delete selected</button>
-  <span id="selected-count" class="muted">Tick records to delete several at once.</span>
+  <button id="download-selected" type="button" disabled>Download selected</button>
+  <a href="{{ records_url(status, q, 1, '/api/export.zip') }}" download>Download {{ 'this filter' if status or q else 'all' }} ({{ matching }})</a>
+  <span id="selected-count" class="muted">Tick records to delete or download several at once.</span>
 </div>
 <table>
   <thead><tr><th class="check"><input id="check-all" type="checkbox" aria-label="Select every record on this page"></th>

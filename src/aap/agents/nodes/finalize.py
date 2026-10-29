@@ -21,6 +21,7 @@ ACTIONS = {
     Reason.GL_REVIEW: "confirm_gl_accounts",
     Reason.PO_SUGGESTED: "confirm_suggested_po",
     Reason.DATE_AMBIGUOUS: "confirm_invoice_date",
+    Reason.RELEASE_MISSING: "ask_vendor_for_release_number",
 }
 
 
@@ -30,11 +31,12 @@ def finalize(state: AgentState) -> dict[str, Any]:
     action = state.get("suggested_action") or next((ACTIONS[r] for r in reasons if r in ACTIONS), None) \
         or "approve"
     notes = state.get("notes") or []
-    matched = [f"line {p['line']} -> PO line {p['po_line']} ({p['method']})" for p in state.get("pairs") or []]
+    matched = [f"line {p['line']} -> PO {p.get('ref') or state.get('po_number')} line {p['po_line']} ({p['method']})"
+               for p in state.get("pairs") or []]
     gl = [f"line {g['line']}: {g.get('account')} ({g['method']})" for g in state.get("gl_lines") or []]
     parts = list(notes)
     if matched:
-        parts.append(f"PO {state.get('po_number')}: " + "; ".join(matched))
+        parts.append("PO matching: " + "; ".join(matched))
     if gl:
         parts.append("GL: " + "; ".join(gl))
     summary = "\n".join(parts) or "All checks passed; ready for approval."
@@ -57,7 +59,9 @@ def finalize(state: AgentState) -> dict[str, Any]:
         if run is not None:
             run.status, run.finished_at = "done", datetime.now(UTC)
             run.outcome = {"status": outcome.value, "reasons": reasons, "suggested_action": action,
-                           "po_number": state.get("po_number"), "pairs": state.get("pairs"),
+                           "po_number": state.get("po_number"), "po_source": state.get("po_source"),
+                           "po_refs": state.get("po_refs"),
+                           "pairs": state.get("pairs"),
                            "gl_lines": state.get("gl_lines"), "variances": state.get("variances")}
         decide(w, state, "finalize", chosen=outcome.value, reason=", ".join(reasons) or "clean")
     return {"outcome": outcome.value, "reasons": reasons, "suggested_action": action}

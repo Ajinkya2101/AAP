@@ -14,7 +14,7 @@ from .nodes.matching import find_po, hold, pair_lines, three_way
 from .nodes.triage import triage
 from .state import AgentState
 
-GRAPH_VERSION = "2"
+GRAPH_VERSION = "3"   # 3: several POs per invoice, blanket releases (po_refs; pairs carry their PO)
 
 
 def _after_triage(state: AgentState) -> str:

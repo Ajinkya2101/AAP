@@ -52,7 +52,9 @@ def triage(state: AgentState) -> dict[str, Any]:
             route, action = "review", "correct_supplier_site"
         elif "V-PO" in fails:
             reasons.append(Reason.PO_NOT_OPEN)
-            note(fails["V-PO"])
+            for r in results:              # one result per PO the invoice names
+                if r.rule_id == "V-PO" and r.result == "fail":
+                    note(r)
             route, action = "review", "contact_buyer_to_reopen_po_or_reject"
         elif fails.keys() & FAILS_VENDOR_MUST_FIX and inv.vendor_id.value:
             reasons.append(Reason.INVOICE_MATH)
@@ -70,7 +72,7 @@ def triage(state: AgentState) -> dict[str, Any]:
                 note(warns["C9"])
             if any(r.rule_id == "V-05" and "chosen by the model" in (r.message or "") for r in results):
                 reasons.append(Reason.CHECK_MAPPING)
-            route = "po" if inv.po_number.value or supplier_po_required else "non_po"
+            route = "po" if inv.po_refs() or supplier_po_required else "non_po"
 
         decide(w, state, "triage", chosen=route, inputs={"fails": sorted(fails), "warnings": sorted(warns),
                                                          "flags": sorted(flags)},

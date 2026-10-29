@@ -34,7 +34,8 @@ class CanonicalLine(BaseModel):
     tax_rate_code: Field[str] = _f(str)     # ZX_RATES_B.TAX_RATE_CODE (TAX lines)
     category_code: Field[str] = _f(str)     # e.g. IT-CLD-INF-001
     category_id: Field[int] = _f(int)
-    po_number: Field[str] = _f(str)
+    po_number: Field[str] = _f(str)         # the line's own PO, else the header PO
+    po_release_num: Field[int] = _f(int)    # blanket release (PO_RELEASES_ALL.RELEASE_NUM)
     po_line_number: Field[int] = _f(int)
     dist_account: Field[str] = _f(str)      # GL account (concatenated segments) for non-PO lines
 
@@ -77,6 +78,7 @@ class CanonicalInvoice(BaseModel):
     terms_id: Field[int] = _f(int)
     terms_name: Field[str] = _f(str)
     po_number: Field[str] = _f(str)
+    po_release_num: Field[int] = _f(int)
     description: Field[str] = _f(str)
     # amounts
     subtotal: Field[Decimal] = _f(Decimal)
@@ -101,6 +103,12 @@ class CanonicalInvoice(BaseModel):
 
     def item_lines(self) -> list[CanonicalLine]:
         return [ln for ln in self.lines if ln.line_type == "ITEM"]
+
+    def po_refs(self) -> list[tuple[str, int | None]]:
+        """Every (PO number, release) the invoice names: the header's and the item lines' own, in order."""
+        refs = [(self.po_number.value, self.po_release_num.value)] if self.po_number.value else []
+        refs += [(ln.po_number.value, ln.po_release_num.value) for ln in self.item_lines() if ln.po_number.value]
+        return list(dict.fromkeys(refs))
 
     def iter_fields(self):
         """Yields (path, Field) for every header and line field."""
