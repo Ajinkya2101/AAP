@@ -1,6 +1,7 @@
 # Model usage
 
 Which models the pipeline uses, where, and why. Three models in total; everything else is rules.
+For every LLM request stage by stage, see [LLM-USAGE-BY-STAGE.md](LLM-USAGE-BY-STAGE.md).
 
 ## At a glance
 

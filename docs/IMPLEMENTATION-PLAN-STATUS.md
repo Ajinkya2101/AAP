@@ -29,6 +29,8 @@ Details per phase: §12. Verification evidence: below. Deviations from the plan:
 
 After the phases: **real-invoice readiness** from the customer's samples (5 invoice PDFs and their `APILOAD` file). Phase R1 (fixes that need no outside input) is done; R2 waits on the functional team. Plan, items and results: [PLAN-REAL-INVOICES.md](PLAN-REAL-INVOICES.md).
 
+From 2026-11-03: the plan to mid-December (non-PO invoices end to end on the internal instance) is tracked in [PLAN-MID-DECEMBER.md](PLAN-MID-DECEMBER.md).
+
 ### Added 2026-10-26 (PLAN-REAL-INVOICES R1)
 
 | Area | What | Verified by |
