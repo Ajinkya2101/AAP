@@ -9,21 +9,28 @@ e.g. a bank account on an invoice that has none). A field the truth does not hav
 from __future__ import annotations
 
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any
 
 from rapidfuzz import fuzz
 
+from aap.common.coa import CoaLayout, layout_from_settings
 from aap.common.text import name_key
 from aap.normalize.amounts import parse_amount, parse_quantity
+
+from .gl import summarize_gl
+from .shadow import ShadowResult, summarize_shadow
 
 # Gates (PLAN 4). Placeholders until finance agrees real ones.
 GATES = {"header_accuracy": 0.97, "line_f1": 0.95}
 # PLAN 4 "header fields": vendor, invoice #, date, total, tax.
 GATE_HEADER_FIELDS = ["header.vendor_id", "header.invoice_num", "header.invoice_date", "header.invoice_amount",
                       "header.tax_amount"]
+# Only when GL was scored (client gold sets run with --agents): lines coded without review must be right
+# (IMPLEMENTATION-PLAN-CLIENT-DATA section 8; otherwise raise GL_SIM_AUTO).
+GL_GATE = ("gl_no_review_accuracy", 0.98)
 
 
 # Stage 8 done. With `--agents` the invoice has moved on to the agents' outcome by the time a run is rescored.
@@ -50,6 +57,10 @@ class DocResult:
     line_invented: int = 0
     duration_ms: int | None = None
     error: str | None = None
+    supplier: str | None = None      # client gold sets: supplier number (per-supplier report)
+    split: str | None = None
+    holdout: bool = False
+    shadow: ShadowResult | None = None   # Oracle-ready JSON vs keyed record (needs the agents)
 
 
 def _alnum(v: Any) -> str | None:
@@ -120,7 +131,15 @@ def field_results(truth: dict[str, Any], source: dict[str, Any] | None,
     if "invoice_number" in src_truth or "invoice_num" in expected:
         e, a = expected.get("invoice_num", src_truth.get("invoice_number")), cval("invoice_num")
         out.append(FieldResult("header.invoice_num", _s(e), _s(a), _same("alnum", e, a)))
+    if expected.get("lines"):                         # keyed lines (client gold set)
+        e_types = Counter(str(ln.get("line_type") or "ITEM") for ln in expected["lines"])
+        a_types = Counter(str(ln.get("line_type") or "ITEM") for ln in canon.get("lines") or [])
+        out.append(FieldResult("lines.line_types", _types(e_types), _types(a_types), e_types == a_types))
     return out
+
+
+def _types(c: Counter) -> str | None:
+    return ",".join(f"{k}x{n}" for k, n in sorted(c.items())) or None
 
 
 def flatten_source(stored: dict[str, Any] | None) -> dict[str, Any]:
@@ -201,7 +220,9 @@ def _ratio(ok: int, n: int) -> float | None:
     return round(ok / n, 4) if n else None
 
 
-def summarize(docs: list[DocResult]) -> dict[str, Any]:
+def summarize(docs: list[DocResult], coa: CoaLayout | None = None) -> dict[str, Any]:
+    coa = coa or layout_from_settings()
+
     def block(sel: list[DocResult]) -> dict[str, Any]:
         per_field: dict[str, list[bool]] = defaultdict(list)
         for d in sel:
@@ -221,11 +242,26 @@ def summarize(docs: list[DocResult]) -> dict[str, Any]:
             "line_values_not_on_invoice": sum(d.line_invented for d in sel),
             "fields": {k: _ratio(sum(v), len(v)) for k, v in sorted(per_field.items())},
             "extract_ms_median": durations[len(durations) // 2] if durations else None,
+            "gl": summarize_gl([d.shadow.gl for d in sel if d.shadow and d.shadow.gl], coa),
+            "shadow": summarize_shadow([(d.name, d.shadow) for d in sel if d.shadow]),
         }
 
-    out = {"all": block(docs)}
+    out: dict[str, Any] = {"all": block(docs)}
     for tier in sorted({d.tier for d in docs}):
         out[tier] = block([d for d in docs if d.tier == tier])
+    gates = dict(GATES)
+    no_review = (out["all"]["gl"] or {}).get("no_review_accuracy_full")
+    if no_review is not None:
+        gates[GL_GATE[0]] = GL_GATE[1]
+        out["all"][GL_GATE[0]] = no_review
     out["gates"] = {k: {"threshold": v, "value": out["all"].get(k),
-                        "pass": (out["all"].get(k) or 0) >= v} for k, v in GATES.items()}
+                        "pass": (out["all"].get(k) or 0) >= v} for k, v in gates.items()}
+    # client gold sets: per supplier, and the held-out suppliers on their own (the evidence that more
+    # suppliers is a matter of data). Kept out of the tier columns of the report.
+    suppliers = sorted({d.supplier for d in docs if d.supplier})
+    if suppliers:
+        out["by_supplier"] = {v: block([d for d in docs if d.supplier == v]) for v in suppliers}
+        held = [d for d in docs if d.holdout]
+        if held:
+            out["holdout"] = {**block(held), "suppliers": sorted({d.supplier for d in held if d.supplier})}
     return out

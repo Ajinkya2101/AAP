@@ -241,7 +241,7 @@ are history the system would really have.
 | # | Item | Status |
 |---|---|---|
 | P4.1 | Gold set builder on the fixtures (P1.4) | ✅ `aap.clientdata.goldset`; split and `history_exclude.json` included |
-| P4.2 | Harness: partial source truth, new mapped fields, per-supplier report | 🟠 partial truth, keyed `terms_id` / `invoice_type` / `payment_method`, `--split` done; line types and per-supplier report ⬜ |
+| P4.2 | Harness: partial source truth, new mapped fields, per-supplier report | ✅ partial truth, keyed `terms_id` / `invoice_type` / `payment_method`, `--split`; keyed line types (`lines.line_types`); per-supplier table and a held-out block in the report (2026-11-04) |
 | P4.3 | Gold set and split from the real delivery | ⏸ A1, A2 |
 
 ### P5. Baseline: the current system on real invoices
@@ -356,7 +356,7 @@ With the real data:
 
 | # | Item | Status |
 |---|---|---|
-| P8.1 | GL metrics in the harness | ⬜ |
+| P8.1 | GL metrics in the harness | ✅ `eval/gl.py`: amount-weighted accuracy (full combination and natural account), lines coded without review and their accuracy, gate `gl_no_review_accuracy` ≥ 98 % when GL is scored; from the Oracle-ready JSON after the agents (`--agents`) |
 | P8.2 | Baseline GL result on test (part of P5) | ⏸ data |
 | P8.3 | Threshold and cost-center rule tuning on dev | ⬜ |
 | P8.4 | Freight / tax line accounts per B7 | ⏸ B7 |
@@ -390,7 +390,7 @@ Krispy Kreme instance and the internal one; whoever writes the push can use eith
 |---|---|---|
 | P9.1 | Oracle-ready JSON from the interface payload; endpoint `GET /api/documents/{id}/oracle.json`; bulk export | ✅ `pipeline/oracle_json.py`; in every export ZIP |
 | P9.2 | JSON Schema document and samples | ✅ `docs/ORACLE-JSON.md`, `docs/oracle-invoice.schema.json`, `docs/oracle-invoice.sample.json` |
-| P9.3 | Shadow comparison report (test split) | ⏸ P4.3 |
+| P9.3 | Shadow comparison report (test split) | ✅ built (`eval/shadow.py`, in every `--agents` run: equal / ready / ready-but-different, per field); run ⏸ P4.3 |
 | P9.4 | Mock import of the test split on the replica | ⏸ P2.3 |
 
 ## 5. Code changes in one place

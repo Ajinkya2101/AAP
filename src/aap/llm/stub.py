@@ -41,7 +41,7 @@ class StubClient:
         grounded = "evidence" in req.schema.get("properties", {})
         if truth is not None:
             source = dict(truth["source"])
-            lines = truth["source"]["lines"]
+            lines = truth["source"].get("lines") or []      # a client gold set has no printed lines
             chunk = req.context.get("chunk")
             if chunk:
                 # Multi-request extraction: only the lines printed on this chunk's pages.

@@ -110,3 +110,57 @@ def test_replica_from_the_fixture_delivery(replica_env, cluster, tmp_path):
                            "JOIN ap.ap_invoice_distributions_all d ON d.invoice_id = i.invoice_id "
                            "WHERE i.invoice_num = 'NEW-1'").fetchone()
         assert row[0] == ccid.ccid and row[1] == "EFT"
+
+
+def _printed_values(gold, delivery):
+    """Gold-set truths only hold what AP keyed; give the stub backend the printed values it would
+    read from these made-up pages (supplier name, dates, item lines) so the whole pipeline runs."""
+    from aap.clientdata.readers import read_delivery
+
+    names = {int(s["VENDOR_ID"]): s["VENDOR_NAME"] for s in read_delivery(delivery).rows("AP_SUPPLIERS")}
+    for p in (gold / "truth").glob("*.truth.json"):
+        t = json.loads(p.read_text(encoding="utf-8"))
+        e = t["expected"]
+        items = [ln for ln in e["lines"] if ln["line_type"] == "ITEM"]
+        tax, freight = (sum(Decimal(ln["amount"]) for ln in e["lines"] if ln["line_type"] == k) for k in ("TAX", "FREIGHT"))
+        t["source"].update(vendor_name=names[e["vendor_id"]], invoice_date=e["invoice_date"],
+                           currency=e["currency_code"], tax_amount=str(tax) if tax else None,
+                           freight_amount=str(freight) if freight else None,
+                           lines=[{"description": ln["description"], "amount": ln["amount"]} for ln in items])
+        p.write_text(json.dumps(t), encoding="utf-8")
+
+
+def test_eval_with_agents_compares_the_json_with_the_keyed_record(replica_env, cluster, tmp_path, monkeypatch):
+    """P4.2 / P8.1 / D4 end to end: gold set -> pipeline + agents on the replica -> Oracle-ready JSON
+    -> shadow comparison, GL metrics, per-supplier and held-out blocks."""
+    from aap.clientdata.replica import run
+    from aap.eval.harness import run_eval
+    from aap.eval.report import render
+    from tests.conftest import _reset_caches
+
+    delivery = build(tmp_path / "2026-11-10")
+    gold = tmp_path / "gold"
+    build_goldset(delivery, gold, holdout={"70003"}, coa=KK, pdf_scan=False)
+    _printed_values(gold, delivery)
+    run([delivery], exclude=gold / "history_exclude.json", create=True,
+        admin_dsn=cluster.dsn("postgres", "postgres"), log=lambda *_: None)
+    monkeypatch.setenv("TRUTH_DIR", str(tmp_path / "truth"))
+    monkeypatch.setenv("FILESTORE_DIR", str(tmp_path / "filestore"))
+    _reset_caches()
+    try:
+        run_id, m = run_eval(gold, name="replica-shadow", split="test", agents=True, log=lambda *_: None)
+    finally:
+        monkeypatch.undo()
+        _reset_caches()
+    text = render(run_id, "replica-shadow", m)
+    sh, gl = m["all"]["shadow"], m["all"]["gl"]
+    assert sh and sh["invoices"] == m["all"]["documents"] >= 4, text
+    assert all(sh["fields"][k] == 1.0 for k in ("supplier", "site", "invoice_amount", "terms", "line_types",
+                                                "amount_by_line_type")), text
+    assert m["all"]["fields"]["lines.line_types"] == 1.0, text
+    # the held-out supplier has no history: its lines get no account and go to review, never coded wrongly
+    assert gl and gl["invoices"] == sh["invoices"] and gl["no_review_accuracy_full"] == 1.0, text
+    held = m["by_supplier"]["70003"]
+    assert m["holdout"]["suppliers"] == ["70003"] and held["gl"]["no_review_share"] == 0.0, text
+    assert all(b["shadow"]["equal"] == 1.0 for v, b in m["by_supplier"].items() if v != "70003"), text
+    assert "Per supplier" in text and "GL coding vs the keyed distributions" in text

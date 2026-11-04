@@ -192,7 +192,7 @@ P1, P2, P9.
 | D2 | 8-segment chart of accounts and payment methods in the mock (§3.4) | `common/coa.py`, `ebs_mock/`, `adapters/`, `config.py` | ✅ |
 | D3 | Replica loader: `ebs_kk` from the extracts, `aap_kk` by reference sync; test invoices, held-out suppliers and history after the cut-off kept out (`history_exclude.json` from C1). Built for every extract (OUs and ledgers, chart of accounts, terms, payment methods, suppliers and sites, invoices / lines / distributions with reversals) and tested end to end on the fixture delivery, including an import with an 8-segment account. **Loaded 2026-11-04** from Dhivya's files: 73 terms (72 with lines from the names), 48 payment methods; no suppliers, accounts or history yet | `ebs_mock/client_load.py`, `clientdata/replica.py` | 🟡 loaded with what exists; reload as B-1, B-2, D-2, D-3 arrive |
 | D3a | `ebs_kk` / `aap_kk` databases next to `ebs` / `aap` (same roles and grants), `.env.kk` / `.env.kk.example` | `clientdata/replica.py --create-databases` | ✅ |
-| D4 | Shadow comparison: JSON vs keyed record on the test split | `eval/` | ⬜ |
+| D4 | Shadow comparison: JSON vs keyed record on the test split. Built 2026-11-04 with the GL metrics (C7's measurement) and the per-supplier report; `python -m aap.eval --dir <gold set> --split test --agents` | `eval/shadow.py`, `eval/gl.py` | ✅ built; ⏸ data |
 | D5 | Mock import of the test split on the replica. The import now reads the account delimiter and segment count of the chart, and takes the terms date and payment currency from the interface row | `ebs_mock/import_program.py` | 🟠 import ready; ⏸ replica |
 | D6 | Live EBS (python-oracledb adapter, refsync, push) | – | ❌ after December |
 

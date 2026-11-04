@@ -7,7 +7,9 @@ eval_run (metrics JSON) and eval_result (one row per document and field).
 
 With agents=True each scored invoice then also runs through the agents (PO matching, GL
 coding), so `python -m aap.eval.model_use --eval-run <id>` can report how often every
-decision point asked the model. The extraction scores are not affected.
+decision point asked the model. The extraction scores are not affected. The Oracle-ready JSON
+built after the agents is then compared with the truth (eval/shadow.py: the shadow comparison,
+and eval/gl.py: the GL metrics), which on a client gold set means: with what AP keyed.
 """
 
 from __future__ import annotations
@@ -22,8 +24,9 @@ from typing import Any
 
 from sqlalchemy import select
 
+from aap.common.coa import layout_from_settings
 from aap.config import get_settings
-from aap.db.models import Document, EvalResult, EvalRun, ExtractionRun
+from aap.db.models import AgentRun, Document, EvalResult, EvalRun, ExtractionRun
 from aap.db.session import session_scope
 from aap.extraction.extract import PROMPT_VERSION
 from aap.ingest.intake import intake
@@ -38,6 +41,7 @@ from .metrics import (
     summarize,
     validation_results,
 )
+from .shadow import ShadowResult, shadow_compare
 
 EVAL_SOURCE = "eval"
 CONTAINERS = {"eml", "msg"}
@@ -82,7 +86,36 @@ def _score(doc: Document, truth: dict[str, Any]) -> DocResult:
     result.line_truth, result.line_pred = len(truth_lines), len(pred_lines)
     result.line_tp = line_match(truth_lines, pred_lines)
     result.line_invented = invented_line_values(truth_lines, pred_lines)
+    result.supplier, result.split = truth.get("vendor_number"), truth.get("split")
+    result.holdout = bool(truth.get("supplier_holdout"))
+    result.shadow = _shadow(doc.id, truth)
     return result
+
+
+def _shadow(doc_id: uuid.UUID, truth: dict[str, Any]) -> ShadowResult | None:
+    """The Oracle-ready JSON against the truth, once the agents have run (before that the JSON would
+    have no PO pairing or GL accounts, and comparing it would be meaningless)."""
+    from aap.pipeline.oracle_json import OracleJsonError, oracle_invoice, to_json
+
+    with session_scope() as s:
+        if s.scalars(select(AgentRun.id).where(AgentRun.document_id == doc_id, AgentRun.status == "done")
+                     .limit(1)).first() is None:
+            return None
+        try:
+            doc_json = to_json(oracle_invoice(s, doc_id))
+        except OracleJsonError:
+            return None
+    return shadow_compare(truth, doc_json, layout_from_settings())
+
+
+def _shadow_rows(run_id: uuid.UUID, doc_id: uuid.UUID, r: DocResult) -> list[EvalResult]:
+    if r.shadow is None:
+        return []
+    rows = [EvalResult(eval_run_id=run_id, document_id=doc_id, tier=r.tier, field_path=f"shadow.{f.name}",
+                       expected=f.expected, actual=f.actual, correct=f.correct) for f in r.shadow.fields]
+    rows.append(EvalResult(eval_run_id=run_id, document_id=doc_id, tier=r.tier, field_path="shadow.equal",
+                           expected="equal", actual=r.shadow.state, correct=r.shadow.equal))
+    return rows
 
 
 UNFINISHED = {"RECEIVED", "PARSED", "ROUTED", "EXTRACTED", "NORMALIZED", "MAPPED"}
@@ -182,6 +215,13 @@ def run_eval(dataset: Path, *, name: str, only: set[str] | None = None, limit: i
                                     correct=r.line_tp == r.line_truth == r.line_pred))
             if agents and r.status == "VALIDATED":
                 run_stage("agents", d)
+                r.shadow = _shadow(d, truths[doc.sha256])
+                if r.shadow is not None:
+                    with session_scope() as sess:
+                        sess.add_all(_shadow_rows(run_id, d, r))
+                    log(f"[eval]   json {r.shadow.state}, {'equal to' if r.shadow.equal else 'differs from'} "
+                        f"the truth" + "".join(f"; {f.name} {f.actual} (truth {f.expected})"
+                                               for f in r.shadow.fields if not f.correct and f.core))
     if resume:   # the report covers the whole run, not only this session
         docs = [_score(d, truths[d.sha256]) for d in _run_documents(run_id)
                 if d.file_type not in CONTAINERS and d.sha256 in truths]
