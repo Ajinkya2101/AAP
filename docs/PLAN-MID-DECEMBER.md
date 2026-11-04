@@ -165,7 +165,7 @@ code (see §9).
 | B4 | Chart of accounts → 8 segments with `.` like theirs; valid code combinations (R2.2). The layout is built (D2); the values and segment meanings are not here | replica loader | ⏸ B-2 |
 | B5 | Store ↔ cost-center table loaded as `location` value maps (R2.1) | `python -m aap.mapping.locations` | ⏸ table |
 | B6 | GL history: non-PO distributions of the selected suppliers into the mock AP history → `gl_history_line`, embeddings | refsync, embed backfill | ⏸ data |
-| B7 | LOVs: invoice types, line types, invoice source (R2.4), in-scope invoice types (R2.7) | seed, `config.py` | ⏸ data |
+| B7 | LOVs: invoice types, line types, invoice source (R2.4), in-scope invoice types (R2.7). Loader, reference copy and rule V-LOV built 2026-11-04: Dhivya's workbook goes in with `python -m aap.clientdata.lov <xlsx> --out <delivery>` (P3.3) | `clientdata/lov.py`, `common/lookups.py`, `validation/rules/r14_lookups.py` | ✅ built; ⏸ Dhivya's list (Fri 11-06) |
 | B8 | Terms matching fixes from the real list: end of month by day, NET vs DIAS by supplier default, CONTADO, KK discount wording | `mapping/map.py`, tests | ✅ |
 
 ### C. Real-invoice gold set, baseline and fine-tuning
@@ -265,6 +265,7 @@ fine-tuning (C5) is the first thing to drop.
 
 | Risk | Effect | Mitigation |
 |---|---|---|
+| Currencies other than the seed's (USD, EUR, GBP, JPY, CAD, AUD, SGD, CHF, AED) on the replica: MXN invoices (the fixture's Mexican supplier; KK Mexico if in scope) fail V-05, and need rates for V-FX | Mexican suppliers unmappable on the replica | Found 2026-11-04 by the replica eval. Add currencies (and `GL_DAILY_RATES`) from the delivery to the replica loader, or ask for FND_CURRENCIES / rates with the extracts |
 | Data arrives late or the PDFs are not linked to their keyed records | No measurement, no training | Request says exactly what links them (`invoice_id`); C1 built in advance |
 | 500 invoices from only 10 suppliers | A tuned model learns 10 layouts; new suppliers unproven | Ask for ~20 suppliers; hold out whole suppliers; report the held-out-supplier result separately |
 | Expectation that "training the model" is the whole job | Disagreement at the demo | §2 explains the parts; report results per part |

@@ -23,6 +23,7 @@ from aap.db.models import (
     RefCcid,
     RefCurrency,
     RefGlPeriod,
+    RefLookup,
     RefOperatingUnit,
     RefPaymentMethod,
     RefSupplier,
@@ -39,7 +40,8 @@ from aap.logging import get_logger
 log = get_logger(__name__)
 
 REF_TABLES = [RefOperatingUnit, RefSupplier, RefSupplierSite, RefSupplierBank, RefTerms, RefCurrency, RefCcid,
-              RefCategory, RefUom, RefTaxRate, RefTolerance, RefGlPeriod, RefPaymentMethod]
+              RefCategory, RefUom, RefTaxRate, RefTolerance, RefGlPeriod, RefPaymentMethod,
+              RefLookup]
 
 
 def _yn(v: Any) -> bool:
@@ -116,6 +118,12 @@ def _rows(data) -> dict[type, list[dict[str, Any]]]:  # noqa: ANN001
     out[RefPaymentMethod] = [dict(payment_method_code=r["payment_method_code"], name=r["name"],
                                   description=r["description"], enabled=r["inactive_date"] is None)
                              for r in data.payment_methods]
+    lookups: dict[tuple[str, str], dict[str, Any]] = {}
+    for r in data.lookups:     # one row per type and code (security groups / languages collapse)
+        lookups.setdefault((r["lookup_type"], r["lookup_code"]), dict(
+            lookup_type=r["lookup_type"], lookup_code=r["lookup_code"], meaning=r["meaning"],
+            description=r["description"], enabled=_yn(r["enabled_flag"]) and r["end_date_active"] is None))
+    out[RefLookup] = list(lookups.values())
     out[RefGlPeriod] = [dict(ledger_id=r["ledger_id"], period_name=r["period_name"], start_date=r["start_date"],
                              end_date=r["end_date"], closing_status=r["closing_status"]) for r in data.gl_periods]
     return out

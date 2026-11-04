@@ -130,6 +130,15 @@ def build(root: Path, *, broken: bool = False) -> Path:
     _write(root / "iby_payment_methods.csv", [{"PAYMENT_METHOD_CODE": c, "PAYMENT_METHOD_NAME": n, "LANGUAGE": lang}
                                               for c, n in PAYMENT_METHODS for lang in ("US", "ESA")])
     _write(root / "stores.csv", [{"STORE": s, "COST_CENTER": cc} for s, cc in STORES])
+    # the instance's Payables lookups (P3.3): DEBIT is disabled there, AAP is the source set up for us
+    _write(root / "fnd_lookup_values.csv", [
+        {"LOOKUP_TYPE": t, "LOOKUP_CODE": c, "MEANING": m, "ENABLED_FLAG": e}
+        for t, c, m, e in (("INVOICE TYPE", "STANDARD", "Standard", "Y"), ("INVOICE TYPE", "CREDIT", "Credit Memo", "Y"),
+                           ("INVOICE TYPE", "DEBIT", "Debit Memo", "N"), ("INVOICE LINE TYPE", "ITEM", "Item", "Y"),
+                           ("INVOICE LINE TYPE", "FREIGHT", "Freight", "Y"), ("INVOICE LINE TYPE", "TAX", "Tax", "Y"),
+                           ("INVOICE LINE TYPE", "MISCELLANEOUS", "Miscellaneous", "Y"),
+                           ("SOURCE", "AAP", "ACSE Autonomous AP", "Y"),
+                           ("SOURCE", "MANUAL INVOICE ENTRY", "Manual Invoice Entry", "Y"))])
 
     invoices, lines_out, dists = [], [], []
     inv_id, dist_id = 7000100, 9100000

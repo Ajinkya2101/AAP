@@ -419,6 +419,17 @@ class RefPaymentMethod(Base):
     enabled: Mapped[bool] = mapped_column(Boolean)
 
 
+class RefLookup(Base):
+    """FND_LOOKUP_VALUES of the Payables lookup types the invoice's codes come from (invoice type,
+    invoice line type, source; common/lookups.py). Checked by validation rule V-LOV."""
+    __tablename__ = "ref_lookup"
+    lookup_type: Mapped[str] = mapped_column(String(30), primary_key=True)
+    lookup_code: Mapped[str] = mapped_column(String(30), primary_key=True)
+    meaning: Mapped[str | None] = mapped_column(String(80))
+    description: Mapped[str | None] = mapped_column(String(240))
+    enabled: Mapped[bool] = mapped_column(Boolean)
+
+
 class RefCurrency(Base):
     __tablename__ = "ref_currency"
     currency_code: Mapped[str] = mapped_column(String(15), primary_key=True)

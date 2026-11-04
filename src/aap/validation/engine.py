@@ -14,6 +14,7 @@ Rule ids: MVP V-01..V-07 and WORKED-EXAMPLE C1..C12 where they coincide:
                                     C13 invoice type vs sign
   V-05 mapping complete  V-PO purchase order  V-GL open GL period
   V-FX exchange rate     V-REF reference data age  V-SENDER known sender
+  V-LOV invoice type, line types and source in the instance's lookups
 """
 
 from __future__ import annotations

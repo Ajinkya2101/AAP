@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from aap.common.lookups import ORACLE_SEEDED
+
 from .context import SEED_USER_ID, SeedContext
 
 START = datetime(2000, 1, 1)
@@ -23,13 +25,8 @@ CURRENCIES = [
 ]
 
 LOOKUPS: dict[str, list[tuple[str, str, str | None]]] = {
-    "INVOICE TYPE": [
-        ("STANDARD", "Standard", "Standard invoice"),
-        ("CREDIT", "Credit Memo", "Credit memo"),
-        ("DEBIT", "Debit Memo", "Debit memo"),
-        ("PREPAYMENT", "Prepayment", "Prepayment"),
-        ("MIXED", "Mixed", "Mixed invoice"),
-    ],
+    # INVOICE TYPE, INVOICE LINE TYPE: Oracle's seeded values (common/lookups.py)
+    **ORACLE_SEEDED,
     "SOURCE": [
         ("MANUAL INVOICE ENTRY", "Manual Invoice Entry", None),
         ("AAP", "ACSE Autonomous AP", "Invoices created by the AAP module"),
@@ -80,12 +77,6 @@ LOOKUPS: dict[str, list[tuple[str, str, str | None]]] = {
         ("CHECK", "Check", None),
         ("EFT", "Electronic", None),
         ("WIRE", "Wire", None),
-    ],
-    "LINE TYPE": [
-        ("ITEM", "Item", None),
-        ("TAX", "Tax", None),
-        ("FREIGHT", "Freight", None),
-        ("MISCELLANEOUS", "Miscellaneous", None),
     ],
     "MATCH OPTION": [
         ("P", "Purchase Order", None),

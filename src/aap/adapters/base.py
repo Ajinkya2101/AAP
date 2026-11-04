@@ -31,6 +31,7 @@ class ReferenceData(BaseModel):
     tolerances: list[dict[str, Any]] = PydField(default_factory=list)
     gl_periods: list[dict[str, Any]] = PydField(default_factory=list)
     payment_methods: list[dict[str, Any]] = PydField(default_factory=list)
+    lookups: list[dict[str, Any]] = PydField(default_factory=list)   # common/lookups.CHECKED_TYPES
 
     def counts(self) -> dict[str, int]:
         return {k: len(v) for k, v in self.__dict__.items()}

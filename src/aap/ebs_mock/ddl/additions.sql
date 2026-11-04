@@ -136,10 +136,34 @@ SELECT lookup_code, meaning, description FROM fnd.fnd_lookup_values
 WHERE  lookup_type = 'PAYMENT METHOD' AND language = 'US'
 ON CONFLICT DO NOTHING;
 
+-- ------------------------------------------------------------ Payables lookups (2026-11-04)
+-- FND_LOOKUP_VALUES_VL: the lookups in the session language, as the Workbench and the reference sync
+-- read them (invoice types, invoice line types, invoice sources; common/lookups.py).
+CREATE OR REPLACE VIEW apps.fnd_lookup_values_vl AS
+SELECT lookup_type, lookup_code, meaning, description, enabled_flag, start_date_active, end_date_active,
+       security_group_id, view_application_id, tag
+FROM   fnd.fnd_lookup_values
+WHERE  language = 'US';
+
+-- Databases seeded before INVOICE LINE TYPE existed in the mock get Oracle's seeded line types. Not on
+-- a new schema (no lookups yet: the seed or the replica loader brings them), and not on a replica
+-- whose delivery brought its own list (NOT EXISTS on the lookup type).
+INSERT INTO fnd.fnd_lookup_values (lookup_type, language, lookup_code, meaning, description, enabled_flag,
+                                   source_lang, security_group_id, view_application_id)
+SELECT 'INVOICE LINE TYPE', 'US', x.code, x.meaning, x.description, 'Y', 'US', 0, 200
+FROM   (VALUES ('ITEM', 'Item', 'Goods or services'), ('FREIGHT', 'Freight', 'Freight charge'),
+               ('MISCELLANEOUS', 'Miscellaneous', 'Miscellaneous charge'), ('TAX', 'Tax', 'Tax'),
+               ('AWT', 'Withholding Tax', 'Withholding tax'),
+               ('PREPAY', 'Prepayment', 'Prepayment application')) AS x(code, meaning, description)
+WHERE  NOT EXISTS (SELECT 1 FROM fnd.fnd_lookup_values WHERE lookup_type = 'INVOICE LINE TYPE')
+  AND  EXISTS (SELECT 1 FROM fnd.fnd_lookup_values WHERE lookup_type = 'INVOICE TYPE')
+ON CONFLICT DO NOTHING;
+DELETE FROM fnd.fnd_lookup_values WHERE lookup_type = 'LINE TYPE';   -- the mock's earlier name for it
+
 -- -------------------------------------------------------------------------------- grants
 GRANT SELECT ON apps.fnd_id_flex_structures, apps.fnd_id_flex_segments, apps.iby_payment_methods_b,
                 apps.iby_payment_methods_tl, apps.iby_payment_methods_vl, apps.gl_code_combinations_kfv,
                 apps.ap_supplier_sites_all, apps.po_vendor_sites_all, apps.ap_invoices_interface,
-                apps.ap_invoice_distributions_all
+                apps.ap_invoice_distributions_all, apps.fnd_lookup_values_vl
       TO apps_ro, apps_intf;
 GRANT INSERT ON apps.ap_invoices_interface TO apps_intf;

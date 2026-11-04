@@ -325,6 +325,26 @@ def _history(r: Replica, d: Delivery, ledgers: dict[int, int],
     return first
 
 
+def lookup_rows(r: Replica, d: Delivery) -> list[str]:
+    """The delivered lookup types replace the seeded rows of the same type (the instance's own list
+    of invoice types, line types, sources); the other seeded lookups stay. Returns notes."""
+    delivered: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for x in d.rows("FND_LOOKUP_VALUES"):
+        delivered[str(x["LOOKUP_TYPE"]).strip().upper()].append(x)
+    kept = [x for x in r.rows["fnd.fnd_lookup_values"] if x["lookup_type"] not in delivered]
+    for lookup_type, rows in sorted(delivered.items()):
+        for x in rows:
+            code = str(x["LOOKUP_CODE"]).strip()
+            kept.append(dict(lookup_type=lookup_type, language="US", lookup_code=code,
+                             meaning=str(x.get("MEANING") or code)[:80], description=x.get("DESCRIPTION"),
+                             enabled_flag=str(x.get("ENABLED_FLAG") or "Y")[:1].upper(),
+                             start_date_active=day(x.get("START_DATE_ACTIVE")) or START,
+                             end_date_active=day(x.get("END_DATE_ACTIVE")), source_lang="US",
+                             security_group_id=0, view_application_id=200))
+    r.rows["fnd.fnd_lookup_values"] = kept
+    return ["lookups from the delivery: " + ", ".join(f"{t} ({len(v)})" for t, v in sorted(delivered.items()))]
+
+
 def build_replica(d: Delivery, coa: CoaLayout, *, exclude: Path | None = None) -> Replica:
     """Every row of the replica, in memory (no database)."""
     r = Replica()
@@ -340,6 +360,8 @@ def build_replica(d: Delivery, coa: CoaLayout, *, exclude: Path | None = None) -
         r.notes.append(f"{len(derived)} term(s) with lines derived from the name (AP_TERMS_LINES not delivered)")
     if unknown:
         r.notes.append(f"terms without days (no lines, name not parseable): {unknown}")
+    if d.has("FND_LOOKUP_VALUES"):
+        r.notes += lookup_rows(r, d)
     if d.has("IBY_PAYMENT_METHODS"):
         r.rows.update(payment_method_rows(d))
     else:

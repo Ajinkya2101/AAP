@@ -27,6 +27,10 @@ uv run python -m aap.clientdata.fixtures client-data\example
 set GL_SEGMENT_COUNT=8& set GL_SEGMENT_SEPARATOR=.& set GL_COST_CENTER_SEGMENT=3& set GL_NATURAL_ACCOUNT_SEGMENT=4
 uv run python -m aap.clientdata.check client-data\kk\2026-11-10
 
+:: a list-of-values workbook (invoice types, line types, sources) -> fnd_lookup_values.csv in the delivery;
+:: prints what was recognised and the values that are not Oracle codes or meanings (confirm those)
+uv run python -m aap.clientdata.lov "client-data\kk\2026-11-06\<workbook>.xlsx"
+
 :: pair attachments with what AP keyed; test / dev / train split (output in test-data-kk\, also git-ignored)
 uv run python -m aap.clientdata.goldset client-data\kk\2026-11-10 --holdout-count 2
 

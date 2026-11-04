@@ -17,7 +17,7 @@ from sqlalchemy import func, select
 from aap.clientdata.fixtures import build
 from aap.clientdata.goldset import build_goldset
 from aap.common.coa import CoaLayout
-from aap.db.models import GlHistoryLine, RefCcid, RefPaymentMethod, RefSupplier, RefTerms, ValueMap
+from aap.db.models import GlHistoryLine, RefCcid, RefLookup, RefPaymentMethod, RefSupplier, RefTerms, ValueMap
 
 pytestmark = pytest.mark.integration
 KK = CoaLayout(segment_count=8, separator=".", company_segment=1, cost_center_segment=3, natural_account_segment=4)
@@ -82,6 +82,10 @@ def test_replica_from_the_fixture_delivery(replica_env, cluster, tmp_path):
         ccid = s.scalar(select(RefCcid).where(RefCcid.concatenated == ACCOUNT))
         assert ccid.natural_account == "61210" and len(ccid.segments) == 8 and ccid.account_desc == "Packaging supplies"
         assert s.get(RefTerms, 103).due_day_of_month == 15 and s.get(RefPaymentMethod, "WIRE") is not None
+        # the delivered lookups replace the seeded ones of the same type (P3.3); other types stay seeded
+        types = {(x.lookup_type, x.lookup_code): x.enabled for x in s.scalars(select(RefLookup))}
+        assert types[("INVOICE TYPE", "DEBIT")] is False and ("INVOICE TYPE", "MIXED") not in types
+        assert types[("SOURCE", "AAP")] and types[("INVOICE LINE TYPE", "FREIGHT")]
         assert s.scalar(select(func.count()).select_from(ValueMap).where(ValueMap.map_type == "location")) == 3
         history = list(s.scalars(select(GlHistoryLine)))
         assert history and all(h.natural_account and "." in h.concatenated for h in history)
@@ -133,10 +137,11 @@ def _printed_values(gold, delivery):
 def test_eval_with_agents_compares_the_json_with_the_keyed_record(replica_env, cluster, tmp_path, monkeypatch):
     """P4.2 / P8.1 / D4 end to end: gold set -> pipeline + agents on the replica -> Oracle-ready JSON
     -> shadow comparison, GL metrics, per-supplier and held-out blocks."""
+    from tests.conftest import _reset_caches
+
     from aap.clientdata.replica import run
     from aap.eval.harness import run_eval
     from aap.eval.report import render
-    from tests.conftest import _reset_caches
 
     delivery = build(tmp_path / "2026-11-10")
     gold = tmp_path / "gold"
@@ -158,6 +163,13 @@ def test_eval_with_agents_compares_the_json_with_the_keyed_record(replica_env, c
     assert all(sh["fields"][k] == 1.0 for k in ("supplier", "site", "invoice_amount", "terms", "line_types",
                                                 "amount_by_line_type")), text
     assert m["all"]["fields"]["lines.line_types"] == 1.0, text
+    # V-LOV (P3.3): every invoice's type, line types and source are in the delivered lists
+    from aap.db.models import ValidationResult
+    from aap.db.session import session_scope
+
+    with session_scope(replica_env["AAP_OWNER_DSN"]) as s:
+        lov = [v.result for v in s.scalars(select(ValidationResult).where(ValidationResult.rule_id == "V-LOV"))]
+    assert lov and set(lov) == {"pass"}, lov
     # the held-out supplier has no history: its lines get no account and go to review, never coded wrongly
     assert gl and gl["invoices"] == sh["invoices"] and gl["no_review_accuracy_full"] == 1.0, text
     held = m["by_supplier"]["70003"]

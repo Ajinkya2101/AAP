@@ -17,6 +17,7 @@ from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
 from aap.common.coa import CoaLayout, layout_from_settings
+from aap.common.lookups import CHECKED_TYPES
 
 from .base import (
     CcidCheck,
@@ -111,6 +112,11 @@ WHERE  c.summary_flag = 'N'"""
 SQL_PAYMENT_METHODS = """
 SELECT payment_method_code, payment_method_name AS name, description, inactive_date
 FROM   iby_payment_methods_vl"""
+
+SQL_LOOKUPS = """
+SELECT lookup_type, lookup_code, meaning, description, enabled_flag, end_date_active
+FROM   fnd_lookup_values_vl
+WHERE  view_application_id = 200 AND lookup_type = ANY(%s)"""
 
 SQL_CATEGORIES = """
 SELECT category_id, concat_ws('-', segment1, segment2, segment3, segment4) AS code, description, enabled_flag,
@@ -340,6 +346,8 @@ class MockEbsAdapter:
                            segments=[r[c] for c in coa.columns()]) for r in self._all(sql_ccids(coa))]
         data.payment_methods = [dict(r, inactive_date=_d(r["inactive_date"]))
                                 for r in self._all(SQL_PAYMENT_METHODS)]
+        data.lookups = [dict(r, end_date_active=_d(r["end_date_active"]))
+                        for r in self._all(SQL_LOOKUPS, (list(CHECKED_TYPES),))]
         data.categories = [dict(r, disable_date=_d(r["disable_date"])) for r in self._all(SQL_CATEGORIES)]
         data.uoms = [dict(r, disable_date=_d(r["disable_date"])) for r in self._all(SQL_UOMS)]
         data.tax_rates = [dict(r, effective_to=_d(r["effective_to"])) for r in self._all(SQL_TAX_RATES)]

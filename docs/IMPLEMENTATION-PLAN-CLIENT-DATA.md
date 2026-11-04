@@ -177,7 +177,7 @@ every distribution a valid CCID, period open for every history date, …).
 |---|---|---|
 | P3.1 | Refsync and embedding backfill on `aap_kk`; timing noted | ⏸ data |
 | P3.2 | Terms fixes + tests | ✅ supplier family (NET / DIAS), CONTADO, end of month by day, KK discount wording; term lines from the names until B5 |
-| P3.3 | Invoice / line type codes from lookups | ⬜ |
+| P3.3 | Invoice / line type codes from lookups | ✅ (2026-11-04) Oracle's seeded codes and meanings in `common/lookups.py`; a list-of-values workbook (both layouts: field names on top, or titled sections) → `fnd_lookup_values.csv` with `python -m aap.clientdata.lov`; the replica replaces the seeded rows of each delivered lookup type; refsync → `ref_lookup` (migration 0005); rule **V-LOV** fails an invoice type, line type or invoice source not in (or disabled in) the instance's list |
 | P3.4 | Store table loaded | ⏸ B3 |
 
 ### P4. Gold set: each PDF with what AP keyed
@@ -479,6 +479,7 @@ combination to avoid.
 | Payment method per invoice or site default | Vikram | P9.1 |
 | Invoice types in scope (credit memos?) | Dhivya | P3.3 |
 | Interface columns or an API payload for the JSON? | Siva / Dhivya | P9.1 field names |
+| Invoice source: the import needs our `SOURCE` code (`INVOICE_SOURCE`, default `AAP`) in the instance's SOURCE lookup. Create `AAP` there, or use an existing source? V-LOV fails every invoice until the list has it | Vikram | V-LOV on the replica, the import |
 | GL accuracy target | Siva | P5.3 |
 
 ## 11. Later: connecting to a real EBS

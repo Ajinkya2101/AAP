@@ -65,6 +65,12 @@ TABLES: dict[str, TableSpec] = {t.name: t for t in [
     TableSpec("IBY_PAYMENT_METHODS", key=("PAYMENT_METHOD_CODE",), required=("PAYMENT_METHOD_CODE",),
               optional=("PAYMENT_METHOD_NAME", "DESCRIPTION", "INACTIVE_DATE", "LANGUAGE"),
               aliases=("pay_method", "payment_methods", "iby_payment_methods_tl", "iby_payment_methods_b")),
+    TableSpec("FND_LOOKUP_VALUES", key=("LOOKUP_TYPE", "LOOKUP_CODE"), required=("LOOKUP_TYPE", "LOOKUP_CODE"),
+              optional=("MEANING", "DESCRIPTION", "ENABLED_FLAG", "START_DATE_ACTIVE", "END_DATE_ACTIVE"),
+              aliases=("lookups", "fnd_lookup_values_vl", "ap_lookup_codes", "lookup_values"),
+              columns_alt={"DISPLAYED_FIELD": "MEANING"},
+              description="Payables lookups: invoice types, invoice line types, sources (an extract, or "
+                          "written from a list-of-values workbook by python -m aap.clientdata.lov)"),
     TableSpec("STORES", key=("STORE",), required=("STORE", "COST_CENTER"),
               aliases=("store_cost_center", "locations", "store_table"),
               columns_alt={"STORE_NUMBER": "STORE", "LOCATION": "STORE", "LOCATION_CODE": "STORE",

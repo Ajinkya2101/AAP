@@ -16,6 +16,7 @@ from aap.db.models import (
     RefCcid,
     RefCurrency,
     RefGlPeriod,
+    RefLookup,
     RefOperatingUnit,
     RefPaymentMethod,
     RefSupplier,
@@ -45,6 +46,8 @@ class Reference:
     periods: list[RefGlPeriod]
     value_maps: dict[tuple[str, str, int | None], ValueMap] = field(default_factory=dict)
     payment_methods: dict[str, RefPaymentMethod] = field(default_factory=dict)   # enabled codes
+    # lookup type -> code -> row (all rows; `enabled` says whether the code may be used)
+    lookups: dict[str, dict[str, RefLookup]] = field(default_factory=dict)
 
     @property
     def empty(self) -> bool:
@@ -84,6 +87,8 @@ def load_reference(session: Session) -> Reference:
     )
     ref.payment_methods = {m.payment_method_code: m for m in session.scalars(select(RefPaymentMethod))
                            if m.enabled}
+    for lk in session.scalars(select(RefLookup)):
+        ref.lookups.setdefault(lk.lookup_type, {})[lk.lookup_code] = lk
     for vm in session.scalars(select(ValueMap).where(ValueMap.status == "active")):
         ref.value_maps[(vm.map_type, vm.source_key, vm.vendor_id)] = vm
     return ref
