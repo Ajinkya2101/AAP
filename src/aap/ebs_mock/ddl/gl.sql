@@ -38,8 +38,7 @@ CREATE TABLE gl.gl_code_combinations (
     segment29 varchar(25), segment30 varchar(25),
     @WHO@
 );
-CREATE UNIQUE INDEX gl_code_combinations_u2
-    ON gl.gl_code_combinations (chart_of_accounts_id, segment1, segment2, segment3, segment4);
+-- The unique index over the segments is in additions.sql (gl_code_combinations_u3, 8 segments).
 
 CREATE TABLE gl.gl_period_statuses (
     application_id          bigint       NOT NULL,

@@ -16,11 +16,12 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
+from aap.common.coa import CoaLayout, layout_from_settings
+
 from .base import (
     CcidCheck,
     DuplicateHit,
     GlHistory,
-    InterfaceLine,
     InterfacePayload,
     PoDetail,
     PoLine,
@@ -59,7 +60,9 @@ SQL_SITES = """
 SELECT vendor_site_id, vendor_id, vendor_site_code, org_id, address_line1, address_line2, address_line3,
        city, state, zip, province, country, email_address, remittance_email, pay_site_flag,
        purchasing_site_flag, primary_pay_site_flag, terms_id, invoice_currency_code, tolerance_id,
-       match_option, accts_pay_code_combination_id AS liability_ccid, inactive_date
+       match_option, accts_pay_code_combination_id AS liability_ccid, inactive_date,
+       payment_method_lookup_code AS payment_method, pay_group_lookup_code AS pay_group, payment_currency_code,
+       terms_date_basis
 FROM   ap_supplier_sites_all"""
 
 SQL_BANKS = """
@@ -81,19 +84,33 @@ SQL_CURRENCIES = """
 SELECT currency_code, symbol, precision, issuing_territory_code AS territory, enabled_flag
 FROM   fnd_currencies"""
 
-SQL_CCIDS = """
-SELECT c.code_combination_id AS ccid, c.concatenated_segments AS concatenated,
-       c.segment1, c.segment2, c.segment3, c.segment4, c.account_type, c.enabled_flag,
+
+
+def sql_ccids(coa: CoaLayout) -> str:
+    """Every code combination with its segments and the descriptions of the company, cost-center and
+    natural-account values (value sets found through FND_ID_FLEX_SEGMENTS, as in EBS)."""
+    segments = ", ".join(f"c.segment{i}" for i in range(1, coa.segment_count + 1))
+    joins = []
+    for alias, n in (("co", coa.company_segment), ("cc", coa.cost_center_segment),
+                     ("ac", coa.natural_account_segment)):
+        joins.append(f"""LEFT JOIN fnd_id_flex_segments fs_{alias} ON fs_{alias}.application_id = 101
+       AND fs_{alias}.id_flex_code = 'GL#' AND fs_{alias}.id_flex_num = c.chart_of_accounts_id
+       AND fs_{alias}.application_column_name = 'SEGMENT{n}'
+LEFT JOIN fnd_flex_values_vl v_{alias} ON v_{alias}.flex_value_set_id = fs_{alias}.flex_value_set_id
+       AND v_{alias}.flex_value = c.segment{n}""")
+    return f"""
+SELECT c.code_combination_id AS ccid, c.concatenated_segments AS concatenated, {segments},
+       c.segment{coa.natural_account_segment} AS natural_account, c.account_type, c.enabled_flag,
        c.detail_posting_allowed_flag, c.end_date_active,
-       v1.description AS company_desc, v2.description AS cost_centre_desc, v3.description AS account_desc
+       v_co.description AS company_desc, v_cc.description AS cost_centre_desc, v_ac.description AS account_desc
 FROM   gl_code_combinations_kfv c
-LEFT JOIN fnd_flex_values_vl v1 ON v1.flex_value = c.segment1
-       AND v1.flex_value_set_id = (SELECT flex_value_set_id FROM fnd_flex_value_sets WHERE flex_value_set_name = 'ACSE_COMPANY')
-LEFT JOIN fnd_flex_values_vl v2 ON v2.flex_value = c.segment2
-       AND v2.flex_value_set_id = (SELECT flex_value_set_id FROM fnd_flex_value_sets WHERE flex_value_set_name = 'ACSE_COST_CENTRE')
-LEFT JOIN fnd_flex_values_vl v3 ON v3.flex_value = c.segment3
-       AND v3.flex_value_set_id = (SELECT flex_value_set_id FROM fnd_flex_value_sets WHERE flex_value_set_name = 'ACSE_ACCOUNT')
+{chr(10).join(joins)}
 WHERE  c.summary_flag = 'N'"""
+
+
+SQL_PAYMENT_METHODS = """
+SELECT payment_method_code, payment_method_name AS name, description, inactive_date
+FROM   iby_payment_methods_vl"""
 
 SQL_CATEGORIES = """
 SELECT category_id, concat_ws('-', segment1, segment2, segment3, segment4) AS code, description, enabled_flag,
@@ -188,11 +205,14 @@ WHERE  vendor_id = %(vendor_id)s
         OR (%(amount)s::numeric IS NOT NULL AND %(inv_date)s::date IS NOT NULL
             AND invoice_amount = %(amount)s AND invoice_date::date = %(inv_date)s))"""
 
-SQL_CCID_BY_SEGMENTS = """
+
+def sql_ccid_by_segments(coa: CoaLayout) -> str:
+    where = " AND ".join(f"segment{i} = %s" for i in range(1, coa.segment_count + 1))
+    return f"""
 SELECT code_combination_id, concatenated_segments, enabled_flag, detail_posting_allowed_flag, summary_flag,
        start_date_active, end_date_active
 FROM   gl_code_combinations_kfv
-WHERE  segment1 = %s AND segment2 = %s AND segment3 = %s AND segment4 = %s"""
+WHERE  {where}"""
 
 SQL_CCID_BY_ID = """
 SELECT code_combination_id, concatenated_segments, enabled_flag, detail_posting_allowed_flag, summary_flag,
@@ -202,7 +222,7 @@ WHERE  code_combination_id = %s"""
 
 SQL_GL_HISTORY = """
 SELECT d.invoice_distribution_id, i.vendor_id, i.org_id, coalesce(d.description, l.description) AS description,
-       d.dist_code_combination_id AS ccid, c.concatenated_segments, c.segment3 AS natural_account,
+       d.dist_code_combination_id AS ccid, c.concatenated_segments, c.@NATURAL@ AS natural_account,
        d.amount, i.invoice_date,
        concat_ws('-', cat.segment1, cat.segment2, cat.segment3, cat.segment4) AS category_code
 FROM   ap_invoice_distributions_all d
@@ -213,6 +233,7 @@ LEFT JOIN mtl_item_categories ic ON ic.inventory_item_id = l.inventory_item_id
        AND ic.organization_id = (SELECT min(organization_id) FROM mtl_item_categories y WHERE y.inventory_item_id = l.inventory_item_id)
 LEFT JOIN mtl_categories_b cat ON cat.category_id = ic.category_id
 WHERE  d.line_type_lookup_code = 'ITEM'
+  AND  coalesce(d.reversal_flag, 'N') <> 'Y'
   AND  i.cancelled_date IS NULL
   AND  (%(vendor_id)s::bigint IS NULL OR i.vendor_id = %(vendor_id)s)
   AND  (%(since)s::date IS NULL OR i.invoice_date >= %(since)s)
@@ -248,10 +269,12 @@ SQL_INTF_BY_KEY = """
 
 SQL_INSERT_INTF_HEADER = """
     INSERT INTO ap_invoices_interface (invoice_id, invoice_num, invoice_type_lookup_code, invoice_date, gl_date,
-        vendor_id, vendor_site_id, vendor_site_code, invoice_amount, invoice_currency_code, exchange_rate_type,
-        exchange_date, terms_id, terms_name, po_number, description, source, group_id, org_id,
-        calc_tax_during_import_flag, attribute15)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'N', %s)"""
+        vendor_id, vendor_num, vendor_name, vendor_site_id, vendor_site_code, invoice_amount, invoice_currency_code,
+        payment_currency_code, exchange_rate_type, exchange_date, terms_id, terms_name, terms_date,
+        payment_method_code, pay_group_lookup_code, po_number, description, source, group_id, org_id,
+        operating_unit, calc_tax_during_import_flag, attribute15)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+            %s, 'N', %s)"""
 
 SQL_INSERT_INTF_LINE = """
     INSERT INTO ap_invoice_lines_interface (invoice_id, invoice_line_id, line_number, line_type_lookup_code, amount,
@@ -280,7 +303,9 @@ def _dec(v: Any) -> Decimal:
 class MockEbsAdapter:
     """Read side over apps_ro (pooled); write side over apps_intf (short connections)."""
 
-    def __init__(self, ro_dsn: str, intf_dsn: str | None = None, *, pool_size: int = 5):
+    def __init__(self, ro_dsn: str, intf_dsn: str | None = None, *, pool_size: int = 5,
+                 coa: CoaLayout | None = None):
+        self.coa = coa or layout_from_settings()
         kwargs = {"options": "-c search_path=apps", "autocommit": True, "row_factory": dict_row}
         self._ro = ConnectionPool(ro_dsn, kwargs=kwargs, min_size=1, max_size=pool_size, open=False)
         self._intf_dsn = intf_dsn
@@ -310,7 +335,11 @@ class MockEbsAdapter:
         data.supplier_banks = [dict(r, end_date=_d(r["end_date"])) for r in self._all(SQL_BANKS)]
         data.terms = self._all(SQL_TERMS)
         data.currencies = self._all(SQL_CURRENCIES)
-        data.ccids = [dict(r, end_date_active=_d(r["end_date_active"])) for r in self._all(SQL_CCIDS)]
+        coa = self.coa
+        data.ccids = [dict(r, end_date_active=_d(r["end_date_active"]),
+                           segments=[r[c] for c in coa.columns()]) for r in self._all(sql_ccids(coa))]
+        data.payment_methods = [dict(r, inactive_date=_d(r["inactive_date"]))
+                                for r in self._all(SQL_PAYMENT_METHODS)]
         data.categories = [dict(r, disable_date=_d(r["disable_date"])) for r in self._all(SQL_CATEGORIES)]
         data.uoms = [dict(r, disable_date=_d(r["disable_date"])) for r in self._all(SQL_UOMS)]
         data.tax_rates = [dict(r, effective_to=_d(r["effective_to"])) for r in self._all(SQL_TAX_RATES)]
@@ -397,9 +426,10 @@ class MockEbsAdapter:
             rows = self._all(SQL_CCID_BY_ID, (segments,))
             concat = str(segments)
         else:
-            parts = segments.split("-") if isinstance(segments, str) else list(segments)
-            concat = "-".join(parts)
-            rows = self._all(SQL_CCID_BY_SEGMENTS, tuple(parts)) if len(parts) == 4 else []
+            coa = self.coa
+            parts = (coa.split(segments) or segments.split(coa.separator)) if isinstance(segments, str)                 else list(segments)
+            concat = coa.separator.join(parts)
+            rows = self._all(sql_ccid_by_segments(coa), tuple(parts)) if len(parts) == coa.segment_count else []
         if not rows:
             return CcidCheck(ccid=None, concatenated=concat, exists=False, enabled=False, postable=False,
                              active_on_date=False)
@@ -413,7 +443,9 @@ class MockEbsAdapter:
     def get_gl_history(self, vendor_id: int | None = None, since: date | None = None) -> Iterator[GlHistory]:
         with self._pool().connection() as conn, conn.transaction(), conn.cursor(name="gl_history") as cur:
             cur.itersize = 2000
-            cur.execute(SQL_GL_HISTORY, {"vendor_id": vendor_id, "since": since})
+            natural = f"segment{self.coa.natural_account_segment}"
+            cur.execute(SQL_GL_HISTORY.replace("@NATURAL@", natural),  # type: ignore[arg-type]
+                        {"vendor_id": vendor_id, "since": since})
             for r in cur:
                 yield GlHistory(invoice_distribution_id=r["invoice_distribution_id"], vendor_id=r["vendor_id"],
                                 org_id=r["org_id"], description=r["description"], ccid=r["ccid"],
@@ -456,43 +488,9 @@ class MockEbsAdapter:
         """CanonicalInvoice (approved version) -> Payables Open Interface rows."""
         from aap.config import get_settings
 
-        inv = invoice
-        lines: list[InterfaceLine] = []
-        for ln in inv.lines:
-            amount = ln.amount.value
-            if amount is None and ln.quantity.value is not None and ln.unit_price.value is not None:
-                amount = (ln.quantity.value * ln.unit_price.value).quantize(Decimal("0.01"))
-            item = ln.line_type == "ITEM"
-            paired = item and ln.po_line_number.value is not None
-            lines.append(InterfaceLine(
-                line_number=len(lines) + 1, line_type_lookup_code=ln.line_type, amount=amount or Decimal(0),
-                description=(ln.description.value or "")[:240] or None,
-                quantity_invoiced=ln.quantity.value if item else None,
-                unit_price=ln.unit_price.value if item else None,
-                unit_of_meas_lookup_code=ln.uom.value if item else None,
-                po_number=(ln.po_number.value or inv.po_number.value) if paired else None,
-                release_num=(ln.po_release_num.value or inv.po_release_num.value) if paired else None,
-                po_line_number=ln.po_line_number.value if paired else None,
-                dist_code_concatenated=None if paired else ln.dist_account.value,
-                tax_rate_code=ln.tax_rate_code.value))
-        # Header-level tax / freight become their own lines (INVOICE_AMOUNT = sum of lines).
-        for kind, value in (("TAX", inv.tax_amount.value), ("FREIGHT", inv.freight_amount.value)):
-            if value and not any(x.line_type_lookup_code == kind for x in lines):
-                lines.append(InterfaceLine(line_number=len(lines) + 1, line_type_lookup_code=kind, amount=value,
-                                           description=kind.title()))
-        amount = inv.invoice_amount.value
-        foreign = bool(inv.ledger_currency.value) and inv.currency_code.value != inv.ledger_currency.value
-        inv_type = "CREDIT" if amount is not None and amount < 0 else (inv.invoice_type.value or "STANDARD")
-        return InterfacePayload(
-            invoice_num=inv.invoice_num.value, invoice_type_lookup_code=inv_type,
-            invoice_date=inv.invoice_date.value, gl_date=inv.gl_date.value, vendor_id=inv.vendor_id.value,
-            vendor_site_id=inv.vendor_site_id.value, vendor_site_code=inv.vendor_site_code.value,
-            invoice_amount=amount, invoice_currency_code=inv.currency_code.value,
-            exchange_rate_type=(inv.exchange_rate_type.value or "Corporate") if foreign else None,
-            exchange_date=(inv.gl_date.value or inv.invoice_date.value) if foreign else None,
-            terms_id=inv.terms_id.value, terms_name=None if inv.terms_id.value else inv.terms_name.value,
-            po_number=inv.po_number.value, description=(inv.description.value or "")[:240] or None,
-            source=get_settings().invoice_source, org_id=inv.org_id.value, lines=lines)
+        from .payload import build_payload
+
+        return build_payload(invoice, source=get_settings().invoice_source)
 
     def submit(self, payload: InterfacePayload, idempotency_key: str) -> SubmitRef:
         """Insert into the open interface and submit APXIIMPT for a new GROUP_ID.
@@ -509,9 +507,10 @@ class MockEbsAdapter:
             h = payload
             conn.execute(SQL_INSERT_INTF_HEADER, (
                 inv_id, h.invoice_num, h.invoice_type_lookup_code, h.invoice_date, h.gl_date, h.vendor_id,
-                h.vendor_site_id, h.vendor_site_code, h.invoice_amount, h.invoice_currency_code, h.exchange_rate_type,
-                h.exchange_date, h.terms_id, h.terms_name, h.po_number, h.description, h.source, group_id, h.org_id,
-                idempotency_key))
+                h.vendor_num, h.vendor_name, h.vendor_site_id, h.vendor_site_code, h.invoice_amount,
+                h.invoice_currency_code, h.payment_currency_code, h.exchange_rate_type, h.exchange_date, h.terms_id,
+                h.terms_name, h.terms_date, h.payment_method_code, h.pay_group_lookup_code, h.po_number,
+                h.description, h.source, group_id, h.org_id, h.operating_unit, idempotency_key))
             for ln in h.lines:
                 conn.execute(SQL_INSERT_INTF_LINE, (
                     inv_id, ln.line_number, ln.line_type_lookup_code, ln.amount, ln.description,

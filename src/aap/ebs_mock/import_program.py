@@ -76,12 +76,27 @@ def _ccid_ok(conn: psycopg.Connection, ccid: int | None, on: datetime) -> bool:
     return row is not None
 
 
-def _ccid_from_concat(conn: psycopg.Connection, concat: str) -> int | None:
-    parts = concat.split("-")
-    if len(parts) != 4:
+def _coa_structure(conn: psycopg.Connection, coa_id: int) -> tuple[str, int]:
+    """Delimiter and number of enabled segments of a chart of accounts (FND_ID_FLEX_STRUCTURES /
+    _SEGMENTS); a chart without structure rows is the original mock layout: "-", 4 segments."""
+    st = _one(conn, """SELECT concatenated_segment_delimiter AS d FROM fnd.fnd_id_flex_structures
+                       WHERE application_id = 101 AND id_flex_code = 'GL#' AND id_flex_num = %s""", (coa_id,))
+    n = _one(conn, """SELECT count(*) AS n FROM fnd.fnd_id_flex_segments
+                      WHERE application_id = 101 AND id_flex_code = 'GL#' AND id_flex_num = %s
+                        AND enabled_flag = 'Y'""", (coa_id,))
+    return (st["d"] if st else "-"), (n["n"] if n and n["n"] else 4)
+
+
+def _ccid_from_concat(conn: psycopg.Connection, concat: str, coa_id: int) -> int | None:
+    """DIST_CODE_CONCATENATED -> CCID: split by the chart's delimiter into its segments (no dynamic
+    insert: the combination must exist)."""
+    delimiter, count = _coa_structure(conn, coa_id)
+    parts = concat.split(delimiter)
+    if len(parts) != count:
         return None
-    row = _one(conn, """SELECT code_combination_id FROM gl.gl_code_combinations
-                        WHERE segment1 = %s AND segment2 = %s AND segment3 = %s AND segment4 = %s""", parts)
+    where = " AND ".join(f"segment{i} = %s" for i in range(1, count + 1))
+    row = _one(conn, f"SELECT code_combination_id FROM gl.gl_code_combinations "  # noqa: S608 - fixed columns
+                     f"WHERE chart_of_accounts_id = %s AND {where}", [coa_id, *parts])
     return row["code_combination_id"] if row else None
 
 
@@ -289,7 +304,7 @@ def _import_one(conn: psycopg.Connection, hdr: dict[str, Any], *, default_org: i
         if ltype == "ITEM" and "ccid" not in plan:
             ccid = ln["dist_code_combination_id"]
             if not ccid and ln["dist_code_concatenated"]:
-                ccid = _ccid_from_concat(conn, ln["dist_code_concatenated"])
+                ccid = _ccid_from_concat(conn, ln["dist_code_concatenated"], ledger["chart_of_accounts_id"])
             if not _ccid_ok(conn, ccid, acct_date):
                 rejects.append(_Reject("INVALID DISTRIBUTION ACCT", "AP_INVOICE_LINES_INTERFACE", ln["invoice_line_id"]))
             plan["ccid"] = ccid
@@ -311,7 +326,9 @@ def _import_one(conn: psycopg.Connection, hdr: dict[str, Any], *, default_org: i
     for p in planned:
         if p["type"] != "ITEM" or not p.get("ccid"):
             acct = {"TAX": "1450" if ledger["currency_code"] == "INR" else None, "FREIGHT": "5020"}.get(p["type"])
-            ccid = _ccid_from_concat(conn, f"{company}-000-{acct}-0000") if acct else None
+            # Mock rule for the synthetic chart; another chart (no such combination) falls back to the
+            # first item line's account until the client's tax / freight accounts are known (B-7).
+            ccid = _ccid_from_concat(conn, f"{company}-000-{acct}-0000", ledger["chart_of_accounts_id"])                 if acct else None
             p["ccid"] = ccid if _ccid_ok(conn, ccid, p["accounting_date"]) else first_item_ccid
 
     invoice_id = conn.execute("SELECT nextval('ap.ap_invoices_s')").fetchone()[0]  # type: ignore[index]
@@ -332,8 +349,8 @@ def _import_one(conn: psycopg.Connection, hdr: dict[str, Any], *, default_org: i
             attribute14, attribute15)
         VALUES (%(invoice_id)s, %(invoice_num)s, %(vendor_id)s, %(site_id)s, %(org_id)s, %(sob)s,
             %(type)s, %(invoice_date)s, %(received)s, %(gl_date)s, %(amount)s, %(base)s,
-            0, %(tax)s, %(currency)s, %(currency)s, %(rate)s,
-            %(rate_type)s, %(rate_date)s, %(terms_id)s, %(invoice_date)s, %(description)s, %(source)s, %(po)s,
+            0, %(tax)s, %(currency)s, %(payment_currency)s, %(rate)s,
+            %(rate_type)s, %(rate_date)s, %(terms_id)s, %(terms_date)s, %(description)s, %(source)s, %(po)s,
             'N', 'NOT REQUIRED', 'NEVER APPROVED', %(pay_group)s, %(pay_method)s,
             %(liability)s, %(party_id)s, %(request_id)s, 1318, 1318,
             %(attribute_category)s, %(attribute1)s, %(attribute2)s, %(attribute3)s, %(attribute4)s,
@@ -343,7 +360,9 @@ def _import_one(conn: psycopg.Connection, hdr: dict[str, Any], *, default_org: i
                       site_id=site["vendor_site_id"], org_id=org_id, sob=ledger["ledger_id"],
                       type=hdr["invoice_type_lookup_code"] or "STANDARD", invoice_date=invoice_date,
                       received=hdr["invoice_received_date"] or today, gl_date=gl_date, amount=amount,
-                      base=base(amount), tax=tax_total, currency=currency, rate=rate, rate_type=rate_type,
+                      base=base(amount), tax=tax_total, currency=currency,
+                      payment_currency=hdr.get("payment_currency_code") or site["payment_currency_code"] or currency,
+                      terms_date=hdr["terms_date"] or invoice_date, rate=rate, rate_type=rate_type,
                       rate_date=rate_date, terms_id=terms_id, description=hdr["description"],
                       source=hdr["source"], po=header_po["po_header_id"] if header_po else None,
                       pay_group=hdr["pay_group_lookup_code"] or site["pay_group_lookup_code"],

@@ -77,6 +77,11 @@ class CanonicalInvoice(BaseModel):
     exchange_rate_type: Field[str] = _f(str)
     terms_id: Field[int] = _f(int)
     terms_name: Field[str] = _f(str)
+    terms_date: Field[date] = _f(date)
+    # payment defaults (supplier site, else supplier): mandatory in the Invoice Workbench
+    payment_method: Field[str] = _f(str)        # IBY payment method code (CHECK, EFT, WIRE, ...)
+    pay_group: Field[str] = _f(str)
+    payment_currency_code: Field[str] = _f(str)
     po_number: Field[str] = _f(str)
     po_release_num: Field[int] = _f(int)
     description: Field[str] = _f(str)

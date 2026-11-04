@@ -88,7 +88,7 @@ def account_type(acct: str) -> str:
     return {"1": "A", "2": "L", "3": "O", "4": "R"}.get(acct[0], "E")
 
 
-def _value_set(ctx: SeedContext, name: str, size: int, values: list[tuple[str, str]], attrs=None) -> None:
+def _value_set(ctx: SeedContext, name: str, size: int, values: list[tuple[str, str]], attrs=None) -> int:
     vs_id = ctx.next_id("fnd.fnd_flex_value_sets_s")
     ctx.add("fnd.fnd_flex_value_sets", flex_value_set_id=vs_id, flex_value_set_name=name,
             validation_type="I", format_type="C", maximum_size=size, description=name)
@@ -99,13 +99,29 @@ def _value_set(ctx: SeedContext, name: str, size: int, values: list[tuple[str, s
                 compiled_value_attributes=attrs(value) if attrs else "Y\nY")
         ctx.add("fnd.fnd_flex_values_tl", flex_value_id=fv_id, language="US", source_lang="US",
                 description=desc, flex_value_meaning=value)
+    return vs_id
+
+
+# The accounting flexfield (FND_ID_FLEX_STRUCTURES / _SEGMENTS): 4 segments joined by "-".
+SEGMENT_DELIMITER = "-"
+SEGMENTS = [("Company", "ACSE_COMPANY"), ("Cost Centre", "ACSE_COST_CENTRE"), ("Account", "ACSE_ACCOUNT"),
+            ("Sub-account", "ACSE_SUBACCOUNT")]
 
 
 def generate(ctx: SeedContext) -> None:
-    _value_set(ctx, "ACSE_COMPANY", 2, COMPANIES)
-    _value_set(ctx, "ACSE_COST_CENTRE", 3, COST_CENTRES)
-    _value_set(ctx, "ACSE_ACCOUNT", 4, ACCOUNTS, attrs=lambda v: f"Y\nY\n{account_type(v)}")
-    _value_set(ctx, "ACSE_SUBACCOUNT", 4, SUBACCOUNTS)
+    value_sets = {
+        "ACSE_COMPANY": _value_set(ctx, "ACSE_COMPANY", 2, COMPANIES),
+        "ACSE_COST_CENTRE": _value_set(ctx, "ACSE_COST_CENTRE", 3, COST_CENTRES),
+        "ACSE_ACCOUNT": _value_set(ctx, "ACSE_ACCOUNT", 4, ACCOUNTS, attrs=lambda v: f"Y\nY\n{account_type(v)}"),
+        "ACSE_SUBACCOUNT": _value_set(ctx, "ACSE_SUBACCOUNT", 4, SUBACCOUNTS),
+    }
+    ctx.add("fnd.fnd_id_flex_structures", application_id=101, id_flex_code="GL#", id_flex_num=COA_ID,
+            id_flex_structure_code="ACSE_ACCOUNTING_FLEX", id_flex_structure_name="ACSE Accounting Flex",
+            concatenated_segment_delimiter=SEGMENT_DELIMITER, enabled_flag="Y")
+    for num, (name, value_set) in enumerate(SEGMENTS, start=1):
+        ctx.add("fnd.fnd_id_flex_segments", application_id=101, id_flex_code="GL#", id_flex_num=COA_ID,
+                application_column_name=f"SEGMENT{num}", segment_name=name, segment_num=num,
+                flex_value_set_id=value_sets[value_set], enabled_flag="Y", display_flag="Y")
 
     ctx.ref["ccids"] = {}          # (co, cc, acct, sub) -> ccid
     ctx.ref["ccid_rows"] = {}      # ccid -> row

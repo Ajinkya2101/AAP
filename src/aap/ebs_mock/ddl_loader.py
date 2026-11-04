@@ -16,11 +16,12 @@ DDL_FILES = [
     "po.sql",
     "inv.sql",
     "apps_views.sql",
+    "additions.sql",
     "grants.sql",
     "apps_api.sql",
 ]
 # Idempotent files, re-applied on every migrate so an already-seeded database gets them.
-REFRESH_FILES = ["apps_api.sql"]
+REFRESH_FILES = ["additions.sql", "apps_api.sql"]
 
 OWNER_SCHEMAS = ["apps", "fnd", "hr", "gl", "hz", "iby", "zx", "ap", "po", "inv"]
 

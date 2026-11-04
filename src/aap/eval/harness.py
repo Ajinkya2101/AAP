@@ -125,7 +125,7 @@ def _prepare_resume(run_id: uuid.UUID) -> set[str]:
 
 
 def run_eval(dataset: Path, *, name: str, only: set[str] | None = None, limit: int | None = None,
-             resume: uuid.UUID | None = None, agents: bool = False,
+             resume: uuid.UUID | None = None, agents: bool = False, split: str | None = None,
              log: Callable[[str], None] = print) -> tuple[uuid.UUID, dict[str, Any]]:
     s = get_settings()
     manifest = json.loads((dataset / "manifest.json").read_text(encoding="utf-8"))
@@ -151,6 +151,8 @@ def run_eval(dataset: Path, *, name: str, only: set[str] | None = None, limit: i
     items = manifest["items"]
     if only:
         items = [i for i in items if {d["expected"].get("scenario") for d in i.get("documents") or []} & only]
+    if split:                       # client gold sets: test / dev / train (clientdata/goldset.py)
+        items = [i for i in items if i.get("split") == split]
     if limit:
         items = items[:limit]
     docs: list[DocResult] = []

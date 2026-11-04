@@ -17,6 +17,7 @@ from aap.db.models import (
     RefCurrency,
     RefGlPeriod,
     RefOperatingUnit,
+    RefPaymentMethod,
     RefSupplier,
     RefSupplierBank,
     RefSupplierSite,
@@ -43,6 +44,7 @@ class Reference:
     tolerances: dict[int, RefTolerance]
     periods: list[RefGlPeriod]
     value_maps: dict[tuple[str, str, int | None], ValueMap] = field(default_factory=dict)
+    payment_methods: dict[str, RefPaymentMethod] = field(default_factory=dict)   # enabled codes
 
     @property
     def empty(self) -> bool:
@@ -80,6 +82,8 @@ def load_reference(session: Session) -> Reference:
         tolerances={t.tolerance_id: t for t in session.scalars(select(RefTolerance))},
         periods=list(session.scalars(select(RefGlPeriod))),
     )
+    ref.payment_methods = {m.payment_method_code: m for m in session.scalars(select(RefPaymentMethod))
+                           if m.enabled}
     for vm in session.scalars(select(ValueMap).where(ValueMap.status == "active")):
         ref.value_maps[(vm.map_type, vm.source_key, vm.vendor_id)] = vm
     return ref

@@ -10,6 +10,7 @@ from decimal import Decimal
 
 from aap.db.models import Document, ExtractionRun, InvoiceVersion, ReviewTask, ValidationResult
 from aap.pipeline.export import (
+    CSV_LEFT_OUT,
     HEADER_FIELDS,
     INVOICE_CSV_COLUMNS,
     LINE_FIELDS,
@@ -78,7 +79,7 @@ def _read(text: str) -> list[dict[str, str]]:
 
 def test_layout_covers_every_field_once():
     # taxes, flags and country_hint have their own columns; lines are the rows
-    assert set(CanonicalInvoice.model_fields) - {"taxes", "lines", "flags", "country_hint"} == set(HEADER_FIELDS)
+    assert set(CanonicalInvoice.model_fields) - {"taxes", "lines", "flags", "country_hint"} - CSV_LEFT_OUT         == set(HEADER_FIELDS)
     assert set(CanonicalLine.model_fields) == set(LINE_FIELDS)
     assert len(set(INVOICE_CSV_COLUMNS)) == len(INVOICE_CSV_COLUMNS)
 

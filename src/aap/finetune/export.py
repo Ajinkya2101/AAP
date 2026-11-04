@@ -28,6 +28,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from aap.common.coa import layout_from_settings
 from aap.db.models import AgentDecision, Document, ExtractionRun, InvoiceVersion, Page
 from aap.db.session import session_scope
 from aap.filestore import FileStore
@@ -100,8 +101,8 @@ def _posted_label(node: str, line: int | None, model_choice: Any, approved: dict
         return (str(value) if value is not None else "none"), "clerk" if f.get("method") == "user" else "approved"
     if node == "agent.gl_code" and ln is not None:
         f = ln.get("dist_account") or {}
-        parts = (f.get("value") or "").split("-")
-        return (parts[2] if len(parts) > 2 else None), "clerk" if f.get("method") == "user" else "approved"
+        natural = layout_from_settings().natural_account(f.get("value"))
+        return natural, "clerk" if f.get("method") == "user" else "approved"
     if node.startswith("map."):
         return model_choice, "approved"     # the review screen cannot change a mapping; approval accepts it
     return None, None

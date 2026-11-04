@@ -46,8 +46,10 @@ DEBIT_TITLE = re.compile(r"(?i)\b(debit\s*(memo|note)|note\s+de\s+d[ée]bit|bela
 # "/M" is case-sensitive: "/m" is per metre.
 PER_THOUSAND = re.compile(r"/\s*M\b|(?i:\bper\s*(1,?000|thousand|mille)\b)|/\s*1,?000\b|\bCPM\b")
 CENTS = re.compile(r"(?i)(¢|\bcents?\b)")
-# "handling" alone is not enough ("material handling equipment"); "freight and handling" is.
-FREIGHT_LINE = re.compile(r"(?i)\b(freight|shipping|delivery\s+charges?|carriage|fracht|versand(kosten)?)\b")
+# "handling" alone is not enough ("material handling equipment"); "freight and handling" is. Courier and
+# delivery only with a charge word ("courier bags" are goods). Flete: Spanish (Mexican suppliers).
+FREIGHT_LINE = re.compile(r"(?i)\b(freight|shipping|delivery\s+(charges?|fees?)|courier\s+(charges?|fees?|costs?)|"
+                          r"carriage|fracht|versand(kosten)?|fletes?)\b")
 
 
 def normalize(src: SourceInvoice) -> CanonicalInvoice:

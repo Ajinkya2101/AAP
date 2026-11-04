@@ -379,6 +379,10 @@ class RefSupplierSite(Base):
     match_option: Mapped[str | None] = mapped_column(String(25))
     liability_ccid: Mapped[int | None] = mapped_column(BigInteger)
     inactive_date: Mapped[date | None] = mapped_column(Date)
+    payment_method: Mapped[str | None] = mapped_column(String(30))        # site default (else the supplier's)
+    pay_group: Mapped[str | None] = mapped_column(String(25))
+    payment_currency_code: Mapped[str | None] = mapped_column(String(15))
+    terms_date_basis: Mapped[str | None] = mapped_column(String(25))      # Invoice | Invoice Received | ...
 
 
 class RefSupplierBank(Base):
@@ -406,6 +410,15 @@ class RefTerms(Base):
     installments: Mapped[int] = mapped_column(Integer, default=1)
 
 
+class RefPaymentMethod(Base):
+    """IBY_PAYMENT_METHODS_B/_TL: the payment method codes of the instance."""
+    __tablename__ = "ref_payment_method"
+    payment_method_code: Mapped[str] = mapped_column(String(30), primary_key=True)
+    name: Mapped[str | None] = mapped_column(String(100))
+    description: Mapped[str | None] = mapped_column(String(255))
+    enabled: Mapped[bool] = mapped_column(Boolean)
+
+
 class RefCurrency(Base):
     __tablename__ = "ref_currency"
     currency_code: Mapped[str] = mapped_column(String(15), primary_key=True)
@@ -422,7 +435,11 @@ class RefCcid(Base):
     segment1: Mapped[str] = mapped_column(String(25))
     segment2: Mapped[str] = mapped_column(String(25))
     segment3: Mapped[str] = mapped_column(String(25))
-    segment4: Mapped[str] = mapped_column(String(25))
+    segment4: Mapped[str | None] = mapped_column(String(25))
+    # Every segment in order (GL_SEGMENT_COUNT of them) and the natural-account segment's value:
+    # segment1-4 alone do not describe an 8-segment chart of accounts.
+    segments: Mapped[list[str] | None] = mapped_column(ARRAY(String(25)))
+    natural_account: Mapped[str | None] = mapped_column(String(25), index=True)
     account_type: Mapped[str] = mapped_column(String(1))
     enabled: Mapped[bool] = mapped_column(Boolean)
     end_date_active: Mapped[date | None] = mapped_column(Date)

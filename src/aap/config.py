@@ -72,11 +72,23 @@ class Settings(BaseSettings):
     # GL_EXACT_MIN past lines with the same text agree (history contains miscodings, plan 3.5).
     gl_exact_auto: float = 0.90
     gl_exact_min: int = 3
-    # Chart of accounts: the segment the store / location cost center goes into (1-based) and the
-    # separator of concatenated accounts. Mock: 01-510-6420-0000 (segment 2). Krispy Kreme: segment
-    # 3 of 8, "." (R2.2).
-    gl_cost_center_segment: int = 2
+    # Chart of accounts layout (aap.common.coa). Segment numbers are 1-based. Mock: 01-510-6420-0000
+    # (4 segments, "-", company 1, cost center 2, natural account 3). Krispy Kreme: 8 segments joined
+    # by "." (e.g. 10.20.00110.61210.00000.000.00.000); company 1, store / cost center 3 and natural
+    # account 4 are assumptions until Vikram confirms the segment meanings (R2.2).
+    gl_segment_count: int = 4
     gl_segment_separator: str = "-"
+    gl_company_segment: int = 1
+    gl_cost_center_segment: int = 2
+    gl_natural_account_segment: int = 3
+
+    # Oracle-ready JSON (pipeline/oracle_json.py)
+    # How the terms date is set when the supplier site does not say (AP_SUPPLIER_SITES_ALL.TERMS_DATE_BASIS):
+    # Invoice = invoice date, Invoice Received = the day the document arrived, System = today.
+    terms_date_basis: Literal["Invoice", "Invoice Received", "Goods Received", "System"] = "Invoice"
+    # KK -> target instance value map (aap.mapping.instance): a CSV of kind,source,target rows. Unset
+    # = the target instance uses the same values (supplier numbers, site codes, terms, accounts).
+    instance_map_file: Path | None = None
 
     # worker
     # At start, jobs left `doing` by a crashed worker go back to `todo`. Only correct with one

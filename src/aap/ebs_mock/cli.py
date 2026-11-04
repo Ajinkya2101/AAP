@@ -162,7 +162,14 @@ def main(argv: list[str] | None = None) -> int:
             if a.ccid.isdigit():
                 where, params = "code_combination_id = %s", [int(a.ccid)]
             else:
-                where, params = "segment1 = %s AND segment2 = %s AND segment3 = %s AND segment4 = %s", a.ccid.split("-")
+                from aap.common.coa import layout_from_settings
+
+                coa = layout_from_settings()
+                parts = coa.split(a.ccid)
+                if parts is None:
+                    raise SystemExit(f"{a.ccid!r} is not a {coa.segment_count}-segment account joined by "
+                                     f"{coa.separator!r} (GL_SEGMENT_COUNT / GL_SEGMENT_SEPARATOR)")
+                where, params = " AND ".join(f"{c} = %s" for c in coa.columns()), parts
             if a.end_date:
                 n = conn.execute(f"UPDATE gl.gl_code_combinations SET end_date_active = %s WHERE {where}",
                                  [a.end_date, *params]).rowcount

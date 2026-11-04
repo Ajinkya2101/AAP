@@ -14,6 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from aap.audit import audit
+from aap.common.coa import layout_from_settings
 from aap.db.models import AgentRun, Document, GlHistoryLine, InvoiceVersion, RefCcid, ReviewTask
 from aap.mapping.proposals import propose_value_maps
 from aap.pipeline.stages import _new_version, latest_version
@@ -142,7 +143,8 @@ def learn_gl(session: Session, inv: CanonicalInvoice, gl: dict[int, Any]) -> int
             continue
         added.append(GlHistoryLine(vendor_id=inv.vendor_id.value, org_id=inv.org_id.value,
                                    description=ln.description.value or "", ccid=ccid, concatenated=acct,
-                                   natural_account=acct.split("-")[2], amount=ln.amount.value,
+                                   natural_account=layout_from_settings().natural_account(acct),
+                                   amount=ln.amount.value,
                                    invoice_date=inv.invoice_date.value, source="review"))
     emb = get_embedder() if added else None
     if emb is not None:

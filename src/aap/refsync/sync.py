@@ -24,6 +24,7 @@ from aap.db.models import (
     RefCurrency,
     RefGlPeriod,
     RefOperatingUnit,
+    RefPaymentMethod,
     RefSupplier,
     RefSupplierBank,
     RefSupplierSite,
@@ -38,7 +39,7 @@ from aap.logging import get_logger
 log = get_logger(__name__)
 
 REF_TABLES = [RefOperatingUnit, RefSupplier, RefSupplierSite, RefSupplierBank, RefTerms, RefCurrency, RefCcid,
-              RefCategory, RefUom, RefTaxRate, RefTolerance, RefGlPeriod]
+              RefCategory, RefUom, RefTaxRate, RefTolerance, RefGlPeriod, RefPaymentMethod]
 
 
 def _yn(v: Any) -> bool:
@@ -78,7 +79,9 @@ def _rows(data) -> dict[type, list[dict[str, Any]]]:  # noqa: ANN001
             email_domains=domains, pay_site=_yn(r["pay_site_flag"]), purchasing_site=_yn(r["purchasing_site_flag"]),
             primary_pay_site=_yn(r["primary_pay_site_flag"]), terms_id=r["terms_id"],
             invoice_currency_code=r["invoice_currency_code"], tolerance_id=r["tolerance_id"],
-            match_option=r["match_option"], liability_ccid=r["liability_ccid"], inactive_date=r["inactive_date"]))
+            match_option=r["match_option"], liability_ccid=r["liability_ccid"], inactive_date=r["inactive_date"],
+            payment_method=r.get("payment_method"), pay_group=r.get("pay_group"),
+            payment_currency_code=r.get("payment_currency_code"), terms_date_basis=r.get("terms_date_basis")))
     out[RefSupplierSite] = sites
     out[RefSupplierBank] = [dict(ext_bank_account_id=r["ext_bank_account_id"], vendor_id=r["vendor_id"],
                                  bank_account_num=r["bank_account_num"], iban=r["iban"],
@@ -93,7 +96,8 @@ def _rows(data) -> dict[type, list[dict[str, Any]]]:  # noqa: ANN001
     out[RefCurrency] = [dict(currency_code=r["currency_code"], symbol=r["symbol"], precision=r["precision"],
                              territory=r["territory"], enabled=_yn(r["enabled_flag"])) for r in data.currencies]
     out[RefCcid] = [dict(ccid=r["ccid"], concatenated=r["concatenated"], segment1=r["segment1"],
-                         segment2=r["segment2"], segment3=r["segment3"], segment4=r["segment4"],
+                         segment2=r.get("segment2"), segment3=r.get("segment3"), segment4=r.get("segment4"),
+                         segments=r.get("segments"), natural_account=r.get("natural_account"),
                          account_type=r["account_type"],
                          enabled=_yn(r["enabled_flag"]) and _yn(r["detail_posting_allowed_flag"]),
                          end_date_active=r["end_date_active"], company_desc=r["company_desc"],
@@ -109,6 +113,9 @@ def _rows(data) -> dict[type, list[dict[str, Any]]]:  # noqa: ANN001
     out[RefTolerance] = [dict(tolerance_id=r["tolerance_id"], name=r["name"], price_tolerance=r["price_tolerance"],
                               quantity_tolerance=r["quantity_tolerance"],
                               qty_received_tolerance=r["qty_received_tolerance"]) for r in data.tolerances]
+    out[RefPaymentMethod] = [dict(payment_method_code=r["payment_method_code"], name=r["name"],
+                                  description=r["description"], enabled=r["inactive_date"] is None)
+                             for r in data.payment_methods]
     out[RefGlPeriod] = [dict(ledger_id=r["ledger_id"], period_name=r["period_name"], start_date=r["start_date"],
                              end_date=r["end_date"], closing_status=r["closing_status"]) for r in data.gl_periods]
     return out

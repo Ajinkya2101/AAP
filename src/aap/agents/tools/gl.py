@@ -15,6 +15,7 @@ from rapidfuzz import fuzz, process
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from aap.common.coa import layout_from_settings
 from aap.common.text import text_key
 from aap.db.models import GlHistoryLine, RefCcid
 
@@ -81,7 +82,8 @@ def majority(values: list[str]) -> tuple[str, int, int]:
 
 
 def account_description(session: Session, natural_account: str) -> str:
-    return session.scalar(select(RefCcid.account_desc).where(RefCcid.segment3 == natural_account).limit(1)) or ""
+    return session.scalar(select(RefCcid.account_desc).where(RefCcid.natural_account == natural_account)
+                          .limit(1)) or ""
 
 
 def template_ccid(session: Session, vendor_id: int, natural_account: str) -> str | None:
@@ -93,5 +95,4 @@ def template_ccid(session: Session, vendor_id: int, natural_account: str) -> str
     any_row = session.scalar(select(GlHistoryLine.concatenated).where(GlHistoryLine.vendor_id == vendor_id).limit(1))
     if not any_row:
         return None
-    s1, s2, _, s4 = any_row.split("-")
-    return f"{s1}-{s2}-{natural_account}-{s4}"
+    return layout_from_settings().with_natural_account(any_row, natural_account)

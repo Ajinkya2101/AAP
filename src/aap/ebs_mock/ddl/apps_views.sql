@@ -43,12 +43,7 @@ JOIN   hr.hr_organization_information i
        ON  i.organization_id = o.organization_id
        AND i.org_information_context = 'Operating Unit Information';
 
--- GL_CODE_COMBINATIONS_KFV (4 populated segments, delimiter '-')
-CREATE OR REPLACE VIEW apps.gl_code_combinations_kfv AS
-SELECT c.*,
-       concat_ws('-', c.segment1, c.segment2, c.segment3, c.segment4) AS concatenated_segments,
-       concat_ws('-', c.segment1, c.segment2, c.segment3, c.segment4) AS padded_concatenated_segments
-FROM   gl.gl_code_combinations c;
+-- GL_CODE_COMBINATIONS_KFV: in additions.sql (delimiter from FND_ID_FLEX_STRUCTURES).
 
 -- GL_SETS_OF_BOOKS (11i compatible view over GL_LEDGERS)
 CREATE OR REPLACE VIEW apps.gl_sets_of_books AS

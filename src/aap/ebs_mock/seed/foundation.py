@@ -123,6 +123,12 @@ def generate(ctx: SeedContext) -> None:
                 source_lang="US", security_group_id=0, view_application_id=200,
             )
 
+    # IBY_PAYMENT_METHODS (the same codes as the PAYMENT METHOD lookup the suppliers use)
+    for code, name, description in LOOKUPS["PAYMENT METHOD"]:
+        ctx.add("iby.iby_payment_methods_b", payment_method_code=code, seeded_flag="Y")
+        ctx.add("iby.iby_payment_methods_tl", payment_method_code=code, language="US", source_lang="US",
+                payment_method_name=name, description=description)
+
     for user_id, name, desc in USERS:
         ctx.reserve("fnd.fnd_user_s", user_id)
         ctx.add("fnd.fnd_user", user_id=user_id, user_name=name, description=desc,

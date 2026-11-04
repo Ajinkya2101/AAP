@@ -151,6 +151,30 @@ def export_json(session: DB, document_id: uuid.UUID) -> JSONResponse:
     return JSONResponse(invoice_json(doc, version), headers=_download(export_filename(doc, version, "json")))
 
 
+@app.get("/api/documents/{document_id}/oracle.json", tags=["documents"])
+def export_oracle_json(session: DB, document_id: uuid.UUID) -> JSONResponse:
+    """The Oracle-ready JSON: everything Oracle needs to create the invoice, by business key (supplier
+    number, site code, terms name, account string), plus whether it can be created as it is and why
+    not. Before approval: the newest reviewed version with the agents' PO and GL decisions
+    (`meta.invoice_version_kind` = proposed). Schema: `GET /api/schemas/oracle-invoice.json`."""
+    from aap.pipeline.oracle_json import OracleJsonError, oracle_invoice, to_json
+
+    try:
+        doc = oracle_invoice(session, document_id)
+    except OracleJsonError as exc:   # no document: 404; no invoice version yet: 409
+        raise HTTPException(404 if "not found" in str(exc) else 409, str(exc)) from exc
+    name = f"{doc.header.invoice_num or document_id}-oracle.json".replace("/", "_").replace('"', "")
+    return JSONResponse(to_json(doc), headers=_download(name))
+
+
+@app.get("/api/schemas/oracle-invoice.json", tags=["documents"])
+def oracle_json_schema() -> JSONResponse:
+    """JSON Schema of the Oracle-ready JSON (also docs/oracle-invoice.schema.json)."""
+    from aap.pipeline.oracle_json import json_schema
+
+    return JSONResponse(json_schema())
+
+
 @app.get("/api/documents/{document_id}/invoice.csv", tags=["documents"], response_class=PlainTextResponse)
 def export_csv(session: DB, document_id: uuid.UUID) -> Response:
     """The invoice in the standard CSV layout: one row per line, with the document, header,
@@ -171,12 +195,13 @@ def export_document(session: DB, document_id: uuid.UUID) -> Response:
     stored JSON (invoice, every validation run, every extraction run, and exactly what the model
     returned). Contents: README.txt in the ZIP."""
     from aap.pipeline.export import ExportError, document_zip, folder_name, load_document
+    from aap.pipeline.oracle_json import oracle_json_or_none
 
     try:
         data = load_document(session, document_id)
     except ExportError as exc:
         raise HTTPException(404, str(exc)) from exc
-    return Response(document_zip(data), media_type="application/zip",
+    return Response(document_zip(data, oracle_json_or_none(session, data.doc.id)), media_type="application/zip",
                     headers=_download(folder_name(data.doc, data.invoice) + ".zip"))
 
 

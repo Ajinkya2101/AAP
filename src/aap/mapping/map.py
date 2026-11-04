@@ -214,44 +214,108 @@ def map_org_currency(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSuppli
 
 
 # =================================================================== terms
-TERMS_IMMEDIATE = re.compile(r"(?i)(receipt|immediate|sofort|on delivery|cod\b)")
-TERMS_DISCOUNT = re.compile(r"(?i)(\d+(?:\.\d+)?)\s*%?\s*/\s*(\d+)\s*,?\s*(?:days?\s*,?\s*)?net\s*(\d+)")
+TERMS_IMMEDIATE = re.compile(r"(?i)(receipt|immediate|sofort|on delivery|cod\b|contado|inmediato)")
+# "2/10 net 30", "2% 10 net 30"
+TERMS_DISCOUNT = re.compile(r"(?i)(\d+(?:\.\d+)?)\s*%?\s*/\s*(\d+)\s*,?\s*(?:days?\s*,?\s*)?net\s*(\d+)"
+                            r"|(\d+(?:\.\d+)?)\s*%\s*(\d+)\s*(?:days?)?\s*,?\s*net\s*(\d+)")
+# "30 NET 2%10", "Net 30, 2% 10 days", "net due in 30 days 2% discount in 10 days"
+TERMS_NET_DISCOUNT = re.compile(r"(?i)(?:net\D{0,12}?(\d{1,3})|(\d{1,3})\s*(?:days?\s*)?net)\D{0,12}?"
+                                r"(\d+(?:\.\d+)?)\s*%\s*(?:discount\s*)?(?:in\s*|within\s*)?(\d{1,3})")
 TERMS_NET = re.compile(r"(?i)(?:net|netto|within|in|due|zahlbar|payable)\D{0,20}?(\d{1,3})|(\d{1,3})\s*(?:days?|tage|dias|jours)\b|"
                        r"\bn\s?(\d{1,3})\b")
+TERMS_EOM = re.compile(r"(?i)\b(eom|e\.o\.m|end of (the )?month|month[- ]end|(following|next) month)\b")
+# The due day with end-of-month terms: "15 EOM", "Net 15 EOM", "EOM 15", "due 15th after month end",
+# "15th of the following month". It is the day of the month after month end (KK: "NET DUE ON THE
+# 15TH AFTER MONTH END"), i.e. AP_TERMS_LINES.DUE_DAY_OF_MONTH.
+TERMS_EOM_DAY = re.compile(r"(?i)\b(\d{1,2})(?:st|nd|rd|th)?\s*(?:day\s*)?(?:of\s*)?(?:the\s*)?"
+                           r"(?:after\s*(?:the\s*)?)?(?:eom|e\.o\.m|end of (?:the )?month|month[- ]end|"
+                           r"(?:following|next) month)"
+                           r"|\b(?:eom|end of (?:the )?month)\s*\+?\s*(\d{1,2})\b")
 
 
-def _plain_terms(ref: Reference, days: int) -> RefTerms | None:
-    """The single-installment term without discount that is due `days` after the invoice date."""
+def terms_family(name: str | None) -> str:
+    """The wording of a term name without its numbers: "30 NET" -> NET, "30 DIAS" -> DIAS, "15 EOM" -> EOM.
+    A supplier uses one family (a Mexican supplier's default is "30 DIAS"), so when several terms have
+    the same days, the one in the supplier default's family is taken."""
+    return " ".join(re.sub(r"[\d.,%/+-]+", " ", (name or "").upper()).split())
+
+
+def _plain_terms(ref: Reference, days: int, family: str | None = None) -> RefTerms | None:
+    """The single-installment term without discount that is due `days` after the invoice date; with
+    several (30 NET, 30 DIAS), the one in `family`, else the NET one."""
     plain = [t for t in ref.terms.values() if t.enabled and t.due_days == days and t.installments == 1
              and not t.discount_percent and not t.due_day_of_month]
-    plain.sort(key=lambda t: (t.name != f"{days} NET", t.name))
+    plain.sort(key=lambda t: (bool(family) and terms_family(t.name) != family, t.name != f"{days} NET",
+                              terms_family(t.name) != "NET", t.name))
     return plain[0] if plain else None
 
 
-def _parse_terms(ref: Reference, printed: str, vendor_id: int | None) -> tuple[RefTerms, Method, str | None] | None:
-    """Printed terms text -> payment term, by value map, exact name or the usual wordings."""
+def _eom_terms(ref: Reference, printed: str) -> tuple[RefTerms, str] | None:
+    """End-of-month terms: the one with the day printed, or the only end-of-month term there is."""
+    if not TERMS_EOM.search(printed):
+        return None
+    eom = [t for t in ref.terms.values() if t.enabled and t.due_day_of_month and t.installments == 1
+           and not t.discount_percent]
+    m = TERMS_EOM_DAY.search(printed)
+    if m:
+        day = int(next(g for g in m.groups() if g))
+        hits = sorted((t for t in eom if t.due_day_of_month == day),
+                      key=lambda t: (terms_family(t.name) != "EOM", t.name))
+        return (hits[0], f"parsed: due on day {day} after month end") if hits else None
+    return (eom[0], "parsed: end of month") if len(eom) == 1 else None
+
+
+def _discount_terms(ref: Reference, printed: str) -> tuple[RefTerms, str] | None:
+    m = TERMS_DISCOUNT.search(printed)
+    if m:
+        g = m.groups()
+        pct, days, net = (g[0], g[1], g[2]) if g[0] else (g[3], g[4], g[5])
+    else:
+        m = TERMS_NET_DISCOUNT.search(printed)
+        if not m:
+            return None
+        g = m.groups()
+        net, pct, days = g[0] or g[1], g[2], g[3]
+    pct_d, days_i, net_i = Decimal(pct), int(days), int(net)
+    for t in sorted(ref.terms.values(), key=lambda t: t.name):
+        if t.enabled and t.discount_percent == pct_d and t.discount_days == days_i and t.due_days == net_i:
+            return t, f"parsed: {pct_d}% {days_i} days, net {net_i}"
+    return None
+
+
+def _parse_terms(ref: Reference, printed: str, vendor_id: int | None,
+                 family: str | None = None) -> tuple[RefTerms, Method, str | None] | None:
+    """Printed terms text -> payment term, by value map, exact name or the usual wordings. `family`
+    (terms_family of the supplier's default) decides between terms with the same days."""
     terms_by_name = {t.name.upper(): t for t in ref.terms.values() if t.enabled}
     vm = ref.value_map("terms", printed, vendor_id)
     if vm and vm.oracle_value.upper() in terms_by_name:
         return terms_by_name[vm.oracle_value.upper()], Method.value_map, None
     if printed.upper() in terms_by_name:
         return terms_by_name[printed.upper()], Method.exact, None
-    if TERMS_IMMEDIATE.search(printed) and "IMMEDIATE" in terms_by_name:
-        return terms_by_name["IMMEDIATE"], Method.normalized, "parsed: due immediately"
-    m = TERMS_DISCOUNT.search(printed)
-    if m:
-        pct, days, net = Decimal(m.group(1)), int(m.group(2)), int(m.group(3))
-        for t in ref.terms.values():
-            if t.enabled and t.discount_percent == pct and t.discount_days == days and t.due_days == net:
-                return t, Method.normalized, f"parsed: {pct}% {days} days, net {net}"
-    if re.search(r"(?i)\b(eom|end of (the )?month)\b", printed):
-        eom = [t for t in ref.terms.values() if t.enabled and t.due_day_of_month]
-        if len(eom) == 1:
-            return eom[0], Method.normalized, "parsed: end of month"
+    if TERMS_IMMEDIATE.search(printed):
+        # The zero-day term whose name is in the text ("pago de contado" -> CONTADO), else the one in the
+        # supplier's family, else IMMEDIATE.
+        zero = [t for t in ref.terms.values() if t.enabled and t.due_days == 0 and t.installments == 1
+                and not t.due_day_of_month]
+        words = set(re.findall(r"[A-Z]+", printed.upper()))
+        named = sorted((t for t in zero if terms_family(t.name) and set(terms_family(t.name).split()) <= words),
+                       key=lambda t: t.name)
+        now = named[0] if named else _plain_terms(ref, 0, family)
+        if now is None or (not named and terms_family(now.name) != family):
+            now = terms_by_name.get("IMMEDIATE") or now
+        if now:
+            return now, Method.normalized, "parsed: due immediately"
+    disc = _discount_terms(ref, printed)
+    if disc:
+        return disc[0], Method.normalized, disc[1]
+    eom = _eom_terms(ref, printed)
+    if eom:
+        return eom[0], Method.normalized, eom[1]
     m = TERMS_NET.search(printed)
     if m:
         days = int(next(g for g in m.groups() if g))
-        t = _plain_terms(ref, days)
+        t = _plain_terms(ref, days, family)
         if t:
             return t, Method.normalized, f"parsed: net {days} days"
     return None
@@ -277,6 +341,7 @@ def map_terms(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | No
     due_days = _due_days(inv)
     default_id = (site.terms_id if site else None) or (supplier.terms_id if supplier else None)
     default = ref.terms.get(default_id) if default_id else None
+    family = terms_family(default.name) if default else None
 
     def set_terms(term, method: Method, *flags: str, note: str | None = None,  # noqa: ANN001
                   source: Field | None = None) -> None:
@@ -286,7 +351,7 @@ def map_terms(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | No
 
     unverified = Flag.not_found_in_source in src.flags and due_days is not None
     if printed and not unverified:
-        parsed = _parse_terms(ref, printed, supplier.vendor_id if supplier else None)
+        parsed = _parse_terms(ref, printed, supplier.vendor_id if supplier else None, family)
         if parsed:
             term, method, note = parsed
             if due_days is not None and term.due_days is not None and not term.due_day_of_month \
@@ -300,7 +365,7 @@ def map_terms(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | No
         why = f"due date {inv.due_date.value} - invoice date = {due_days} days"
         if unverified:
             why += f"; printed terms {printed!r} not found on the page"
-        term = _plain_terms(ref, due_days)
+        term = _plain_terms(ref, due_days, family)
         if term:
             set_terms(term, Method.derived, note=why, source=inv.due_date)
         elif default:
@@ -328,6 +393,51 @@ def map_terms(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | No
         inv.terms_id = _like(src, None, Method.fuzzy_llm, Flag.no_map, note=pick.reason)
         return
     set_terms(ref.terms[int(pick.id)], Method.fuzzy_llm, Flag.check_map, note=pick.reason)
+
+
+# ================================================================= payment
+def map_payment(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | None,
+                site: RefSupplierSite | None) -> None:
+    """Payment method, pay group, payment currency and terms date: the supplier site's defaults (else
+    the supplier's), as the Invoice Workbench fills them. Whether AP ever keys a printed payment method
+    instead is open (B-6); until then the default is used and a printed one is not read."""
+    def default(site_value: str | None, supplier_value: str | None, what: str) -> Field:
+        if site_value:
+            return Field(value=site_value, method=Method.default, note=f"{what}: supplier site default")
+        if supplier_value:
+            return Field(value=supplier_value, method=Method.default, note=f"{what}: supplier default")
+        return Field(value=None, method=Method.default, flags=[Flag.missing], note=f"{what}: no default")
+
+    if supplier is None:
+        return
+    inv.payment_method = default(site.payment_method if site else None, supplier.payment_method, "payment method")
+    methods = ctx.ref.payment_methods
+    if methods and inv.payment_method.value and inv.payment_method.value not in methods:
+        inv.payment_method.with_flag(Flag.no_map)
+    inv.pay_group = default(site.pay_group if site else None, supplier.pay_group, "pay group")
+    payment_currency = site.payment_currency_code if site else None
+    inv.payment_currency_code = Field(
+        value=payment_currency or inv.currency_code.value, method=Method.default if payment_currency else Method.derived,
+        note="supplier site payment currency" if payment_currency else "same as the invoice currency")
+    inv.terms_date = terms_date(inv, site, ctx.document)
+
+
+def terms_date(inv: CanonicalInvoice, site: RefSupplierSite | None, document: Document | None) -> Field:
+    """The date the payment terms count from (AP_SUPPLIER_SITES_ALL.TERMS_DATE_BASIS, else TERMS_DATE_BASIS
+    setting). Goods Received needs a receipt, which a non-PO invoice does not have: the invoice date."""
+    from datetime import date as _date
+
+    from aap.config import get_settings
+
+    basis = (site.terms_date_basis if site else None) or get_settings().terms_date_basis
+    if basis == "Invoice Received" and document is not None and document.created_at is not None:
+        return Field(value=document.created_at.date(), method=Method.derived,
+                     note="terms date basis Invoice Received: the day the invoice arrived")
+    if basis == "System":
+        return Field(value=_date.today(), method=Method.derived, note="terms date basis System: today")
+    note = "terms date basis Invoice: the invoice date" if basis == "Invoice" else \
+        f"terms date basis {basis}: no receipt for this invoice, the invoice date"
+    return Field(value=inv.invoice_date.value, method=Method.derived, note=note)
 
 
 # ==================================================================== lines
@@ -521,6 +631,7 @@ def map_invoice(ctx: MapContext, normalized: CanonicalInvoice) -> CanonicalInvoi
     site = map_site(ctx, inv, supplier) if supplier else None
     map_org_currency(ctx, inv, supplier, site)
     map_terms(ctx, inv, supplier, site)
+    map_payment(ctx, inv, supplier, site)
     map_lines(ctx, inv, supplier)
     map_location(ctx, inv, supplier)
     if inv.due_date.value is None and inv.invoice_date.value and inv.terms_id.value in ctx.ref.terms:

@@ -30,6 +30,7 @@ class ReferenceData(BaseModel):
     tax_rates: list[dict[str, Any]] = PydField(default_factory=list)
     tolerances: list[dict[str, Any]] = PydField(default_factory=list)
     gl_periods: list[dict[str, Any]] = PydField(default_factory=list)
+    payment_methods: list[dict[str, Any]] = PydField(default_factory=list)
 
     def counts(self) -> dict[str, int]:
         return {k: len(v) for k, v in self.__dict__.items()}
@@ -259,24 +260,32 @@ class InterfaceLine(BaseModel):
 
 
 class InterfacePayload(BaseModel):
-    """One AP_INVOICES_INTERFACE row + its lines (Payables Open Interface)."""
+    """One AP_INVOICES_INTERFACE row + its lines (Payables Open Interface). Built by
+    adapters.payload.build_payload; the Oracle-ready JSON is made from the same object."""
     invoice_num: str
     invoice_type_lookup_code: str = "STANDARD"
     invoice_date: date
     gl_date: date | None = None
     vendor_id: int
+    vendor_num: str | None = None             # supplier number (AP_SUPPLIERS.SEGMENT1)
+    vendor_name: str | None = None
     vendor_site_id: int | None = None
     vendor_site_code: str | None = None
     invoice_amount: Decimal
     invoice_currency_code: str
+    payment_currency_code: str | None = None
     exchange_rate_type: str | None = None
     exchange_date: date | None = None
     terms_id: int | None = None
     terms_name: str | None = None
+    terms_date: date | None = None
+    payment_method_code: str | None = None
+    pay_group_lookup_code: str | None = None
     po_number: str | None = None
     description: str | None = None
     source: str
     org_id: int
+    operating_unit: str | None = None
     lines: list[InterfaceLine]
 
 

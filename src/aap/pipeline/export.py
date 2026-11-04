@@ -5,6 +5,7 @@ One document (`GET /api/documents/{id}/export.zip`):
 
     README.txt
     invoice.csv           the invoice in the standard layout (INVOICE_CSV_COLUMNS)
+    oracle_invoice.json   the Oracle-ready JSON (pipeline/oracle_json.py)
     invoice.json          the newest invoice version, every field with its provenance
     validation.json       every validation run of every version
     extraction_runs.json  every extraction run: model, prompt, status, raw output, printed values
@@ -52,7 +53,10 @@ LABELS = {"invoice_num": "Invoice number", "org_id": "Operating unit ID", "dist_
           "po_release_num": "PO release"}
 WORDS = {"id": "ID", "po": "PO", "gl": "GL", "iban": "IBAN", "uom": "UOM", "num": "number"}
 
-# The standard layout. Every Field of CanonicalInvoice / CanonicalLine is listed (a unit test checks it).
+# The standard layout. Every Field of CanonicalInvoice / CanonicalLine is listed or in CSV_LEFT_OUT (a
+# unit test checks it). The layout is frozen (Siva, 2026-11-02: JSON is the output); fields added since
+# are in the Oracle-ready JSON (pipeline/oracle_json.py) and in invoice.json, not in the CSV.
+CSV_LEFT_OUT = {"terms_date", "payment_method", "pay_group", "payment_currency_code"}
 DOCUMENT_COLUMNS = ["Document ID", "File", "Status", "Received", "Version", "Version kind"]
 HEADER_FIELDS = ["invoice_num", "invoice_type", "invoice_date", "due_date", "gl_date", "vendor_name", "vendor_id",
                  "vendor_number", "vendor_site_id", "vendor_site_code", "vendor_tax_id", "vendor_email",
@@ -75,6 +79,8 @@ README = """\
 AAP export of {what}, made {when}.
 
 invoice.csv           The invoice in the standard CSV layout (below); opens in Excel
+oracle_invoice.json   The Oracle-ready JSON: what Oracle needs to create the invoice, by business key,
+                      and whether it can be created as it is (schema: docs/oracle-invoice.schema.json)
 invoice.json          The newest invoice version with every field and its provenance (as printed,
                       page, method, flags, note)
 validation.json       Every validation run of every version
@@ -319,9 +325,12 @@ def export_filename(doc: Document, version: InvoiceVersion, ext: str) -> str:
     return f"{_safe(str(inv.get('value') or doc.id))}-v{version.version}-{version.kind}.{ext}"
 
 
-def _write_document(zf: zipfile.ZipFile, prefix: str, data: DocumentData) -> None:
+def _write_document(zf: zipfile.ZipFile, prefix: str, data: DocumentData,
+                    oracle: dict[str, Any] | None = None) -> None:
     files = {"invoice.csv": invoice_csv(data), "validation.json": _json(validation_json(data)),
              "extraction_runs.json": _json(extraction_runs_json(data))}
+    if oracle is not None:
+        files["oracle_invoice.json"] = _json(oracle)
     if data.version is not None:
         files["invoice.json"] = _json(invoice_json(data.doc, data.version))
     for name, text in files.items():
@@ -336,11 +345,11 @@ def _readme(what: str) -> str:
     return README.format(what=what, when=datetime.now(UTC).isoformat(timespec="seconds"))
 
 
-def document_zip(data: DocumentData) -> bytes:
+def document_zip(data: DocumentData, oracle: dict[str, Any] | None = None) -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("README.txt", _readme(f"document {data.doc.id} ({data.doc.filename})"))
-        _write_document(zf, "", data)
+        _write_document(zf, "", data, oracle)
     return buf.getvalue()
 
 
@@ -356,7 +365,10 @@ def bulk_zip(session: Session, document_ids: Iterable[uuid.UUID]) -> IO[bytes]:
                 data = load_document(session, document_id)
             except ExportError:
                 continue
-            _write_document(zf, f"documents/{folder_name(data.doc, data.invoice)}/", data)
+            from aap.pipeline.oracle_json import oracle_json_or_none
+
+            oracle = oracle_json_or_none(session, document_id)
+            _write_document(zf, f"documents/{folder_name(data.doc, data.invoice)}/", data, oracle)
             rows += invoice_csv_rows(data)
             session.expunge_all()                  # keep memory flat over thousands of documents
             n += 1

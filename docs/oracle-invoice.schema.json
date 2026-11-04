@@ -1,0 +1,808 @@
+{
+  "$defs": {
+    "AccountLayout": {
+      "properties": {
+        "segment_count": {
+          "title": "Segment Count",
+          "type": "integer"
+        },
+        "separator": {
+          "title": "Separator",
+          "type": "string"
+        }
+      },
+      "required": [
+        "segment_count",
+        "separator"
+      ],
+      "title": "AccountLayout",
+      "type": "object"
+    },
+    "Distribution": {
+      "description": "AP_INVOICE_DISTRIBUTIONS: one per non-PO line here (the whole line amount to its account).",
+      "properties": {
+        "distribution_line_number": {
+          "title": "Distribution Line Number",
+          "type": "integer"
+        },
+        "line_type_lookup_code": {
+          "title": "Line Type Lookup Code",
+          "type": "string"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Amount"
+        },
+        "accounting_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "GL date of the distribution",
+          "title": "Accounting Date"
+        },
+        "dist_code_concatenated": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Account: the concatenated segments",
+          "title": "Dist Code Concatenated"
+        }
+      },
+      "required": [
+        "distribution_line_number",
+        "line_type_lookup_code",
+        "amount",
+        "accounting_date",
+        "dist_code_concatenated"
+      ],
+      "title": "Distribution",
+      "type": "object"
+    },
+    "Header": {
+      "description": "AP_INVOICES_INTERFACE columns, by business key (no instance IDs).",
+      "properties": {
+        "operating_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Operating Unit"
+        },
+        "invoice_type_lookup_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "STANDARD, CREDIT, ...",
+          "title": "Invoice Type Lookup Code"
+        },
+        "vendor_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Trading partner (supplier name)",
+          "title": "Vendor Name"
+        },
+        "vendor_num": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Supplier number (AP_SUPPLIERS.SEGMENT1)",
+          "title": "Vendor Num"
+        },
+        "vendor_site_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vendor Site Code"
+        },
+        "invoice_num": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Invoice Num"
+        },
+        "invoice_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Invoice Date"
+        },
+        "invoice_currency_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Invoice Currency Code"
+        },
+        "invoice_amount": {
+          "anyOf": [
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Invoice Amount"
+        },
+        "gl_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gl Date"
+        },
+        "payment_currency_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Payment Currency Code"
+        },
+        "terms_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Terms Name"
+        },
+        "terms_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Terms Date"
+        },
+        "payment_method_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Payment Method Code"
+        },
+        "pay_group_lookup_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pay Group Lookup Code"
+        },
+        "exchange_rate_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exchange Rate Type"
+        },
+        "exchange_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exchange Date"
+        },
+        "po_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Po Number"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "due_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "For information: Oracle computes it from the terms",
+          "title": "Due Date"
+        }
+      },
+      "required": [
+        "operating_unit",
+        "invoice_type_lookup_code",
+        "vendor_name",
+        "vendor_num",
+        "vendor_site_code",
+        "invoice_num",
+        "invoice_date",
+        "invoice_currency_code",
+        "invoice_amount",
+        "gl_date",
+        "payment_currency_code",
+        "terms_name",
+        "terms_date",
+        "payment_method_code",
+        "source"
+      ],
+      "title": "Header",
+      "type": "object"
+    },
+    "Issue": {
+      "properties": {
+        "field": {
+          "description": "JSON path, e.g. header.terms_name or lines[2].dist_code_concatenated",
+          "title": "Field",
+          "type": "string"
+        },
+        "code": {
+          "description": "Why the value is not certain (e.g. check_map, gl_review, not_in_instance_map)",
+          "title": "Code",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        }
+      },
+      "required": [
+        "field",
+        "code"
+      ],
+      "title": "Issue",
+      "type": "object"
+    },
+    "Line": {
+      "description": "AP_INVOICE_LINES_INTERFACE columns.",
+      "properties": {
+        "line_number": {
+          "title": "Line Number",
+          "type": "integer"
+        },
+        "line_type_lookup_code": {
+          "description": "ITEM, TAX, FREIGHT or MISCELLANEOUS",
+          "title": "Line Type Lookup Code",
+          "type": "string"
+        },
+        "amount": {
+          "anyOf": [
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Amount"
+        },
+        "accounting_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "GL date of the line",
+          "title": "Accounting Date"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "quantity_invoiced": {
+          "anyOf": [
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quantity Invoiced"
+        },
+        "unit_price": {
+          "anyOf": [
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit Price"
+        },
+        "unit_of_meas_lookup_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit Of Meas Lookup Code"
+        },
+        "po_number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Po Number"
+        },
+        "release_num": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Release Num"
+        },
+        "po_line_number": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Po Line Number"
+        },
+        "tax_rate_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tax Rate Code"
+        },
+        "dist_code_concatenated": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Account of a non-PO line; empty on PO-matched, tax and freight lines",
+          "title": "Dist Code Concatenated"
+        },
+        "account_source": {
+          "description": "line: the account above; po_match: Oracle takes the PO distribution's; oracle_setup: Oracle's tax / freight setup decides",
+          "enum": [
+            "line",
+            "po_match",
+            "oracle_setup"
+          ],
+          "title": "Account Source",
+          "type": "string"
+        },
+        "distributions": {
+          "items": {
+            "$ref": "#/$defs/Distribution"
+          },
+          "title": "Distributions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "line_number",
+        "line_type_lookup_code",
+        "amount",
+        "accounting_date",
+        "account_source"
+      ],
+      "title": "Line",
+      "type": "object"
+    },
+    "Meta": {
+      "properties": {
+        "schema_id": {
+          "default": "aap.oracle-invoice",
+          "title": "Schema Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "document_id": {
+          "title": "Document Id",
+          "type": "string"
+        },
+        "filename": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Filename"
+        },
+        "document_status": {
+          "title": "Document Status",
+          "type": "string"
+        },
+        "invoice_version": {
+          "title": "Invoice Version",
+          "type": "integer"
+        },
+        "invoice_version_kind": {
+          "description": "approved: what the clerk approved; proposed: the newest reviewed version with the agents' PO and GL decisions",
+          "title": "Invoice Version Kind",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "prompt_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prompt Version"
+        },
+        "account_layout": {
+          "$ref": "#/$defs/AccountLayout"
+        },
+        "target_instance": {
+          "description": "Whose values the JSON carries (instance value map)",
+          "title": "Target Instance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "generated_at",
+        "document_id",
+        "filename",
+        "document_status",
+        "invoice_version",
+        "invoice_version_kind",
+        "account_layout",
+        "target_instance"
+      ],
+      "title": "Meta",
+      "type": "object"
+    },
+    "SourceIds": {
+      "description": "IDs in the instance the reference data was read from. Valid only there; on another instance\nlook the records up by the business keys in `header`.",
+      "properties": {
+        "instance": {
+          "title": "Instance",
+          "type": "string"
+        },
+        "org_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Org Id"
+        },
+        "vendor_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vendor Id"
+        },
+        "vendor_site_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vendor Site Id"
+        },
+        "terms_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Terms Id"
+        }
+      },
+      "required": [
+        "instance"
+      ],
+      "title": "SourceIds",
+      "type": "object"
+    },
+    "Status": {
+      "properties": {
+        "state": {
+          "description": "ready: can be created as it is; needs_review / on_hold: a clerk decides first; approved / submitted / created: decided in the application",
+          "enum": [
+            "ready",
+            "needs_review",
+            "on_hold",
+            "approved",
+            "submitted",
+            "created",
+            "rejected",
+            "not_ready"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "postable": {
+          "description": "Every required field is filled and the state is ready or approved",
+          "title": "Postable",
+          "type": "boolean"
+        },
+        "validation": {
+          "enum": [
+            "pass",
+            "warning",
+            "fail",
+            "not_run"
+          ],
+          "title": "Validation",
+          "type": "string"
+        },
+        "validation_messages": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Validation Messages",
+          "type": "array"
+        },
+        "review_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Review Reasons",
+          "type": "array"
+        },
+        "missing": {
+          "description": "Required fields without a value",
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing",
+          "type": "array"
+        },
+        "issues": {
+          "items": {
+            "$ref": "#/$defs/Issue"
+          },
+          "title": "Issues",
+          "type": "array"
+        }
+      },
+      "required": [
+        "state",
+        "postable",
+        "validation"
+      ],
+      "title": "Status",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "status": {
+      "$ref": "#/$defs/Status"
+    },
+    "header": {
+      "$ref": "#/$defs/Header"
+    },
+    "lines": {
+      "items": {
+        "$ref": "#/$defs/Line"
+      },
+      "title": "Lines",
+      "type": "array"
+    },
+    "source_ids": {
+      "$ref": "#/$defs/SourceIds"
+    }
+  },
+  "required": [
+    "meta",
+    "status",
+    "header",
+    "lines",
+    "source_ids"
+  ],
+  "title": "Oracle-ready invoice",
+  "type": "object",
+  "$id": "https://acse.example/schemas/aap.oracle-invoice/1.0",
+  "description": "Oracle-ready JSON: one document per invoice with everything Oracle needs to create it (Siva,\n2026-11-02: \"invoice in, one JSON out, a Python program calls the Oracle API / interface\")."
+}

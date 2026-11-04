@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "schema_id": "aap.oracle-invoice",
+    "schema_version": "1.0",
+    "generated_at": "2026-11-04T09:00:00Z",
+    "document_id": "3f0c9a52-6f1e-4c1b-9d2e-5a7b8c9d0e1f",
+    "filename": "NWP-24017.pdf",
+    "document_status": "IN_REVIEW",
+    "invoice_version": 3,
+    "invoice_version_kind": "proposed",
+    "model": "qwen2.5-vl-7b",
+    "prompt_version": "v5",
+    "account_layout": {
+      "segment_count": 8,
+      "separator": "."
+    },
+    "target_instance": "same values as the source instance"
+  },
+  "status": {
+    "state": "needs_review",
+    "postable": false,
+    "validation": "pass",
+    "validation_messages": [],
+    "review_reasons": [
+      "GL_REVIEW"
+    ],
+    "missing": [],
+    "issues": [
+      {
+        "field": "lines[2].dist_code_concatenated",
+        "code": "gl_review",
+        "detail": "model chose 65020 among 2 accounts"
+      }
+    ]
+  },
+  "header": {
+    "operating_unit": "Example Donuts US OU",
+    "invoice_type_lookup_code": "STANDARD",
+    "vendor_name": "Northwind Packaging LLC",
+    "vendor_num": "70001",
+    "vendor_site_code": "NWP-MAIN",
+    "invoice_num": "NWP-24017",
+    "invoice_date": "2026-10-01",
+    "invoice_currency_code": "USD",
+    "invoice_amount": "1274.95",
+    "gl_date": "2026-10-02",
+    "payment_currency_code": "USD",
+    "terms_name": "30 NET 2%10",
+    "terms_date": "2026-10-01",
+    "payment_method_code": "EFT",
+    "pay_group_lookup_code": "STANDARD",
+    "exchange_rate_type": null,
+    "exchange_date": null,
+    "po_number": null,
+    "description": "Northwind Packaging LLC invoice NWP-24017",
+    "source": "AAP",
+    "due_date": "2026-10-31"
+  },
+  "lines": [
+    {
+      "line_number": 1,
+      "line_type_lookup_code": "ITEM",
+      "amount": "1200.00",
+      "accounting_date": "2026-10-02",
+      "description": "Donut boxes 12 count",
+      "quantity_invoiced": "500",
+      "unit_price": "2.40",
+      "unit_of_meas_lookup_code": null,
+      "po_number": null,
+      "release_num": null,
+      "po_line_number": null,
+      "tax_rate_code": null,
+      "dist_code_concatenated": "10.20.00110.61210.00000.000.00.000",
+      "account_source": "line",
+      "distributions": [
+        {
+          "distribution_line_number": 1,
+          "line_type_lookup_code": "ITEM",
+          "amount": "1200.00",
+          "accounting_date": "2026-10-02",
+          "dist_code_concatenated": "10.20.00110.61210.00000.000.00.000"
+        }
+      ]
+    },
+    {
+      "line_number": 2,
+      "line_type_lookup_code": "FREIGHT",
+      "amount": "74.95",
+      "accounting_date": "2026-10-02",
+      "description": "Freight",
+      "quantity_invoiced": null,
+      "unit_price": null,
+      "unit_of_meas_lookup_code": null,
+      "po_number": null,
+      "release_num": null,
+      "po_line_number": null,
+      "tax_rate_code": null,
+      "dist_code_concatenated": "10.20.00110.65020.00000.000.00.000",
+      "account_source": "line",
+      "distributions": [
+        {
+          "distribution_line_number": 1,
+          "line_type_lookup_code": "FREIGHT",
+          "amount": "74.95",
+          "accounting_date": "2026-10-02",
+          "dist_code_concatenated": "10.20.00110.65020.00000.000.00.000"
+        }
+      ]
+    }
+  ],
+  "source_ids": {
+    "instance": "the reference data's instance",
+    "org_id": 81,
+    "vendor_id": 5001,
+    "vendor_site_id": 6001,
+    "terms_id": 102
+  }
+}

@@ -2,7 +2,8 @@
 
 Field results are (field_path, expected, actual, correct). A field whose truth is empty
 counts as correct only if the pipeline also left it empty (catches invented values,
-e.g. a bank account on an invoice that has none).
+e.g. a bank account on an invoice that has none). A field the truth does not have at all
+(no key) is not scored: a client gold set only knows what AP keyed, not every printed value.
 """
 
 from __future__ import annotations
@@ -88,6 +89,8 @@ EXTRACT_FIELDS = {
 HEADER_FIELDS = {
     "vendor_id": "exact", "vendor_site_id": "exact", "invoice_date": "exact", "invoice_amount": "amount",
     "subtotal": "amount", "tax_amount": "amount", "currency_code": "exact", "po_number": "alnum",
+    # keyed values of a client gold set (clientdata/goldset.py); synthetic truths do not have them
+    "terms_id": "exact", "invoice_type": "exact", "payment_method": "exact",
 }
 
 
@@ -97,6 +100,8 @@ def field_results(truth: dict[str, Any], source: dict[str, Any] | None,
     src_truth, expected = truth.get("source") or {}, truth.get("expected") or {}
     source = source or {}
     for name, kind in EXTRACT_FIELDS.items():
+        if name not in src_truth:
+            continue
         e, a = src_truth.get(name), source.get(name)
         out.append(FieldResult(f"extract.{name}", _s(e), _s(a), _same(kind, e, a)))
     canon = canonical or {}
@@ -106,12 +111,15 @@ def field_results(truth: dict[str, Any], source: dict[str, Any] | None,
         return f.get("value") if isinstance(f, dict) else None
 
     for name, kind in HEADER_FIELDS.items():
+        if name not in expected:
+            continue
         e, a = expected.get(name), cval(name)
         if name == "tax_amount" and e in (None, "") and _amount(a) == 0:
             a = None                                  # "no tax" and "tax 0.00" mean the same
         out.append(FieldResult(f"header.{name}", _s(e), _s(a), _same(kind, e, a)))
-    e, a = src_truth.get("invoice_number"), cval("invoice_num")
-    out.append(FieldResult("header.invoice_num", _s(e), _s(a), _same("alnum", e, a)))
+    if "invoice_number" in src_truth or "invoice_num" in expected:
+        e, a = expected.get("invoice_num", src_truth.get("invoice_number")), cval("invoice_num")
+        out.append(FieldResult("header.invoice_num", _s(e), _s(a), _same("alnum", e, a)))
     return out
 
 

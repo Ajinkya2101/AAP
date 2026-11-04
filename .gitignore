@@ -1,4 +1,5 @@
 .env
+.env.kk
 .venv/
 __pycache__/
 *.pyc
@@ -12,6 +13,11 @@ build/
 *.egg-info/
 /data/
 /out/
+data_received/
+# Client data (IMPLEMENTATION-PLAN-CLIENT-DATA section 9): raw deliveries and gold sets are never committed
+client-data/*
+!client-data/README.md
+test-data-kk/
 
 # Local machine config (docker/wslconfig.example is the tracked template)
 docker/.wslconfig
