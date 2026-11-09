@@ -1,0 +1,9 @@
+# Adapter B plumbing: printed values + a made-up context pack (smoke/0) -> supplier, site, OU, currency.
+# Dataset: uv run python -m aap.finetune.chat decide-smoke --eval-set test-data/invoices-dev-55 --out training/chat-data/smoke-b
+name: smoke-b-qlora
+task: decide
+model: {base: Qwen/Qwen2.5-VL-7B-Instruct, size_b: 8.3}
+method: {name: qlora}
+data: {dataset: chat-data/smoke-b, max_seq_len: 4096, limit_dev: 3}
+train: {max_steps: 10, batch_size: 2, grad_accum: 2, learning_rate: 2.0e-4, save_steps: 5, logging_steps: 1}
+eval: {limit: 3, max_new_tokens: 256}

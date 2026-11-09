@@ -1,0 +1,9 @@
+# Adapter A on the real train split (only when the CLIENT-DATA P7 decision rule says so, after J-1).
+# Dataset under test-data-kk/ (client data, git-ignored).
+name: a-qlora
+task: extract
+model: {base: Qwen/Qwen2.5-VL-7B-Instruct, size_b: 8.3}
+method: {name: qlora, rank: 16, alpha: 32, dropout: 0.05}
+data: {dataset: ../test-data-kk/train-a, max_seq_len: 8192}
+train: {epochs: 3, learning_rate: 1.0e-4, warmup_ratio: 0.03, batch_size: 1, grad_accum: 8, save_steps: 50}
+eval: {limit: 50, max_new_tokens: 4096}

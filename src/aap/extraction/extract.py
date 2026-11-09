@@ -81,15 +81,20 @@ def _content(pages: list[PageInput]) -> list[dict[str, Any]]:
     return parts
 
 
-def extract(pages: list[PageInput], llm: LlmClient, *, sha256: str | None = None) -> ExtractionOutput:
+@dataclass
+class ChunkRequest:
+    request: LlmRequest
+    schema_cls: type[ExtractedInvoice]       # the answer is read with this class
+    pages: list[PageInput]
+
+
+def extraction_requests(pages: list[PageInput], *, sha256: str | None = None) -> list[ChunkRequest]:
+    """The extraction requests for an invoice, one per chunk of pages. The training datasets
+    (aap.finetune.chat) are built from the same requests, so a model is trained on exactly the input
+    it is served."""
     settings = get_settings()
     chunks = _chunks(sorted(pages, key=lambda p: p.page_no), settings.llm_max_images_per_request)
-    header: ExtractedInvoice | None = None
-    lines: list[ExtractedLine] = []
-    evidence: list[dict[str, Any]] = []
-    raw: list[dict[str, Any]] = []
-    duration = 0
-    model = backend = ""
+    out: list[ChunkRequest] = []
     for idx, chunk in enumerate(chunks):
         grounded = any(p.route == "image_only" for p in chunk)
         model_cls = ExtractedInvoiceGrounded if grounded else ExtractedInvoice
@@ -98,14 +103,28 @@ def extract(pages: list[PageInput], llm: LlmClient, *, sha256: str | None = None
             system += "\n\n" + load_prompt("extract_grounded")
         if idx > 0:
             system += "\n\n" + load_prompt("extract_lines_only")
-        req = LlmRequest(
+        out.append(ChunkRequest(LlmRequest(
             task="extract", system=system, content=_content(chunk), schema=model_cls.model_json_schema(),
             max_tokens=settings.extract_max_tokens,
             context={"sha256": sha256, "page_texts": [p.text for p in chunk],
                      "chunk": {"index": idx, "pages": [p.page_no for p in chunk], "lines_only": idx > 0}
                      if len(chunks) > 1 else None},
-        )
-        resp = llm.ask(req)
+        ), model_cls, chunk))
+    return out
+
+
+def extract(pages: list[PageInput], llm: LlmClient, *, sha256: str | None = None) -> ExtractionOutput:
+    requests_ = extraction_requests(pages, sha256=sha256)
+    chunks = [r.pages for r in requests_]
+    header: ExtractedInvoice | None = None
+    lines: list[ExtractedLine] = []
+    evidence: list[dict[str, Any]] = []
+    raw: list[dict[str, Any]] = []
+    duration = 0
+    model = backend = ""
+    for idx, r in enumerate(requests_):
+        chunk, model_cls = r.pages, r.schema_cls
+        resp = llm.ask(r.request)
         parsed = model_cls.model_validate(resp.data)
         raw.append({"chunk": idx, "pages": [p.page_no for p in chunk], "model": resp.model,
                     "duration_ms": resp.duration_ms, "output": resp.data, "usage": resp.usage})

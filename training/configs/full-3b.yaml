@@ -1,0 +1,8 @@
+# Full fine-tune of the 3B base (the "smaller and faster" option). Not possible for the 7B on one 24 GB GPU.
+# May not fit with page images either: measure with a smoke run (--set train.max_steps=5) first.
+name: full-3b
+task: extract
+model: {base: Qwen/Qwen2.5-VL-3B-Instruct, size_b: 3.8}
+method: {name: full}
+data: {dataset: ../test-data-kk/train-a, max_seq_len: 8192}
+train: {epochs: 2, learning_rate: 1.0e-5, batch_size: 1, grad_accum: 8, optim: adamw_bnb_8bit, save_steps: 50, save_total_limit: 2}

@@ -1,0 +1,9 @@
+# Adapter B on the real train split (keyed records + context packs); learning curve with
+# --set data.limit_train=<n>.
+name: b-qlora
+task: decide
+model: {base: Qwen/Qwen2.5-VL-7B-Instruct, size_b: 8.3}
+method: {name: qlora, rank: 16, alpha: 32}
+data: {dataset: ../test-data-kk/train-b, max_seq_len: 4096}
+train: {epochs: 3, learning_rate: 2.0e-4, batch_size: 2, grad_accum: 4, save_steps: 50}
+eval: {limit: 50, max_new_tokens: 1024}

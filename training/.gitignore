@@ -1,0 +1,9 @@
+# runs, checkpoints and adapters (trained on client data they are client data), generated datasets
+runs/
+chat-data/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+wandb/

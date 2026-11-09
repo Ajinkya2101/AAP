@@ -1,0 +1,9 @@
+# Plumbing with a tiny random Qwen2.5-VL (a few MB): every step of the pipeline, in seconds, without
+# stopping vLLM. Scores are meaningless (random weights).
+name: smoke-tiny
+task: extract
+model: {base: trl-internal-testing/tiny-Qwen2_5_VLForConditionalGeneration, size_b: 0.01}
+method: {name: lora, rank: 8, alpha: 16}
+data: {dataset: chat-data/smoke-a, max_seq_len: 8192, limit_train: 4, limit_dev: 1}
+train: {max_steps: 4, grad_accum: 1, save_steps: 2, logging_steps: 1}
+eval: {limit: 1, max_new_tokens: 16}

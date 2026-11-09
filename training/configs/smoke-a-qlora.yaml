@@ -1,0 +1,10 @@
+# Adapter A plumbing on synthetic invoices: QLoRA on the served 7B base, a few steps.
+# The score proves the pipeline runs end to end; it says nothing about client invoices.
+# Dataset: uv run python -m aap.finetune.chat extract --eval-set test-data/invoices-dev-55 --out training/chat-data/smoke-a
+name: smoke-a-qlora
+task: extract
+model: {base: Qwen/Qwen2.5-VL-7B-Instruct, size_b: 8.3}
+method: {name: qlora, rank: 16, alpha: 32}
+data: {dataset: chat-data/smoke-a, max_seq_len: 8192, limit_dev: 2}
+train: {max_steps: 10, grad_accum: 2, learning_rate: 1.0e-4, save_steps: 5, logging_steps: 1}
+eval: {limit: 2, max_new_tokens: 2048}

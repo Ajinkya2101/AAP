@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | Approved to build 2026-11-09; T0 first |
+| Status | T0-T2 and T4 done, T3 / T6 on the tiny model (2026-11-09); the 7B smoke runs and T5 need vLLM stopped |
 | Scope | Everything needed to fine-tune, check and serve adapter A (reading) and adapter B (Oracle fields) of [PLAN-MODEL-JSON.md](PLAN-MODEL-JSON.md), ready before the real training data exists |
 | Where | `training/` at the repository root: its own Python project, its own container. The application (`src/aap`) writes the datasets; `training/` reads them and never imports `aap` |
 | Builds on | CLIENT-DATA P6-P7, [FINETUNING-SCOPE.md](FINETUNING-SCOPE.md), `aap.finetune.export` |
@@ -40,7 +40,7 @@ from what production sends.
 | Method | Base | Memory estimate (batch 1, gradient checkpointing, one page) | Served as |
 |---|---|---|---|
 | `qlora` (default) | Qwen2.5-VL-7B, 4-bit NF4 | about 10-14 GB | LoRA adapter on the vLLM base |
-| `lora` | 7B bf16 | about 20-24 GB: likely does not fit with page images | LoRA adapter |
+| `lora` | 7B bf16 | about 20-24 GB: likely does not fit with page images (refused by the config) | LoRA adapter |
 | `lora` | Qwen2.5-VL-3B bf16 | about 10-12 GB | LoRA adapter on a 3B base |
 | `lora_projector` | 7B 4-bit + the vision-language merger trained in full | about 12-16 GB | **Merged model** (vLLM LoRA cannot carry non-LoRA weights) |
 | `full` | Qwen2.5-VL-3B only | about 20+ GB with 8-bit Adam; may not fit | Full checkpoint |
@@ -187,13 +187,13 @@ Defaults are starting points for the real runs; the smoke configs use a handful 
 
 | # | Item | Status |
 |---|---|---|
-| T0 | `training/` project skeleton, `envcheck` (GPU, CUDA, bf16, 4-bit, SDPA, free memory); Dockerfile; run it on the RTX 5090 | ⬜ |
-| T1 | Dataset contract: application-side builder `aap.finetune.chat` for adapter A from a synthetic eval set and from the `aap.finetune.export` output; the extraction request factored out of `extract()` so both use one function | ⬜ |
-| T2 | `aap_train`: config, contract reader, collator with target-only labels, methods (`qlora`, `lora`, `lora_projector`, `full` with the refusals), trainer, run directory, optional wandb; unit tests without GPU | ⬜ |
-| T3 | Smoke run A on synthetic invoices (QLoRA, 7B); measured memory and speed; `evaluate` picks the checkpoint; `package` writes the adapter | ⬜ |
-| T4 | Adapter B contract with a made-up context pack; smoke dataset and smoke run B | ⬜ |
+| T0 | `training/` project skeleton, `envcheck` (GPU, CUDA, bf16, 4-bit, SDPA, free memory); Dockerfile; run it on the RTX 5090 | ✅ torch 2.11 cu128 (native sm_120), transformers 5.22, peft 0.21, bitsandbytes 0.50: bf16, NF4 4-bit and SDPA work on the GPU; no flash-attention (SDPA). Runs natively on Windows; Windows Application Control blocked torch's DLLs on the first load, then allowed them; the Dockerfile is the fallback |
+| T1 | Dataset contract: application-side builder `aap.finetune.chat` for adapter A from a synthetic eval set and from the `aap.finetune.export` output; the extraction request factored out of `extract()` so both use one function | ✅ `extraction_requests()` in `aap.extraction.extract`; synthetic `invoices-dev-55`: 49 examples (6 image-only left out: no evidence-box labels); about 3,400 tokens per one-page invoice |
+| T2 | `aap_train`: config, contract reader, collator with target-only labels, methods (`qlora`, `lora`, `lora_projector`, `full` with the refusals), trainer, run directory, optional wandb; unit tests without GPU | ✅ 26 tests without GPU; found and guarded: the processor ignores `size=` from `from_pretrained` (4,819 instead of 1,240 image tokens), so `max_pixels` is passed as vLLM does and checked after loading; transformers 5's skip-list matching quantized the vision tower to 4-bit, now kept bf16 and checked after loading |
+| T3 | Smoke run A on synthetic invoices (QLoRA, 7B); measured memory and speed; `evaluate` picks the checkpoint; `package` writes the adapter | 🟠 every step done on the tiny random Qwen2.5-VL (`configs/smoke-tiny.yaml`, `AAP_TRAIN_GPU_TESTS=1` tests); the 7B run needs vLLM stopped (it holds about 15 GB) and the weights copied out of the `models` volume |
+| T4 | Adapter B contract with a made-up context pack; smoke dataset and smoke run B | ✅ `aap.finetune.chat decide-smoke` (context pack `smoke/0`, 55 examples, about 500 tokens each); text-only run on the tiny model; the 7B run with T3 |
 | T5 | vLLM: `--enable-lora` behind a compose setting, two adapters, `EXTRACT_MODEL` / `DECIDE_MODEL`, rollback; verify fp8 base + LoRA and text-only B | ⬜ |
-| T6 | `lora_projector` merge and `full` on 3B, smoke only | ⬜ |
+| T6 | `lora_projector` merge and `full` on 3B, smoke only | 🟠 both methods train and package (merged `model/`) on the tiny model; the 3B full run not tried yet |
 | T7 | Real runs: B on the train split (learning curve), A only if the decision rule says so | ⏸ data, J-1 |
 
 Order: T0 → T1 → T2 → T3 → T4 → T5 → T6. If T0 shows that 4-bit loading does not work on this GPU,

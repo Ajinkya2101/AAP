@@ -1,0 +1,8 @@
+# Adapter A with the vision-language merger trained in full (when scanned pages are the problem).
+# Served as a merged model (aap_train.package writes model/), not as a vLLM LoRA adapter.
+name: a-lora-projector
+task: extract
+model: {base: Qwen/Qwen2.5-VL-7B-Instruct, size_b: 8.3}
+method: {name: lora_projector, rank: 16, alpha: 32}
+data: {dataset: ../test-data-kk/train-a, max_seq_len: 8192}
+train: {epochs: 2, learning_rate: 5.0e-5, batch_size: 1, grad_accum: 8, save_steps: 50}
