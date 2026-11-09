@@ -107,6 +107,7 @@ the checker passes or the exceptions are understood.**
 |---|---|---|
 | P1.1 | `client-data/` in `.gitignore`; folder layout; README with the handling rules (§9) | ✅ `client-data/README.md`; `test-data-kk/` ignored too |
 | P1.2 | `aap.clientdata` readers (CSV / XLSX, column name mapping, dates, numbers with commas) | ✅ also SQL Developer exports ("Export Worksheet" + "SQL" sheets) and `_TL` languages; tried on Dhivya's two files |
+| P1.5 | Extracts that are not one table each (2026-11-09 delivery) | ✅ `aap.clientdata.views`: Header / Line / Distribution sheets (generic sheet names only match a sheet with the table's columns, so a list-of-values workbook is not misread); the joined supplier / site / payment-method list split into suppliers and sites, VENDOR_ID from the invoices, the payee's default payment method; exact duplicate rows dropped (warning); header ORG_ID from the lines; distribution set tables and checks; fixture `--list-format` |
 | P1.3 | Checker with the join and content checks above; manifest | ✅ `python -m aap.clientdata.check`; also store cost centers, segment values vs value sets, segment count, PO-matched invoices |
 | P1.4 | Fixtures with the same columns (made up, 3 suppliers) so P1-P4 can be built and tested before the data arrives | ✅ `python -m aap.clientdata.fixtures` (8 segments, reversal, cancelled and image-only invoice; `--broken`) |
 
@@ -156,9 +157,9 @@ every distribution a valid CCID, period open for every history date, …).
 |---|---|---|
 | P2.1 | Settings for the segment count, separator, natural-account and cost-center segment; 8-segment changes in the files above; tests with an 8-segment fixture | ✅ `common/coa.py`; delimiter in `FND_ID_FLEX_STRUCTURES` (`ebs_mock/ddl/additions.sql`); `ref_ccid.segments` / `natural_account` (migration 0004) |
 | P2.2 | Mock `IBY_PAYMENT_METHODS_B/_TL`; payment method on the site reference data | ✅ plus pay group, payment currency and terms date basis on the site |
-| P2.3 | `client_load`: foundation from the seed, the rest from the extracts; history without the test split | ✅ `aap.ebs_mock.client_load` + `aap.clientdata.replica`; tested on the fixtures (`tests/integration/test_replica_load.py`); loaded 2026-11-04 with Dhivya's terms and payment methods; reload when the extracts arrive |
+| P2.3 | `client_load`: foundation from the seed, the rest from the extracts; history without the test split | ✅ `aap.ebs_mock.client_load` + `aap.clientdata.replica`; tested on the fixtures (`tests/integration/test_replica_load.py`); loaded 2026-11-04 with Dhivya's terms and payment methods; reloaded 2026-11-09 with the invoice history and supplier list (`--skip-unmatched-invoices` leaves out the invoices of suppliers not delivered yet); CCIDs without GL_CODE_COMBINATIONS get placeholder accounts (natural-account segment = CCID) until B2 |
 | P2.4 | `ebs_kk` / `aap_kk` databases, `.env.kk`, Makefile / script targets to load and switch | ✅ created by `python -m aap.clientdata.replica --create-databases`; switching the running stack to the replica (use `.env.kk`'s DSNs) not scripted yet |
-| P2.5 | Invariants on the replica | ✅ the seed's checks run after every load (the S1 fixture check skipped); today only "open GL periods" fails, as there are no ledgers yet |
+| P2.5 | Invariants on the replica | ✅ the seed's checks run after every load (the S1 fixture check skipped); after the 2026-11-09 load only the known gaps fail: site liability accounts (not delivered), invoices whose lines are missing or do not add up |
 
 ### P3. Reference sync and mapping on the replica
 
@@ -175,7 +176,9 @@ every distribution a valid CCID, period open for every history date, …).
 
 | # | Item | Status |
 |---|---|---|
-| P3.1 | Refsync and embedding backfill on `aap_kk`; timing noted | ⏸ data |
+| P3.1 | Refsync and embedding backfill on `aap_kk`; timing noted | 🟠 refsync done 2026-11-09 (GL history lines in `aap_kk`, seconds); embedding backfill not run yet (most keyed line descriptions are empty, so it matters little until the invoice files arrive) |
+| P3.5 | What the keyed history says before the invoice files | ✅ `python -m aap.clientdata.history`: GL from history by rule (distribution set, the site's top account, review), amount-weighted, with the share coded without review and its accuracy, and candidate recall at 1/3/5/15 (sizes the context pack); site defaults vs keyed terms / pay group / payment method; invoice and line types, tax-engine lines, empty descriptions. Report written into the delivery (client data) |
+| P3.6 | Terms from the site default | ✅ `TERMS_SOURCE=site_default` (in `.env.kk.example`): AP keeps the site's terms, so the printed terms are only noted; default `printed` for the synthetic setup |
 | P3.2 | Terms fixes + tests | ✅ supplier family (NET / DIAS), CONTADO, end of month by day, KK discount wording; term lines from the names until B5 |
 | P3.3 | Invoice / line type codes from lookups | ✅ (2026-11-04) Oracle's seeded codes and meanings in `common/lookups.py`; a list-of-values workbook (both layouts: field names on top, or titled sections) → `fnd_lookup_values.csv` with `python -m aap.clientdata.lov`; the replica replaces the seeded rows of each delivered lookup type; refsync → `ref_lookup` (migration 0005); rule **V-LOV** fails an invoice type, line type or invoice source not in (or disabled in) the instance's list |
 | P3.4 | Store table loaded | ⏸ B3 |

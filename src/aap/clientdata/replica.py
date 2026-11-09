@@ -130,8 +130,13 @@ def sync_aap(stores: list[tuple[str, str]]) -> dict[str, Any]:
     return out
 
 
+# Checker errors that --skip-unmatched-invoices accepts: those invoices are left out of the history instead.
+UNMATCHED_CHECKS = ("invoice suppliers (VENDOR_ID) not in AP_SUPPLIERS",
+                    "invoice sites (VENDOR_SITE_ID) not in AP_SUPPLIER_SITES_ALL")
+
+
 def run(deliveries: list[Path], *, exclude: Path | None = None, create: bool = False, admin_dsn: str | None = None,
-        sync: bool = True, log=print) -> dict[str, Any]:  # noqa: ANN001
+        sync: bool = True, skip_unmatched: bool = False, log=print) -> dict[str, Any]:  # noqa: ANN001
     from aap.clientdata.check import check_delivery
     from aap.common.coa import layout_from_settings
     from aap.config import get_settings
@@ -150,13 +155,15 @@ def run(deliveries: list[Path], *, exclude: Path | None = None, create: bool = F
         report, _ = check_delivery(path, pdf_scan=False)
         log(f"[replica] check {path}: {'pass' if report.passed else 'FAIL'} "
             f"({len(report.errors)} errors, {len(report.warnings)} warnings); tables {report.tables}")
-        if not report.passed:
-            for f in report.errors:
-                log(f"[replica]   error: {f.message} {f.examples}")
+        blocking = [f for f in report.errors if not (skip_unmatched and f.message in UNMATCHED_CHECKS)]
+        for f in report.errors:
+            accepted = "" if f in blocking else " (accepted: those invoices are left out)"
+            log(f"[replica]   error{accepted}: {f.message} {f.examples}")
+        if blocking:
             raise SystemExit("fix the delivery (or leave it out) before loading: python -m aap.clientdata.check")
     coa = layout_from_settings()
     d = merge_deliveries(deliveries)
-    r = build_replica(d, coa, exclude=exclude)
+    r = build_replica(d, coa, exclude=exclude, skip_unmatched=skip_unmatched)
     result = load_replica(s.ebs_owner_dsn, r)
     log(f"[replica] {ebs_db}: " + ", ".join(f"{t.split('.')[1]} {n}" for t, n in result["counts"].items()))
     for note in result["notes"]:
@@ -180,13 +187,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--create-databases", action="store_true")
     ap.add_argument("--superuser-dsn", default=None, help="default: postgres:postgres on the same server")
     ap.add_argument("--no-sync", action="store_true", help="load ebs_kk only")
+    ap.add_argument("--skip-unmatched-invoices", action="store_true",
+                    help="leave out invoices whose supplier or site was not delivered, instead of refusing the load")
     a = ap.parse_args(argv)
     if not a.env_file.exists():
         print(f"{a.env_file} not found (copy .env.kk.example)", file=sys.stderr)
         return 2
     load_env(a.env_file, local=a.local)
     run(a.deliveries, exclude=a.exclude, create=a.create_databases, admin_dsn=a.superuser_dsn,
-        sync=not a.no_sync)
+        sync=not a.no_sync, skip_unmatched=a.skip_unmatched_invoices)
     return 0
 
 

@@ -191,12 +191,88 @@ def build(root: Path, *, broken: bool = False) -> Path:
     return root
 
 
+def _read(path: Path) -> list[dict[str, Any]]:
+    with path.open(encoding="utf-8", newline="") as f:
+        return [{k: (v if v != "" else None) for k, v in r.items()} for r in csv.DictReader(f)]
+
+
+def _workbook(path: Path, sheets: dict[str, list[dict[str, Any]]], sql: str | None = None) -> None:
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    for title, rows in sheets.items():
+        ws = wb.create_sheet(title)
+        cols = list(dict.fromkeys(k for r in rows for k in r))
+        ws.append(cols)
+        for r in rows:
+            ws.append([r.get(c) for c in cols])
+    if sql is not None:
+        wb.create_sheet("SQL").append([sql])
+    wb.save(path)
+
+
+VIEW_COLUMNS = {"SEGMENT1": "Vendor Number", "VENDOR_NAME": "Vendor Name", "VENDOR_TYPE": "Vendor Type",
+                "PURCHASING_SITE_FLAG": "Purchasing Site", "PAY_SITE_FLAG": "Payment Site",
+                "ADDRESS_LINE1": "Address Line 1", "CITY": "City", "VENDOR_SITE_CODE": "Site Code",
+                "VENDOR_SITE_ID": "Site Id", "SUPPLIER_TERMS": "Supplier Terms", "TERMS_ID": "Site Terms",
+                "TERMS_DATE_BASIS": "Terms Date Basis", "PAY_GROUP_LOOKUP_CODE": "Pay Group Lookup Code",
+                "PRIMARY_PAYMENT_FLAG": "Primary Payment Flag", "PRIMARY_PAYMENT_METHOD": "Primary Payment Method",
+                "DEFAULT_PAYMENT_METHOD_CODE": "Default Payment Method Code", "ORG_ID": "Org_Id"}
+SET_SUPPLIER, DISTRIBUTION_SET = 5002, 8801      # its lines are keyed through a distribution set
+
+
+def build_list_format(root: Path, *, accounts: bool = True) -> Path:
+    """The same made-up delivery in the layout of the 2026-11-09 extract: one workbook with Header /
+    Line / Distribution sheets (the header without ORG_ID, one row repeated by a join), and one
+    supplier / site list joining suppliers, sites and payment methods (no VENDOR_ID, two rows per site,
+    plus a supplier no invoice uses). `accounts=False` leaves GL_CODE_COMBINATIONS out."""
+    build(root)
+    take = {name: _read(root / f"{name}.csv") for name in ("ap_invoices_all", "ap_invoice_lines_all",
+                                                           "ap_invoice_distributions_all", "ap_suppliers",
+                                                           "ap_supplier_sites_all")}
+    for name in take:
+        (root / f"{name}.csv").unlink()
+    if not accounts:
+        (root / "gl_code_combinations.csv").unlink()
+    header = [{k: v for k, v in r.items() if k != "ORG_ID"} for r in take["ap_invoices_all"]]
+    header.insert(1, dict(header[0]))
+    vendor_of = {r["INVOICE_ID"]: int(r["VENDOR_ID"]) for r in take["ap_invoices_all"]}
+    lines = [{**r, "ORG_ID": ORG, "DISTRIBUTION_SET_ID": DISTRIBUTION_SET
+              if vendor_of[r["INVOICE_ID"]] == SET_SUPPLIER else None} for r in take["ap_invoice_lines_all"]]
+    _workbook(root / "ap_invoices_list.xlsx", {"Header": header, "Line": lines,
+                                               "Distribution": take["ap_invoice_distributions_all"]})
+    suppliers = {r["VENDOR_ID"]: r for r in take["ap_suppliers"]}
+    view = []
+    for site in take["ap_supplier_sites_all"]:
+        s = suppliers[site["VENDOR_ID"]]
+        base = {"SEGMENT1": s["SEGMENT1"], "VENDOR_NAME": s["VENDOR_NAME"], "VENDOR_TYPE": "VENDOR",
+                "PURCHASING_SITE_FLAG": "Y", "PAY_SITE_FLAG": site["PAY_SITE_FLAG"],
+                "ADDRESS_LINE1": site["ADDRESS_LINE1"], "CITY": site["CITY"],
+                "VENDOR_SITE_CODE": site["VENDOR_SITE_CODE"], "VENDOR_SITE_ID": int(site["VENDOR_SITE_ID"]),
+                "SUPPLIER_TERMS": s["TERMS_ID"], "TERMS_ID": int(site["TERMS_ID"]), "TERMS_DATE_BASIS": "Invoice",
+                "PAY_GROUP_LOOKUP_CODE": "STANDARD", "DEFAULT_PAYMENT_METHOD_CODE": site["PAYMENT_METHOD_LOOKUP_CODE"],
+                "ORG_ID": ORG}
+        view.append({**base, "PRIMARY_PAYMENT_FLAG": "Y", "PRIMARY_PAYMENT_METHOD": site["PAYMENT_METHOD_LOOKUP_CODE"]})
+        view.append({**base, "PRIMARY_PAYMENT_FLAG": "N", "PRIMARY_PAYMENT_METHOD": "CHECK"})
+    view.append({"SEGMENT1": "70009", "VENDOR_NAME": "Unused Supplier Co", "VENDOR_SITE_CODE": "UNUSED",
+                 "VENDOR_SITE_ID": 6009, "TERMS_ID": 101, "ORG_ID": ORG, "DEFAULT_PAYMENT_METHOD_CODE": "CHECK"})
+    _workbook(root / "ap_sup_list.xlsx",
+              {"Export Worksheet": [{VIEW_COLUMNS[k]: v for k, v in r.items()} for r in view]},
+              sql="SELECT sup.segment1 \"Vendor Number\", ... FROM ap.ap_suppliers sup, ...")
+    return root
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m aap.clientdata.fixtures", description=__doc__.split("\n")[0])
     ap.add_argument("dir", type=Path)
     ap.add_argument("--broken", action="store_true")
+    ap.add_argument("--list-format", action="store_true",
+                    help="the layout of the 2026-11-09 extract (Header / Line / Distribution sheets, supplier view)")
+    ap.add_argument("--no-accounts", action="store_true", help="with --list-format: leave GL_CODE_COMBINATIONS out")
     a = ap.parse_args(argv)
-    print(f"made-up delivery written to {build(a.dir, broken=a.broken)}")
+    path = build_list_format(a.dir, accounts=not a.no_accounts) if a.list_format else build(a.dir, broken=a.broken)
+    print(f"made-up delivery written to {path}")
     return 0
 
 

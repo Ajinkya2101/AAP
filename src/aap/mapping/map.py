@@ -350,6 +350,19 @@ def map_terms(ctx: MapContext, inv: CanonicalInvoice, supplier: RefSupplier | No
         inv.terms_name = _like(base, term.name, method, *flags, note=note)
 
     unverified = Flag.not_found_in_source in src.flags and due_days is not None
+    from aap.config import get_settings
+
+    if default and get_settings().terms_source == "site_default":
+        # what the invoice says, without the model: only to note a difference
+        parsed = _parse_terms(ref, printed, supplier.vendor_id if supplier else None, family)             if printed and not unverified else None
+        seen = parsed[0] if parsed else (_plain_terms(ref, due_days, family) if due_days is not None else None)
+        note = "supplier site default (TERMS_SOURCE=site_default)"
+        if seen is not None and seen.term_id != default.term_id:
+            note += f"; the invoice suggests {seen.name}"
+        elif printed and seen is None:
+            note += f"; printed terms {printed!r} not matched"
+        set_terms(default, Method.default, note=note)
+        return
     if printed and not unverified:
         parsed = _parse_terms(ref, printed, supplier.vendor_id if supplier else None, family)
         if parsed:

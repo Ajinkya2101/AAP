@@ -97,6 +97,8 @@ def _shape(d: Delivery, r: Report) -> None:
             r.add("warning", "files", f"{name} not delivered")
     if d.unknown_files:
         r.add("info", "files", "files / sheets that are not a known extract (ignored)", d.unknown_files)
+    for level, message, items in d.derived:
+        r.add(level, "derived", message, items or None)  # type: ignore[arg-type]
     if d.unnamed_attachments:
         r.add("error", "files", "attachments whose name does not start with the INVOICE_ID", d.unnamed_attachments)
     for name, t in d.tables.items():
@@ -186,6 +188,20 @@ def _joins(d: Delivery, r: Report) -> None:
         r.add("info", "joins", "invoices of suppliers that are not in the selected list",
               sorted({num(x.get("INVOICE_ID")) for x in d.rows("AP_INVOICES_ALL")
                       if by_id.get(num(x.get("VENDOR_ID"))) not in chosen}, key=str))
+    used_sets = sorted({num(x.get("DISTRIBUTION_SET_ID")) for x in d.rows("AP_INVOICE_LINES_ALL")} - {None}, key=str)
+    if used_sets and d.has("AP_DISTRIBUTION_SETS_ALL"):
+        r.add("warning", "joins", "distribution sets used by invoice lines but not in AP_DISTRIBUTION_SETS_ALL",
+              _missing(used_sets, _ids(d, "AP_DISTRIBUTION_SETS_ALL", "DISTRIBUTION_SET_ID")))
+    elif used_sets:
+        r.add("info", "joins", "distribution sets used by invoice lines (their setup not delivered)", used_sets)
+    if d.has("AP_DISTRIBUTION_SET_LINES_ALL"):
+        r.add("error", "joins", "distribution set lines whose set is not in AP_DISTRIBUTION_SETS_ALL",
+              _missing((num(x.get("DISTRIBUTION_SET_ID")) for x in d.rows("AP_DISTRIBUTION_SET_LINES_ALL")),
+                       _ids(d, "AP_DISTRIBUTION_SETS_ALL", "DISTRIBUTION_SET_ID")))
+    if dists and not d.has("GL_CODE_COMBINATIONS"):
+        r.add("warning", "joins", "GL_CODE_COMBINATIONS not delivered: the distributions' accounts are bare "
+              "CCIDs (the replica uses placeholder accounts)",
+              sorted({num(x.get("DIST_CODE_COMBINATION_ID")) for x in dists} - {None}, key=str))
     _segment_values(d, r)
 
 

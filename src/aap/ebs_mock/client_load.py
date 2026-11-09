@@ -11,7 +11,7 @@ Everything else comes from the deliveries, when they have it:
 |--------------------------------|----------------------------------------------------------------------|
 | HR_OPERATING_UNITS             | hr_all_organization_units, hr_organization_information, gl_ledgers   |
 | FND_ID_FLEX_SEGMENTS, _VALUES  | fnd_id_flex_structures / _segments, fnd_flex_value_sets / _values(_tl)|
-| GL_CODE_COMBINATIONS           | gl_code_combinations                                                 |
+| GL_CODE_COMBINATIONS           | gl_code_combinations (placeholders for CCIDs used, not delivered)    |
 | AP_TERMS (+ AP_TERMS_LINES)    | ap_terms_tl, ap_terms_lines (lines from the names when not delivered)|
 | IBY_PAYMENT_METHODS            | iby_payment_methods_b / _tl                                          |
 | AP_SUPPLIERS, _SITES_ALL       | hz_parties, ap_suppliers, ap_supplier_sites_all                      |
@@ -165,6 +165,39 @@ def _chart(r: Replica, d: Delivery, coa: CoaLayout, coa_id: int) -> None:
               detail_posting_allowed_flag=c.get("DETAIL_POSTING_ALLOWED_FLAG") or "Y",
               start_date_active=day(c.get("START_DATE_ACTIVE")), end_date_active=day(c.get("END_DATE_ACTIVE")),
               **segs)
+    _placeholder_accounts(r, d, coa, coa_id)
+
+
+PLACEHOLDER_SEGMENT = "X"
+
+
+def placeholder_account(ccid: int, coa: CoaLayout) -> list[str]:
+    """The segments of an account known only by its CCID: "X" everywhere, the CCID as the natural
+    account, so two placeholders are equal exactly when their CCIDs are."""
+    return [str(ccid) if n == coa.natural_account_segment else PLACEHOLDER_SEGMENT
+            for n in range(1, coa.segment_count + 1)]
+
+
+def _placeholder_accounts(r: Replica, d: Delivery, coa: CoaLayout, coa_id: int) -> None:
+    """CCIDs used by distributions, line defaults or sites but not in GL_CODE_COMBINATIONS get a
+    placeholder combination (placeholder_account), so the history, the GL coding and the scoring work
+    on CCIDs until the chart of accounts is delivered (B-2). Delivered combinations are never replaced."""
+    known = {num(c.get("CODE_COMBINATION_ID")) for c in d.rows("GL_CODE_COMBINATIONS")}
+    liability = {num(x.get("ACCTS_PAY_CODE_COMBINATION_ID"))
+                 for t in ("AP_SUPPLIER_SITES_ALL", "AP_INVOICES_ALL") for x in d.rows(t)}
+    used = {num(x.get("DIST_CODE_COMBINATION_ID")) for x in d.rows("AP_INVOICE_DISTRIBUTIONS_ALL")}
+    used |= {num(x.get("DEFAULT_DIST_CCID")) for x in d.rows("AP_INVOICE_LINES_ALL")} | liability
+    missing = sorted(used - known - {None})  # type: ignore[type-var]
+    if not missing:
+        return
+    for ccid in missing:
+        segs: dict[str, str | None] = dict.fromkeys((f"segment{i}" for i in range(1, 31)), None)
+        segs.update({f"segment{i}": v for i, v in enumerate(placeholder_account(ccid, coa), start=1)})
+        r.add("gl.gl_code_combinations", code_combination_id=ccid, chart_of_accounts_id=coa_id,
+              account_type="L" if ccid in liability else "E", enabled_flag="Y", summary_flag="N",
+              detail_posting_allowed_flag="Y", start_date_active=None, end_date_active=None, **segs)
+    r.notes.append(f"{len(missing)} account(s) known only by CCID (not in GL_CODE_COMBINATIONS): placeholder "
+                   "combinations, natural-account segment = CCID (B-2)")
 
 
 def _org(r: Replica, d: Delivery, coa_id: int) -> dict[int, int]:
@@ -256,16 +289,32 @@ def _suppliers(r: Replica, d: Delivery) -> None:
               inactive_date=day(s.get("INACTIVE_DATE")))
 
 
+def unmatched_invoices(d: Delivery) -> set[int]:
+    """Invoices whose supplier or site is not in the delivered master data."""
+    vendors = {num(s.get("VENDOR_ID")) for s in d.rows("AP_SUPPLIERS")}
+    sites = {num(s.get("VENDOR_SITE_ID")) for s in d.rows("AP_SUPPLIER_SITES_ALL")}
+    return {num(x["INVOICE_ID"]) for x in d.rows("AP_INVOICES_ALL")  # type: ignore[misc]
+            if num(x.get("VENDOR_ID")) not in vendors
+            or (x.get("VENDOR_SITE_ID") is not None and num(x.get("VENDOR_SITE_ID")) not in sites)}
+
+
 def _history(r: Replica, d: Delivery, ledgers: dict[int, int],
-             exclude: tuple[set[int], set[int], date | None]) -> date | None:
-    """Invoices, lines and distributions, without the gold set's test / dev invoices. Returns the
+             exclude: tuple[set[int], set[int], date | None], *, skip_unmatched: bool = False) -> date | None:
+    """Invoices, lines and distributions, without the gold set's test / dev invoices (and, with
+    `skip_unmatched`, without the invoices whose supplier or site was not delivered). Returns the
     earliest invoice date loaded (for the GL periods)."""
     ids, holdout, cutoff = exclude
     numbers = {num(s.get("VENDOR_ID")): str(s.get("SEGMENT1")) for s in d.rows("AP_SUPPLIERS")}
+    unmatched = unmatched_invoices(d) if skip_unmatched else set()
+    if unmatched:
+        r.notes.append(f"{len(unmatched)} invoice(s) left out: their supplier or site is not in the delivered "
+                       "master data")
     kept: dict[int, dict[str, Any]] = {}
     dropped = 0
     for x in d.rows("AP_INVOICES_ALL"):
         inv_id, inv_date = num(x["INVOICE_ID"]), day(x.get("INVOICE_DATE"))
+        if inv_id in unmatched:
+            continue
         if inv_id in ids or numbers.get(num(x.get("VENDOR_ID"))) in holdout or (cutoff and inv_date and inv_date >= cutoff):
             dropped += 1
             continue
@@ -345,7 +394,8 @@ def lookup_rows(r: Replica, d: Delivery) -> list[str]:
     return ["lookups from the delivery: " + ", ".join(f"{t} ({len(v)})" for t, v in sorted(delivered.items()))]
 
 
-def build_replica(d: Delivery, coa: CoaLayout, *, exclude: Path | None = None) -> Replica:
+def build_replica(d: Delivery, coa: CoaLayout, *, exclude: Path | None = None,
+                  skip_unmatched: bool = False) -> Replica:
     """Every row of the replica, in memory (no database)."""
     r = Replica()
     _foundation(r)
@@ -368,7 +418,7 @@ def build_replica(d: Delivery, coa: CoaLayout, *, exclude: Path | None = None) -
         r.notes.append("IBY_PAYMENT_METHODS not delivered: no payment methods")
     ledgers = _org(r, d, coa_id)
     _suppliers(r, d)
-    first = _history(r, d, ledgers, read_exclusions(exclude))
+    first = _history(r, d, ledgers, read_exclusions(exclude), skip_unmatched=skip_unmatched)
     _periods(r, ledgers, first)
     if not d.has("AP_SUPPLIERS"):
         r.notes.append("no suppliers delivered (B-1): the replica cannot map invoices yet")

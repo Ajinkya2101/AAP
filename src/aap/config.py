@@ -86,6 +86,10 @@ class Settings(BaseSettings):
     # How the terms date is set when the supplier site does not say (AP_SUPPLIER_SITES_ALL.TERMS_DATE_BASIS):
     # Invoice = invoice date, Invoice Received = the day the document arrived, System = today.
     terms_date_basis: Literal["Invoice", "Invoice Received", "Goods Received", "System"] = "Invoice"
+    # Where the invoice's payment terms come from. printed: the terms printed on the invoice (or its due
+    # date), the site default when nothing is printed. site_default: always the supplier site's terms,
+    # as Krispy Kreme's AP keys them (see aap.clientdata.history); a printed difference is noted.
+    terms_source: Literal["printed", "site_default"] = "printed"
     # KK -> target instance value map (aap.mapping.instance): a CSV of kind,source,target rows. Unset
     # = the target instance uses the same values (supplier numbers, site codes, terms, accounts).
     instance_map_file: Path | None = None

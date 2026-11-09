@@ -20,6 +20,9 @@ class TableSpec:
     optional: tuple[str, ...] = ()           # used when present
     description: str = ""
     columns_alt: dict[str, str] = field(default_factory=dict)   # other spelling -> EBS column
+    # generic names ("Header", "Line"): they match only a sheet that has the required columns, so a
+    # list-of-values workbook with the same sheet names is not read as an extract
+    weak_aliases: tuple[str, ...] = ()
 
 
 TABLES: dict[str, TableSpec] = {t.name: t for t in [
@@ -43,6 +46,25 @@ TABLES: dict[str, TableSpec] = {t.name: t for t in [
                         "PAY_GROUP_LOOKUP_CODE", "TERMS_DATE_BASIS", "ACCTS_PAY_CODE_COMBINATION_ID",
                         "DISTRIBUTION_SET_ID", "INACTIVE_DATE", "EMAIL_ADDRESS"),
               aliases=("supplier_sites", "sites")),
+    TableSpec("SUPPLIER_SITE_VIEW", key=("VENDOR_SITE_ID",),
+              required=("SEGMENT1", "VENDOR_NAME", "VENDOR_SITE_ID", "VENDOR_SITE_CODE", "ORG_ID"),
+              optional=("VENDOR_ID", "VENDOR_NAME_ALT", "TERMS_ID", "SUPPLIER_TERMS_ID", "PAY_GROUP_LOOKUP_CODE",
+                        "DEFAULT_PAYMENT_METHOD_CODE", "PRIMARY_PAYMENT_METHOD", "PRIMARY_PAYMENT_FLAG",
+                        "ACCTS_PAY_CODE_COMBINATION_ID", "DISTRIBUTION_SET_ID"),
+              aliases=("ap_sup_list", "sup_list", "supplier_site_list", "supplier_sites_view"),
+              columns_alt={"VENDOR_NUMBER": "SEGMENT1", "VENDOR_NUM": "SEGMENT1", "DBA_VENDOR_NAME": "VENDOR_NAME_ALT",
+                           "PURCHASING_SITE": "PURCHASING_SITE_FLAG", "PAYMENT_SITE": "PAY_SITE_FLAG",
+                           "PURCHASE_PAY_EMAIL_ADDRESS": "EMAIL_ADDRESS", "PO_EMAIL_ADDRESS": "CONTACT_EMAIL_ADDRESS",
+                           "ADDRESS_LINE_1": "ADDRESS_LINE1", "ADDRESS_LINE_2": "ADDRESS_LINE2",
+                           "TAX_ID": "NUM_1099", "TAX_TYPE": "TYPE_1099", "VENDOR_END_DATE": "END_DATE_ACTIVE",
+                           "SITE_NUMBER": "PARTY_SITE_NUMBER", "SITE_CODE": "VENDOR_SITE_CODE",
+                           "SITE_ID": "VENDOR_SITE_ID", "SITE_INACTIVE_FLAG": "INACTIVE_DATE",
+                           "SITE_INACTIVE_DATE": "INACTIVE_DATE", "VENDOR_TYPE": "VENDOR_TYPE_LOOKUP_CODE",
+                           "SUPPLIER_TERMS": "SUPPLIER_TERMS_ID", "SITE_TERMS": "TERMS_ID",
+                           "HOLD_ALL_PAYMENTS": "HOLD_ALL_PAYMENTS_FLAG",
+                           "SITE_LIABILITY_ACCOUNT": "ACCTS_PAY_CODE_COMBINATION_ID"},
+              description="One export joining suppliers, sites, contacts and payment methods (several rows per "
+                          "site); split into AP_SUPPLIERS and AP_SUPPLIER_SITES_ALL by aap.clientdata.views"),
     TableSpec("GL_CODE_COMBINATIONS", key=("CODE_COMBINATION_ID",), required=("CODE_COMBINATION_ID", "SEGMENT1"),
               optional=tuple(f"SEGMENT{i}" for i in range(2, 31)) + (
                   "CHART_OF_ACCOUNTS_ID", "ENABLED_FLAG", "DETAIL_POSTING_ALLOWED_FLAG", "ACCOUNT_TYPE",
@@ -80,26 +102,45 @@ TABLES: dict[str, TableSpec] = {t.name: t for t in [
               required=("INVOICE_ID", "VENDOR_ID", "INVOICE_NUM", "INVOICE_DATE", "INVOICE_AMOUNT"),
               optional=("VENDOR_SITE_ID", "ORG_ID", "INVOICE_CURRENCY_CODE", "INVOICE_TYPE_LOOKUP_CODE", "TERMS_ID",
                         "TERMS_DATE", "GL_DATE", "PAYMENT_METHOD_CODE", "PAY_GROUP_LOOKUP_CODE", "SOURCE",
-                        "DESCRIPTION", "CANCELLED_DATE", "PO_HEADER_ID", "CREATION_DATE", "TOTAL_TAX_AMOUNT"),
-              aliases=("invoices", "invoice_headers")),
+                        "DESCRIPTION", "CANCELLED_DATE", "PO_HEADER_ID", "CREATION_DATE", "TOTAL_TAX_AMOUNT",
+                        "ACCTS_PAY_CODE_COMBINATION_ID", "PAYMENT_CURRENCY_CODE", "PARTY_SITE_ID"),
+              aliases=("invoices", "invoice_headers"), weak_aliases=("header", "headers", "invoice_header")),
     TableSpec("AP_INVOICE_LINES_ALL", key=("INVOICE_ID", "LINE_NUMBER"),
               required=("INVOICE_ID", "LINE_NUMBER", "LINE_TYPE_LOOKUP_CODE", "AMOUNT"),
               optional=("DESCRIPTION", "QUANTITY_INVOICED", "UNIT_PRICE", "PO_HEADER_ID", "DISCARDED_FLAG",
-                        "CANCELLED_FLAG", "ACCOUNTING_DATE"), aliases=("invoice_lines", "lines")),
+                        "CANCELLED_FLAG", "ACCOUNTING_DATE", "ORG_ID", "DISTRIBUTION_SET_ID", "DEFAULT_DIST_CCID",
+                        "LINE_SOURCE", "MATCH_TYPE", "TAX_REGIME_CODE", "TAX_RATE_CODE"),
+              aliases=("invoice_lines", "lines"), weak_aliases=("line", "invoice_line")),
     TableSpec("AP_INVOICE_DISTRIBUTIONS_ALL", key=("INVOICE_DISTRIBUTION_ID",),
               required=("INVOICE_DISTRIBUTION_ID", "INVOICE_ID", "INVOICE_LINE_NUMBER", "AMOUNT",
                         "DIST_CODE_COMBINATION_ID"),
               optional=("DISTRIBUTION_LINE_NUMBER", "LINE_TYPE_LOOKUP_CODE", "DESCRIPTION", "ACCOUNTING_DATE",
-                        "REVERSAL_FLAG", "PARENT_REVERSAL_ID", "PO_DISTRIBUTION_ID", "CANCELLATION_FLAG"),
-              aliases=("invoice_distributions", "distributions")),
+                        "REVERSAL_FLAG", "PARENT_REVERSAL_ID", "PO_DISTRIBUTION_ID", "CANCELLATION_FLAG",
+                        "ACCTS_PAY_CODE_COMBINATION_ID", "ORG_ID"),
+              aliases=("invoice_distributions", "distributions"),
+              weak_aliases=("distribution", "invoice_distribution")),
+    TableSpec("AP_DISTRIBUTION_SETS_ALL", key=("DISTRIBUTION_SET_ID",),
+              required=("DISTRIBUTION_SET_ID", "DISTRIBUTION_SET_NAME"),
+              optional=("ORG_ID", "DESCRIPTION", "TOTAL_PERCENT_DISTRIBUTION", "INACTIVE_DATE"),
+              aliases=("distribution_sets", "dist_sets")),
+    TableSpec("AP_DISTRIBUTION_SET_LINES_ALL", key=("DISTRIBUTION_SET_ID", "DISTRIBUTION_SET_LINE_NUMBER"),
+              required=("DISTRIBUTION_SET_ID", "DISTRIBUTION_SET_LINE_NUMBER", "DIST_CODE_COMBINATION_ID",
+                        "PERCENT_DISTRIBUTION"),
+              optional=("DESCRIPTION", "ORG_ID", "LINE_TYPE_LOOKUP_CODE"),
+              aliases=("distribution_set_lines", "dist_set_lines")),
 ]}
 
 ATTACHMENTS_DIR = "attachments"
 
 
-def table_for(file_stem: str) -> TableSpec | None:
+def table_for(file_stem: str, columns: list[str] | None = None) -> TableSpec | None:
+    """The table a file or sheet holds, by its name; a generic name (weak alias) only when `columns`
+    (normalised, after columns_alt) has every required column of the table."""
     key = file_stem.strip().lower().replace(" ", "_").replace("-", "_")
     for t in TABLES.values():
         if key == t.name.lower() or key in t.aliases:
+            return t
+    for t in TABLES.values():
+        if key in t.weak_aliases and columns is not None and set(t.required) <= set(columns):
             return t
     return None

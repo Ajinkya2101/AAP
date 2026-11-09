@@ -94,11 +94,14 @@ def test_wrong_segment_count_is_a_warning(delivery):
 
 def test_missing_columns_and_duplicates(tmp_path):
     (tmp_path / "ap_suppliers.csv").write_text("VENDOR_ID,VENDOR_NAME\n1,A\n1,B\n", encoding="utf-8")
-    (tmp_path / "ap_terms.csv").write_text("TERM_ID,NAME\n10,30 NET\n10,30 NET\n", encoding="utf-8")
+    # same key, different values: an error; an exact copy of a row (a join in the query): dropped, a warning
+    (tmp_path / "ap_terms.csv").write_text("TERM_ID,NAME\n10,30 NET\n10,30 DAYS\n11,45 NET\n11,45 NET\n",
+                                           encoding="utf-8")
     report, _ = check_delivery(tmp_path, pdf_scan=False)
     errors = _messages(report, "error")
     assert "AP_SUPPLIERS: required columns missing: SEGMENT1" in errors
     assert errors["AP_TERMS: duplicate TERM_ID"].examples == ["10"]
+    assert any(m.startswith("AP_TERMS: 1 exact duplicate row") for m in _messages(report, "warning"))
 
 
 def test_cli_writes_manifest_and_report(delivery, kk_layout):

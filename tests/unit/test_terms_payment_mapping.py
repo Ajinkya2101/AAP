@@ -156,3 +156,40 @@ def test_vikram_terms_wordings():
                               ("Due in 30 Days", "30 NET"), ("Immediate", "Immediate"),
                               ("Cash On Delivery", "Immediate"), ("Due in 60 Days", "60 NET")]:
         assert _terms(printed).terms_name.value == expected, printed
+
+
+# -------------------------------------------------- TERMS_SOURCE=site_default
+def _site_default(monkeypatch):
+    from aap.config import get_settings
+
+    monkeypatch.setenv("TERMS_SOURCE", "site_default")
+    get_settings.cache_clear()
+
+
+def test_site_default_terms_win_over_printed_ones(monkeypatch):
+    _site_default(monkeypatch)
+    try:
+        inv = _terms("Net 60", default=3)
+        assert inv.terms_id.value == 3 and inv.terms_id.method == Method.default
+        assert "the invoice suggests 60 NET" in (inv.terms_id.note or "")
+        same = _terms("Net 30", default=3)
+        assert same.terms_id.value == 3 and "suggests" not in (same.terms_id.note or "")
+        by_due = _terms(None, due=date(2026, 11, 30), default=3)          # 60 days after the invoice date
+        assert by_due.terms_id.value == 3 and "60 NET" in (by_due.terms_id.note or "")
+        unmatched = _terms("pay whenever", default=3)                     # no model call in this mode
+        assert unmatched.terms_id.value == 3 and "not matched" in (unmatched.terms_id.note or "")
+    finally:
+        from aap.config import get_settings
+
+        get_settings.cache_clear()
+
+
+def test_site_default_mode_without_a_default_falls_back_to_the_printed_terms(monkeypatch):
+    _site_default(monkeypatch)
+    try:
+        inv = _terms("Net 60", default=None)
+        assert inv.terms_id.value == 5
+    finally:
+        from aap.config import get_settings
+
+        get_settings.cache_clear()

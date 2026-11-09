@@ -45,6 +45,7 @@ class Delivery:
     unknown_files: list[str] = field(default_factory=list)
     unnamed_attachments: list[str] = field(default_factory=list)     # file name without an INVOICE_ID
     files: dict[str, str] = field(default_factory=dict)              # relative path -> sha256
+    derived: list[tuple[str, str, list[str]]] = field(default_factory=list)  # (level, message, items): views.py
 
     def rows(self, table: str) -> list[Row]:
         t = self.tables.get(table)
@@ -168,7 +169,8 @@ def _add(delivery: Delivery, spec: TableSpec, raw: list[list[Any]], source: str)
 
 
 def read_delivery(root: Path) -> Delivery:
-    """Every extract and attachment under `root` (manifest.json and *.md / *.txt notes are skipped)."""
+    """Every extract and attachment under `root` (manifest.json and *.md / *.txt notes are skipped), with
+    the extracts that are not one table each turned into tables (views.py)."""
     root = Path(root)
     d = Delivery(root=root)
     for path in sorted(p for p in root.rglob("*") if p.is_file()):
@@ -192,12 +194,17 @@ def read_delivery(root: Path) -> Delivery:
             for title, raw in sheets:
                 # a sheet named like a table, else the file's name when the workbook has one sheet
                 spec = table_for(title) or (table_for(path.stem) if len(sheets) == 1 else None)
+                if spec is None and raw:
+                    spec = next((t for t in TABLES.values() if table_for(title, _normalize(t, raw[0])) is t), None)
                 if spec:
                     _add(d, spec, raw, f"{rel}#{title}")
                 else:
                     d.unknown_files.append(f"{rel}#{title}")
         elif suffix not in (".md", ".txt"):
             d.unknown_files.append(rel)
+    from .views import derive
+
+    derive(d)
     return d
 
 
