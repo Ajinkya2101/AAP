@@ -3,8 +3,8 @@
 | Item | Value |
 |---|---|
 | Status | Tracking copy of IMPLEMENTATION-PLAN.md (Draft 0.1) |
-| Last updated | 2026-10-26 (real-invoice readiness R1: [PLAN-REAL-INVOICES.md](PLAN-REAL-INVOICES.md)) |
-| Scope | Mock Oracle EBS in PostgreSQL, mailbox intake, Python pipeline, agent layer, containerized runtime, minimal UI |
+| Last updated | 2026-11-12 (mailbox and vendor email marked removed; current tracking: [PLAN-MID-DECEMBER.md](PLAN-MID-DECEMBER.md)) |
+| Scope | Mock Oracle EBS in PostgreSQL, mailbox intake (removed 2026-10-03), Python pipeline, agent layer, containerized runtime, minimal UI |
 | Builds on | PLAN.md, TECH-STACK.md, ARCHITECTURE.md, DIAGRAMS.md, WORKED-EXAMPLE.md |
 
 Legend: ✅ done and verified · 🟡 done except one item · 🟠 in progress · ⬜ not started
@@ -18,14 +18,16 @@ Legend: ✅ done and verified · 🟡 done except one item · 🟠 in progress �
 | 2 | App DB + core | ✅ |
 | 3 | Invoice generator | ✅ |
 | 4 | Pipeline 1–8 | ✅ stub and vLLM modes run end to end (vLLM accuracy findings → Phase 6) |
-| 5 | Mailbox | ✅ |
+| 5 | Mailbox | ✅ built and verified; ❌ removed 2026-10-03 (upload only; migration `0003_remove_mailbox`) |
 | 6 | Eval baseline | ✅ harness + real-model baseline; prompt v2 passes both PLAN 4 gates on the dev set (held-out 515 set: see below); current prompt v4 still passes them (header 99.3 %, line F1 100 %) |
 | 7 | Agents: match + GL | ✅ |
-| 8 | Agents: exceptions | ✅ |
+| 8 | Agents: exceptions | ✅ built; the vendor email loop was removed with the mailbox on 2026-10-03 (the review task names the suggested action instead) |
 | 9 | Submit + result | ✅ |
 | 10 | Minimal UI + hardening | ✅ |
 
 Details per phase: §12. Verification evidence: below. Deviations from the plan: §0.1.
+
+**Mailbox removed (2026-10-03).** Phase 5 and the vendor email part of phase 8 were built and verified as recorded below, then taken out of scope: the IMAP poller, GreenMail, the outbox, reminders and the vendor simulator no longer exist, and invoices arrive by upload only. The verification rows below that mention the mailbox, the S3 / S11 / S14 email paths or `/ui/outbox` are kept as the record of that time; they no longer describe the code. HOW-IT-WORKS.md describes the code as it is.
 
 After the phases: **real-invoice readiness** from the customer's samples (5 invoice PDFs and their `APILOAD` file). Phase R1 (fixes that need no outside input) is done; R2 waits on the functional team. Plan, items and results: [PLAN-REAL-INVOICES.md](PLAN-REAL-INVOICES.md).
 

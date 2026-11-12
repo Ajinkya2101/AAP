@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | Describes the code as built (2026-09-29; real-invoice changes of PLAN-REAL-INVOICES.md R1 added 2026-10-26) |
+| Status | Describes the code as built (2026-09-29; real-invoice changes of PLAN-REAL-INVOICES.md R1 added 2026-10-26; mailbox and vendor emails taken out of the text 2026-11-12, as in the code since 2026-10-03) |
 | Audience | Engineers who work on or review this codebase |
 | Builds on | PLAN.md, ARCHITECTURE.md, TECH-STACK.md, WORKED-EXAMPLE.md, IMPLEMENTATION-PLAN.md, IMPLEMENTATION-PLAN-STATUS.md |
 
@@ -19,7 +19,7 @@ The other documents say what the system should do and why. This one explains how
 7. [Stage 5: extraction with the LLM](#7-stage-5-extraction-with-the-llm)
 8. [Stages 6–8: normalize, map, validate](#8-stages-68-normalize-map-validate)
 9. [The agent layer](#9-the-agent-layer)
-10. [The mailbox](#10-the-mailbox)
+10. [The mailbox (removed)](#10-the-mailbox-removed)
 11. [Review, approval and posting to Oracle](#11-review-approval-and-posting-to-oracle)
 12. [The mock Oracle EBS](#12-the-mock-oracle-ebs)
 13. [Reference data, GL history and embeddings](#13-reference-data-gl-history-and-embeddings)
@@ -37,13 +37,12 @@ The other documents say what the system should do and why. This one explains how
 
 ## 1. The system in one page
 
-An invoice arrives as an email attachment or an upload. The application reads it, turns it into a structured invoice, checks it against Oracle EBS data, lets a set of agents match it to a purchase order and choose GL accounts, and puts it in front of an AP clerk. When the clerk approves, the application posts it to Oracle through the Payables Open Interface and reports the result.
+An invoice arrives as an upload (a PDF, an image, a sheet, or an `.eml` / `.msg` whose attachments are unpacked). The application reads it, turns it into a structured invoice, checks it against Oracle EBS data, lets a set of agents match it to a purchase order and choose GL accounts, and puts it in front of an AP clerk. When the clerk approves, the application posts it to Oracle through the Payables Open Interface and reports the result.
 
 ```mermaid
 flowchart TB
     subgraph In["Arrives"]
         direction LR
-        mail["Email to ap@acse.local<br/>(IMAP poller)"]
         up["Upload<br/>(API / UI)"]
     end
     subgraph Pipe["Pipeline (one job per stage)"]
@@ -55,7 +54,6 @@ flowchart TB
         direction LR
         tri["triage"] --> po["PO match / 3-way"]
         tri --> gl["GL coding"]
-        tri --> exc["vendor email loop"]
     end
     subgraph Human["Person"]
         rev["Review in /ui<br/>approve · reject · correct"]
@@ -63,12 +61,10 @@ flowchart TB
     subgraph ERP["Oracle EBS (mock in Postgres)"]
         oi["Open Interface<br/>+ APXIIMPT"]
     end
-    mail --> s1
     up --> s1
     s8 --> tri
     po --> rev
     gl --> rev
-    exc --> rev
     rev -- approve --> sub["10 Submit"] --> oi --> res["11 Result"] --> rev
 ```
 
@@ -77,9 +73,9 @@ What each part owns:
 | Part | Owns | Never does |
 |---|---|---|
 | Pipeline stages 1–8 | Turning a file into a validated `CanonicalInvoice` | Posts anything, contacts anyone |
-| LLM | Reading the document (stage 5); picking one item from a list prepared by code (mapping, line pairing, GL); wording emails; reading replies | Calls tools, invents Oracle values, validates |
-| Agents | Deciding what happens next: PO, holds, GL, vendor email | Sends email or posts without a person |
-| Person | Approving, rejecting, correcting, approving vendor emails | — |
+| LLM | Reading the document (stage 5); picking one item from a list prepared by code (mapping, line pairing, GL) | Calls tools, invents Oracle values, validates |
+| Agents | Deciding what happens next: PO, holds, GL, review reason and suggested action | Posts without a person; contacts anyone |
+| Person | Approving, rejecting, correcting; contacting the vendor when the suggested action says so | — |
 | Adapter | Every read from and write to Oracle | — |
 
 ---
@@ -100,7 +96,7 @@ The architecture defines seven rules (ARCHITECTURE §2). This is where each one 
 
 Two further rules come from the plan:
 
-- **No automatic posting and no automatic email.** Every invoice ends with a person (`agents/nodes/finalize.py`). Every vendor email waits for approval (`interrupt()` in `agents/nodes/exception.py`).
+- **No automatic posting and no email.** Every invoice ends with a person (`agents/nodes/finalize.py`). The application sends no email: when the vendor must act (invoice maths, missing PO number, blanket release), the review task names it as the suggested action.
 - **Money is `Decimal`.** Amounts are parsed into `Decimal` in `normalize/amounts.py` and never pass through `float`.
 
 ---
@@ -121,7 +117,6 @@ flowchart TB
         worker["worker<br/>Procrastinate: ingest · llm · agents · erp · periodic"]
         ebscm["ebs-cm<br/>mock concurrent manager"]
         pg[("postgres (pgvector)<br/>db aap · db ebs")]
-        mailsrv["mail<br/>GreenMail SMTP 3025 / IMAP 3143"]
         migrate["migrate (one-shot)<br/>EBS DDL + seed, Alembic"]
         ef["embed-fetch (one-shot)<br/>bge-m3 ONNX"]
     end
@@ -131,7 +126,6 @@ flowchart TB
     browser --> api
     api --> pg
     worker --> pg
-    worker --> mailsrv
     worker --> vllm
     ebscm --> pg
     migrate --> pg
@@ -149,7 +143,6 @@ flowchart TB
 | `api` | `uvicorn aap.api.main:app` | JSON API, Swagger (`/docs`) and the UI (`/ui`). It enqueues jobs; it does not call the LLM or Oracle, except in `?inline=true` dev mode. |
 | `worker` | `python -m aap.worker` | One Procrastinate worker per queue, each with its own concurrency. It mounts `models` read-only for the embedder. |
 | `ebs-cm` | `python -m aap.ebs_mock.concurrent_manager` | Part of the *simulated* Oracle: runs APXIIMPT requests. |
-| `mail` | GreenMail 2.1.2 | Auth disabled: any address can log in, and a mailbox is created on first use. |
 | `vllm` | `aap-vllm:dev` (built from `docker/vllm.Dockerfile`) | vLLM 0.10.1.1 with a one-line patch for the RTX 5090 (sm_120): the Qwen vision encoder uses PyTorch SDPA instead of xformers. Host debug port `VLLM_HOST_PORT` (default 8100). |
 | `model-fetch`, `embed-fetch` | one-shot | Download model weights into the `models` volume on first start only (a marker file makes restarts offline-safe). |
 
@@ -163,15 +156,15 @@ Volumes: `pgdata`, `filestore`, `models`, `hf-cache`. They are named volumes, be
 |---|---|---|
 | `ingest` | 8 | `aap.stage.ingest`: parse, route, normalize, validate (CPU work) |
 | `llm` | 4 | `aap.stage.llm`: extract, map (these call the LLM) |
-| `agents` | 4 | `aap.stage.agents`, `aap.agents.resume`, `aap.mail.send_reminder` |
+| `agents` | 4 | `aap.stage.agents` |
 | `erp` | 2 | `aap.stage.erp`: submit, result (Oracle) |
-| `periodic` | 1 | mailbox poll, stalled-job sweeper, `recheck_holds`, vendor follow-ups, embedding backfill, nightly reference sync |
+| `periodic` | 1 | stalled-job sweeper, `recheck_holds`, embedding backfill, nightly reference sync |
 
 A stage job carries only `(stage, document_id)`. Everything else comes from the database, so a job can be retried or replayed at any time. `worker/tasks.py:enqueue_stage` picks the queue from the stage name. The `result` stage is deferred with `schedule_in=5 s`, so polling Oracle never sleeps inside a worker.
 
 ```mermaid
 sequenceDiagram
-    participant API as api / poller
+    participant API as api
     participant Q as procrastinate_jobs (Postgres)
     participant W as worker
     participant DB as aap DB
@@ -197,7 +190,7 @@ sequenceDiagram
 | Database | Role | Who writes |
 |---|---|---|
 | `ebs` | The mock Oracle EBS: EBS schemas, tables and column names (§12) | Only the seeder (`ebs_owner`), the mock import program and the adapter's `apps_intf` role (open interface + two APIs) |
-| `aap` | The application: documents, versions, agents, mail, queue, checkpoints, reference copy, vectors, eval, audit | The application (`aap_app`; `aap_owner` for migrations) |
+| `aap` | The application: documents, versions, agents, queue, checkpoints, reference copy, vectors, eval, audit | The application (`aap_app`; `aap_owner` for migrations) |
 
 They are separate databases, not schemas, so application SQL cannot join into EBS tables by mistake (R-06).
 
@@ -209,7 +202,6 @@ They are separate databases, not schemas, so application SQL cannot join into EB
 |---|---|
 | `originals/<sha[:2]>/<sha256>` | Every received file, stored once per content hash |
 | `pages/<document_id>/<n>.png` | 200 DPI page images (parse stage) |
-| `mail/<sha[:2]>/<sha256>.eml` | Raw inbound emails that are not documents (vendor replies, auto-replies) |
 | `truth/<sha256>.truth.json` | Invoice-generator ground truth (stub LLM and eval only) |
 
 ### 4.3 Data model (`db/models.py`)
@@ -228,9 +220,6 @@ erDiagram
     AGENT_RUN ||--o{ AGENT_DECISION : records
     DOCUMENT ||--o{ REVIEW_TASK : "waits in"
     DOCUMENT ||--o{ HOLD : "proposed/active"
-    DOCUMENT ||--o{ EMAIL_OUTBOX : "vendor emails"
-    EMAIL_MESSAGE ||--o{ EMAIL_ATTACHMENT : has
-    EMAIL_MESSAGE }o--|| DOCUMENT : "belongs to"
     EVAL_RUN ||--o{ EVAL_RESULT : has
     DOCUMENT ||--o{ AUDIT_EVENT : "logged in"
 ```
@@ -238,7 +227,6 @@ erDiagram
 | Group | Tables | Key points |
 |---|---|---|
 | Documents | `document`, `page`, `extraction_run`, `invoice_version`, `field_evidence`, `validation_result`, `document_status_history`, `submission` | `document.parent_id` links attachments to their email. `invoice_version.canonical_invoice` (JSONB) is the whole `CanonicalInvoice`. `validation_result.run_no` separates re-validations of the same version. |
-| Mailbox | `mailbox_state`, `email_message`, `email_attachment`, `email_outbox` | `email_message.thread_key` = document id for vendor-thread messages. `email_outbox.kind` = `exception` or `reminder`. |
 | Agents | `agent_run`, `agent_decision`, `review_task`, `hold` | `agent_run.outcome` (JSONB) keeps the pairs, variances and GL lines that approval and `recheck_holds` read back. `hold.status`: proposed → active (in Oracle) or released. |
 | Reference copy | `ref_supplier`, `ref_supplier_site`, `ref_supplier_bank`, `ref_terms`, `ref_currency`, `ref_operating_unit`, `ref_ccid`, `ref_category`, `ref_uom`, `ref_tax_rate`, `ref_tolerance`, `ref_gl_period`, `ref_sync_run` | Replaced in one transaction by the reference sync (§13). |
 | Mapping | `value_map`, `value_map_proposal` | Functional-team owned translations (e.g. `Net 30 days` → `30 NET`). |
@@ -305,9 +293,6 @@ stateDiagram-v2
     VALIDATED --> AGENTS_RUNNING
     AGENTS_RUNNING --> IN_REVIEW
     AGENTS_RUNNING --> ON_HOLD : QTY / PRICE variance
-    IN_REVIEW --> AWAITING_VENDOR : vendor email sent
-    AWAITING_VENDOR --> AGENTS_RUNNING : vendor replied
-    AWAITING_VENDOR --> IN_REVIEW : reply timeout
     ON_HOLD --> AGENTS_RUNNING : receipt changed (recheck_holds)
     IN_REVIEW --> APPROVED : clerk approves
     ON_HOLD --> APPROVED : clerk approves
@@ -339,7 +324,7 @@ It does not cover a job that was *running* when the worker process died (a nativ
 3. Hash (sha256). A top-level file that was already received is not processed again (`created=False`, audit `intake.duplicate_file`). Attachments of an email are always new documents, because their parent differs.
 4. Store the original once per hash, insert `document` (RECEIVED) and audit `intake.received`.
 
-Sources: `upload` (API/UI), `mailbox` (IMAP poller), `unpack` (children of an email), `eval` (the eval harness sandbox, §19).
+Sources: `upload` (API/UI), `unpack` (children of an uploaded email), `eval` (the eval harness sandbox, §19). The `mailbox` source was removed on 2026-10-03.
 
 ### 6.2 Stage 2: unpack (`ingest/unpack.py`)
 
@@ -348,8 +333,7 @@ An `.eml` / `.msg` goes to unpack instead of parse:
 ```mermaid
 flowchart TD
     e["email document"] --> p["parse_eml / parse_msg<br/>(headers, text body, attachments;<br/>HTML sanitized with bleach)"]
-    p --> row["email_message row<br/>(reused when the poller made one)"]
-    row --> ar{"auto-reply?<br/>Auto-Submitted, X-Autoreply,<br/>Precedence, 'Out of office' subject"}
+    p --> ar{"auto-reply?<br/>Auto-Submitted, X-Autoreply,<br/>Precedence, 'Out of office' subject"}
     ar -- yes --> ni["NOT_INVOICE (S14)"]
     ar -- no --> snd{"sender domain on any<br/>ref_supplier_site?"}
     snd -- no --> fl["children flagged unknown_sender (S15)"]
@@ -556,33 +540,24 @@ Results go to `validation_result` (with `run_no`). The document becomes VALIDATE
 flowchart TD
     S([start]) --> triage
     triage -- "review<br/>(bank change, duplicate, inactive site,<br/>PO not open, missing data)" --> finalize
-    triage -- "exception<br/>(invoice maths)" --> draft_email
+    triage -- "invoice maths<br/>(review: ask_vendor_for_corrected_invoice)" --> finalize
     triage -- "po<br/>(PO printed, or supplier PO_REQUIRED)" --> find_po
     triage -- "non_po" --> gl_code
     find_po -- "PO found" --> pair_lines
-    find_po -- "none / several fit" --> draft_email
+    find_po -- "none / several fit<br/>(PO_MISSING: ask_vendor_for_po_number)" --> finalize
     pair_lines -- "pairs" --> three_way
     pair_lines -- "no pairs" --> finalize
     three_way -- "variances" --> hold
     three_way -- "within tolerance" --> gl_code
     hold --> finalize
     gl_code --> finalize
-    draft_email --> await_approval[/"interrupt: approve_email"/]
-    await_approval -- approve --> send_email
-    await_approval -- discard --> finalize
-    send_email --> await_reply[/"interrupt: vendor_reply"/]
-    await_reply --> parse_reply
-    parse_reply -- "usable PO →<br/>new version, re-validate" --> triage
-    parse_reply -- "otherwise" --> finalize
     finalize --> E([end: IN_REVIEW or ON_HOLD])
 ```
 
 `agents/runner.py`:
 
-- `run_agents(doc)`: creates `agent_run`, sets AGENTS_RUNNING and invokes the graph on the latest `mapped` / `user` / `vendor_reply` version.
-- `resume_agents(doc, value, expect=...)`: checks that the graph is waiting for exactly that interrupt, then continues with `Command(resume=value)`.
-- `pending_interrupt(doc)`: what the graph is waiting for, if anything.
-- `MAX_LOOPS = 2`: at most two passes through triage after vendor replies.
+- `run_agents(doc)`: creates `agent_run`, sets AGENTS_RUNNING and invokes the graph on the latest `mapped` / `user` version (`vendor_reply` versions from before 2026-10-03 are still read).
+- The graph has no interrupts: one run goes from triage to finalize.
 
 Every node works inside `agents/context.py:work()` (its own transaction) and records what it did with `decide()`: an `agent_decision` row plus an `agent.<node>` audit event.
 
@@ -596,13 +571,13 @@ Plain code over the validation results, checked in this order (the order matters
 | 2 | C10 fail | review | DUPLICATE | reject as duplicate |
 | 3 | C8 fail | review | SUPPLIER_INACTIVE | correct supplier site |
 | 4 | V-PO fail | review | PO_NOT_OPEN | contact the buyer |
-| 5 | C2–C5 fail and supplier known | exception | INVOICE_MATH | vendor email: corrected invoice |
+| 5 | C2–C5 fail and supplier known | review | INVOICE_MATH | ask the vendor for a corrected invoice |
 | 6 | other fails | review | DATA_MISSING / VALIDATION_FAILED | correct invoice data |
 | 7 | no fails | po / non_po | + DATE_AMBIGUOUS (C9 warning), CHECK_MAPPING (model-chosen mapping) | — |
 
 ### 9.3 Finding the PO and pairing lines (`agents/nodes/matching.py`, `agents/tools/pairing.py`)
 
-**find_po.** Printed PO numbers are used directly: the header PO and any PO printed on a line (`CanonicalInvoice.po_refs()`; stage 7 gives lines without their own PO the header PO). Each becomes a reference in `state["po_refs"]`: `4500123`, or `4500210-2` for release 2 of a blanket agreement. A blanket agreement without a printed release takes its only open release; with several open releases the invoice goes to review (RELEASE_MISSING, suggested action `ask_vendor_for_release_number`). A release printed for a standard PO is ignored with a note. Otherwise the adapter searches the supplier's open POs in the invoice currency whose open amount covers the invoice and whose unit prices match. Exactly one hit → it is used (PO_SUGGESTED). None or several → the exception agent asks the vendor (WORKED-EXAMPLE 3, scenario S3).
+**find_po.** Printed PO numbers are used directly: the header PO and any PO printed on a line (`CanonicalInvoice.po_refs()`; stage 7 gives lines without their own PO the header PO). Each becomes a reference in `state["po_refs"]`: `4500123`, or `4500210-2` for release 2 of a blanket agreement. A blanket agreement without a printed release takes its only open release; with several open releases the invoice goes to review (RELEASE_MISSING, suggested action `ask_vendor_for_release_number`). A release printed for a standard PO is ignored with a note. Otherwise the adapter searches the supplier's open POs in the invoice currency whose open amount covers the invoice and whose unit prices match. Exactly one hit → it is used (PO_SUGGESTED). None or several → review with PO_MISSING and the suggested action `ask_vendor_for_po_number` (WORKED-EXAMPLE 3, scenario S3; the clerk contacts the vendor).
 
 **pair_lines.** Every invoice line is scored against the open lines of every PO of the invoice (a blanket agreement through its release's shipments, `PoDetail.for_release`); a line with its own PO is only paired with that PO's lines (the others score 0), a line without one with any. Each pair records its reference (`ref`, `po`, `release`), which three-way, holds, GL coding and approval use:
 
@@ -648,83 +623,15 @@ flowchart TD
 
 For a model-chosen account, the company and cost centre come from the supplier's usual coding (`template_ccid`). When the invoice's store / location maps to a cost center (`cost_center`, §8.2), that cost center replaces segment `GL_COST_CENTER_SEGMENT` (separator `GL_SEGMENT_SEPARATOR`) of any non-PO account found this way: history gives the natural account, the location says where the cost lands (`with_cost_center`; the history account stays in `gl_lines[].history_account`). The combination then goes through `ccid_valid` like any other. The store table is loaded with `python -m aap.mapping.locations stores.csv` (`mapping/locations.py`). Any line that is not automatic adds the GL_REVIEW reason. When the clerk approves such a line, it is added to `gl_history_line` (source `review`, embedded at once), so the next identical line is coded from exact history (§11.1).
 
-### 9.6 Exception agent: the vendor email loop (`agents/nodes/exception.py`)
-
-Facts come from code; the LLM only writes the wording.
-
-```mermaid
-sequenceDiagram
-    participant G as Graph (worker)
-    participant DB as aap DB
-    participant C as Clerk (UI /ui/outbox)
-    participant M as Mail server
-    participant V as Vendor
-    participant P as IMAP poller
-    G->>DB: draft_email: email_outbox PENDING_APPROVAL<br/>subject "... [AP-REF:1a2b3c4d]", review task
-    G-->>G: interrupt approve_email (checkpointed)
-    C->>G: approve (optionally edited) → resume
-    G->>M: SMTP send (Message-ID, Reply-To AP mailbox)
-    G->>DB: outbox SENT, outbound email_message, AWAITING_VENDOR
-    G-->>G: interrupt vendor_reply
-    V->>M: "Out of office" (Auto-Submitted)
-    P->>DB: threaded auto_reply → logged, keep waiting (S14)
-    V->>M: "Sorry, it's PO 4500187"
-    P->>DB: threaded vendor_reply, raw .eml stored
-    P->>G: resume with the reply text (quotes removed)
-    G->>G: parse_reply: LLM {po_number}, the digits must be in the reply AND the PO must exist
-    G->>DB: new invoice_version (vendor_reply), re-validate
-    G->>G: triage again → find_po → pair_lines → three_way → gl_code → finalize
-```
-
-- Only `PO_MISSING` replies are parsed into data. For `INVOICE_MATH` the reply is recorded, and the corrected invoice arrives as a new document.
-- **Reminders and timeouts** (`agents/followup.py`, hourly): an exception email unanswered for `VENDOR_REPLY_REMINDER_DAYS` (3) gets one reminder draft (kind `reminder`, threaded on the first email, needs approval). After `VENDOR_REPLY_TIMEOUT_DAYS` (7) a `VENDOR_NO_REPLY` review task is created and the document goes to IN_REVIEW. The graph keeps waiting, so a late reply is still picked up. There is at most one reminder per email (no email loops).
-
-### 9.7 Finalize
+### 9.6 Finalize
 
 `finalize` closes the open review tasks, releases holds that no longer apply, and writes one new review task: the reason codes, a summary (notes, PO pairing, GL lines) and a suggested action. It then sets IN_REVIEW or ON_HOLD and stores `agent_run.outcome` (status, reasons, pairs, variances, GL lines, PO number). Approval and `recheck_holds` read that outcome back.
 
 ---
 
-## 10. The mailbox
+## 10. The mailbox (removed)
 
-### 10.1 Components (`mailbox/`)
-
-| Module | Role |
-|---|---|
-| `connector.py` | `MailboxConnector` protocol (`select`, `fetch_new`, `move`, `send`, `close`) and `ImapSmtpConnector` (stdlib `imaplib` + SMTP). A Microsoft Graph connector would implement the same protocol. |
-| `classify.py` | Threading and classification, code only |
-| `poller.py` | One pass over INBOX (`poll_once`), run every `MAILBOX_POLL_SECONDS` (30 s; the cron has a seconds field) |
-| `agents/tools/mail.py` | Outbound send for the agents (`MAIL_SEND_BACKEND=smtp`, or `log` in tests) |
-
-### 10.2 One poll
-
-```mermaid
-flowchart TD
-    sel["SELECT INBOX → UIDVALIDITY<br/>(changed → last_uid = 0)"] --> fetch["UID SEARCH last_uid+1:*<br/>≤ MAILBOX_BATCH (200) messages"]
-    fetch --> each["for each message (own transaction)"]
-    each --> dup{"Message-ID or sha256<br/>seen before?"}
-    dup -- yes --> skip["count duplicate"]
-    dup -- no --> cls{"classify"}
-    cls -- "threaded + auto-reply" --> ar["email_message auto_reply<br/>(raw .eml stored; agents keep waiting)"]
-    cls -- "threaded" --> vr["email_message vendor_reply"]
-    vr --> w{"graph waiting for vendor_reply?"}
-    w -- yes --> res["after commit: defer aap.agents.resume"]
-    w -- no --> rt["review task VENDOR_REPLY_UNEXPECTED"]
-    cls -- "not threaded" --> intake["email_message + intake(.eml, source=mailbox)<br/>→ after commit: enqueue parse (→ unpack)"]
-    skip & ar & res & rt & intake --> mv["IMAP MOVE → Processed<br/>(→ Failed if handling raised)"]
-    mv --> st["mailbox_state.last_uid = uid"]
-```
-
-**Threading** (`thread_document`): In-Reply-To first, then References (newest first), each matched against our outbound `email_message.message_id` or `email_outbox.sent_message_id`. If nothing matches, the subject token `[AP-REF:<8 hex>]` is tried, but only against documents we actually emailed, and only when exactly one matches.
-
-**Crash safety.** A message is committed before it is moved. A crash between the commit and the move re-fetches it next time, and the Message-ID / sha256 dedupe absorbs it. A message whose handling raises goes to the `Failed` folder and the poll continues with the next one. `last_error` on `mailbox_state` records connection failures (shown on the admin page).
-
-**Reply text** (`reply_text`): lines starting with `>` are dropped, and everything after an `On … wrote:` / `-----Original Message-----` / `From:` line is cut.
-
-### 10.3 Vendor simulator (`tools/vendor_sim`)
-
-- `send --dir <invoicegen set> [--only S1,S3]`: emails a generated set to the AP mailbox. PDFs are wrapped in an email from the supplier site's address (read from EBS).
-- `reply [--ooo] [--watch N] [--vendor addr]`: logs in to vendor mailboxes (GreenMail allows any login), finds unseen emails with `[AP-REF:` and answers them with scripted replies (S3 → "it's PO 4500187"), optionally sending an out-of-office auto-reply first.
+The IMAP mailbox, the vendor email loop (exception agent, outbox, reminders) and the vendor simulator were removed on 2026-10-03 (migration `0003_remove_mailbox`; PLAN-MID-DECEMBER §10). Invoices arrive by upload only. An uploaded `.eml` / `.msg` is still unpacked into its attachments (§6.2). Where the vendor must act, the review task carries the suggested action and the clerk contacts the vendor.
 
 ---
 
@@ -734,7 +641,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    a["approve(doc, by, note, corrections)"] --> c1{"status IN_REVIEW, ON_HOLD<br/>or ORACLE_ERROR, and the graph<br/>not waiting for an email / reply?"}
+    a["approve(doc, by, note, corrections)"] --> c1{"status IN_REVIEW, ON_HOLD<br/>or ORACLE_ERROR?"}
     c1 -- no --> x["DecisionError (409 in the API)"]
     c1 -- yes --> m["latest reviewed version<br/>+ agent outcome: PO line per line (pairs),<br/>dist_account per non-PO line (gl_lines)"]
     m --> corr["apply clerk corrections<br/>(method user; PO line or account per line)"]
@@ -899,15 +806,13 @@ bge-m3 runs through ONNX Runtime instead of PyTorch, which keeps the ~2.5 GB CUD
 |---|---|---|---|
 | `extract` | `EXTRACT_MODEL` | `ExtractedInvoice` / `ExtractedInvoiceGrounded` | stage 5 |
 | `choose` | `CHOICE_MODEL` | `{choice: enum[ids…, none/review], reason}` | mapping, line pairing, GL |
-| `draft_email` | `CHOICE_MODEL` | `{subject, body}` | exception agent |
-| `parse_reply` | `EXTRACT_MODEL` | `{po_number: string | null}` | exception agent |
 
 All calls use temperature 0 and a strict JSON schema. One retry is made if the output does not parse, except after a truncation (§7.2).
 
 ### 14.2 Backends
 
 - **`LLM_BACKEND=vllm`**: the OpenAI SDK pointed at `VLLM_BASE_URL` (the `vllm` container). Qwen2.5-VL-7B-Instruct, FP8 quantized at load, `--max-model-len 16384`, up to 4 images per prompt, `max_pixels ≈ 1 MP`.
-- **`LLM_BACKEND=stub`** (`llm/stub.py`): no GPU. `extract` returns the invoice generator's ground truth from `TRUTH_DIR/<sha256>.truth.json` (or a regex fallback). `choose` takes the first real candidate. `draft_email` fills a template. `parse_reply` uses a regex. With the stub, every stage and agent path can be developed and tested in CI.
+- **`LLM_BACKEND=stub`** (`llm/stub.py`): no GPU. `extract` returns the invoice generator's ground truth from `TRUTH_DIR/<sha256>.truth.json` (or a regex fallback). `choose` takes the first real candidate. With the stub, every stage and agent path can be developed and tested in CI.
 
 ### 14.3 Measured performance (RTX 5090 laptop, FP8)
 
@@ -923,11 +828,9 @@ All calls use temperature 0 and a strict JSON schema. One retry is made if the o
 
 | Job | Schedule | What it does |
 |---|---|---|
-| `aap.mailbox.poll` | every `MAILBOX_POLL_SECONDS` (30 s) | §10.2 (skipped when `MAILBOX_ENABLED=false`) |
 | `aap.requeue_stalled` | every minute | Re-enqueues stuck documents (§5); eval documents excluded |
 | `aap.agents.recheck_holds` | every 5 min | §9.4 |
 | `aap.embed.backfill` | every 5 min | §13.2 (no-op until the model exists) |
-| `aap.agents.vendor_followups` | hourly (:17) | §9.6 reminders and timeouts |
 | `aap.refsync.nightly` | 02:00 | §13.1 |
 
 Each periodic task has a Procrastinate `lock`, so two runs never overlap.
@@ -946,8 +849,6 @@ flowchart TD
     k -- "Oracle unreachable at submit" --> oe["ORACLE_ERROR + review task ORACLE_UNAVAILABLE<br/>clerk approves again (new version, new key)"]
     k -- "Oracle rejects" --> oe2["ORACLE_ERROR + reject codes, fix_and_resubmit"]
     k -- "Oracle import never finishes" --> to["after 120 polls: ORACLE_ERROR (TIMEOUT)"]
-    k -- "IMAP server down" --> mb["poll raises; mailbox_state.last_error;<br/>next poll tries again"]
-    k -- "one email breaks handling" --> pe["moved to Failed folder; the poll continues"]
     k -- "crash between commit and enqueue" --> rs["requeue_stalled picks it up"]
     k -- "worker process dies mid-job<br/>(native crash, OOM kill)" --> wr["job left 'doing'; at the next worker start<br/>it goes back to 'todo' (WORKER_RECOVER_ON_START)"]
     k -- "same job delivered twice" --> sk["StageSkipped (status check), no effect"]
@@ -965,9 +866,9 @@ Three layers record what happened:
 
 | Layer | Written by | Answers |
 |---|---|---|
-| `audit_event` (INSERT-only) | `audit()` everywhere: intake, stage completion, status changes, every agent / mapping decision, approvals, submissions, mail events | who did what, when |
+| `audit_event` (INSERT-only) | `audit()` everywhere: intake, stage completion, status changes, every agent / mapping decision, approvals, submissions | who did what, when |
 | `document_status_history` | `set_status()` | the exact path of a document |
-| Domain rows | `agent_decision` (candidates, prompt, raw model output, choice, reason), `validation_result`, `invoice_version` (every version kept), `extraction_run.raw_output`, `email_message` + stored `.eml` | why a value or a decision is what it is |
+| Domain rows | `agent_decision` (candidates, prompt, raw model output, choice, reason), `validation_result`, `invoice_version` (every version kept), `extraction_run.raw_output` | why a value or a decision is what it is |
 
 `python -m aap.audit_check [--since DATE]` (`audit_check.py`) verifies, per document (eval documents excluded):
 
@@ -975,9 +876,7 @@ Three layers record what happened:
 - every agent or mapping decision has its audit event, and every finished agent run has an outcome;
 - every document Need Attention has an open review task;
 - every approved version has an approval event by a named person;
-- every submission has `submit.sent` and its result event;
-- every sent vendor email has an outbound `email_message` (Message-ID) and an approver;
-- every inbound email has its raw `.eml` in the file store.
+- every submission has `submit.sent` and its result event.
 
 The e2e suite runs this check at the end of every module. On the dev stack it reported 0 problems over 2,077 documents after the 1,000-invoice replay.
 
@@ -992,9 +891,8 @@ Server-rendered Jinja2 with HTMX (vendored in `api/static/`, so it works offline
 | Page | Shows | Actions |
 |---|---|---|
 | `/ui` | Invoices (email containers hidden), status chips with counts, open reasons; the table refreshes every 10 s | filter by status |
-| `/ui/documents/{id}` | Original file (iframe), review tasks and suggested action, the fields (value, as printed, method, flags), validation, agent decisions, holds, the email thread, Oracle submissions, status history | approve (with a PO line or GL account per line) / reject (reason required) |
-| `/ui/outbox` | Vendor emails waiting for approval; recently sent | edit subject and body, approve and send, discard |
-| `/ui/admin` | Mailbox state, job queue by status, reference sync, GL history / embeddings, failed documents, eval runs | poll now, sync now, retry a failed document |
+| `/ui/documents/{id}` | Original file (iframe), review tasks and suggested action, the fields (value, as printed, method, flags), validation, agent decisions, holds, Oracle submissions, status history | approve (with a PO line or GL account per line) / reject (reason required) |
+| `/ui/admin` | Job queue by status, reference sync, GL history / embeddings, failed documents, value-map proposals, eval runs | sync now, retry a failed document, decide a proposal |
 
 There is no login in the dev build (bound to 127.0.0.1). "Acting as" is a cookie, and that name goes into the audit and the approvals.
 
@@ -1012,10 +910,8 @@ There is no login in the dev build (bound to 127.0.0.1). "Acting as" is a cookie
 | `POST /api/documents/{id}/decision` | `{action: approve | reject, by, note, corrections}` |
 | `POST /api/documents/{id}/retry` | FAILED → RECEIVED |
 | `POST /api/documents/{id}/agents` | Re-run the agents |
-| `POST /api/documents/{id}/vendor-reply` | Manual vendor reply (the poller normally does this) |
-| `GET /api/outbox`, `POST /api/outbox/{id}/approve | discard` | Vendor emails (reminders are sent directly, since the graph is already waiting) |
 | `GET /api/review-tasks` | Open tasks |
-| `GET /api/admin/mailbox`, `POST /api/admin/mailbox/poll`, `POST /api/admin/refsync` | Operations |
+| `POST /api/admin/refsync`, `GET /api/value-map-proposals`, `POST /api/value-map-proposals/{id}/decision` | Operations |
 | `GET /health`, `GET /health/llm` | Health |
 
 ---
@@ -1066,9 +962,9 @@ Latest results (details in the status doc):
 
 | Suite | Runs where | Covers |
 |---|---|---|
-| `tests/unit` | host (`uv run pytest tests/unit`) | normalizers, tax IDs, routing, the stub LLM, seed build, mailbox classification, eval metrics; the real-invoice rules (terms from the due date, tax rows, price basis, bank plausibility, invoice type, Canada hints, C4 / C11 / C13, location map; `test_real_invoice_rules.py`); APLOAD byte-for-byte against the sample (`test_apload.py`); POs per line, blanket releases, store → cost center, the tax re-read and the store-table loader (`test_call_followups.py`); the export layout incl. the printed terms / due date columns (`test_invoice_export.py`); worker start recovery (`test_worker_recover.py`) |
+| `tests/unit` | host (`uv run pytest tests/unit`) | normalizers, tax IDs, routing, the stub LLM, seed build, eval metrics; the real-invoice rules (terms from the due date, tax rows, price basis, bank plausibility, invoice type, Canada hints, C4 / C11 / C13, location map; `test_real_invoice_rules.py`); APLOAD byte-for-byte against the sample (`test_apload.py`); POs per line, blanket releases, store → cost center, the tax re-read and the store-table loader (`test_call_followups.py`); the export layout incl. the printed terms / due date columns (`test_invoice_export.py`); worker start recovery (`test_worker_recover.py`) |
 | `tests/integration` | host, testcontainers pgvector | seed invariants, WORKED-EXAMPLE SQL as `apps_ro`, role permissions, APXIIMPT create / reject / hold, adapter + reference sync |
-| `tests/e2e` | app container against a throwaway Postgres (`PG_TEST_HOST`), GreenMail | S1–S15 with agent outcomes; the S3 email loop; the mailbox loop; reminders and timeouts; `recheck_holds`; submit (S1 hold + idempotency, S4 duplicate, S2 non-PO GL + feedback, S8 FX); UI pages and forms; failure modes; embeddings (in `worker`); audit check after every module |
+| `tests/e2e` | app container against a throwaway Postgres (`PG_TEST_HOST`) | S1–S15 with agent outcomes; `recheck_holds`; submit (S1 hold + idempotency, S4 duplicate, S2 non-PO GL + feedback, S8 FX); UI pages and forms; failure modes; embeddings (in `worker`); audit check after every module |
 
 Each e2e module starts from a fresh EBS seed and an empty `aap` database (`clean_aap` fixture), because modules post invoices and receive goods. `TEST_LLM_BACKEND=vllm` runs the scenarios against the real model.
 
@@ -1108,7 +1004,6 @@ All settings come from the environment / `.env` (`config.py`).
 | LLM | `VLLM_BASE_URL`, `VLLM_API_KEY`, `EXTRACT_MODEL`, `CHOICE_MODEL`, `*_MODEL_REPO`, `LLM_TIMEOUT_SECONDS` (180), `LLM_MAX_IMAGES_PER_REQUEST` (4), `VLLM_IMAGE`, `VLLM_HOST_PORT` (8100) |
 | Embeddings | `EMBED_MODEL` (BAAI/bge-m3), `EMBED_MODEL_DIR` (/models/bge-m3), `EMBED_ENABLED` (true), `EMBED_THREADS` (8) |
 | Files | `FILESTORE_DIR`, `TRUTH_DIR`, `MAX_UPLOAD_MB` (25) |
-| Mailbox | `MAIL_IMAP_HOST/PORT`, `MAIL_USER`, `MAIL_PASSWORD`, `MAIL_SMTP_HOST/PORT`, `AP_MAILBOX`, `MAILBOX_ENABLED` (true), `MAILBOX_POLL_SECONDS` (30, must divide 60), `MAILBOX_BATCH` (200), `MAIL_PROCESSED_FOLDER` (Processed), `MAIL_FAILED_FOLDER` (Failed), `MAIL_SEND_BACKEND` (smtp / log), `VENDOR_REPLY_REMINDER_DAYS` (3), `VENDOR_REPLY_TIMEOUT_DAYS` (7) |
 | Agents | `MATCH_AUTO_ACCEPT` (0.80), `MATCH_MARGIN` (0.15), `GL_SIM_AUTO` (0.90), `GL_EXACT_AUTO` (0.90), `GL_EXACT_MIN` (3) |
 | Worker | `WORKER_RECOVER_ON_START` (true; only with one worker process, §5) |
 | Pipeline | `INVOICE_SOURCE` (AAP; also the APLOAD InvoiceSource), `GL_DATE_POLICY` (invoice_date / today, §8.2), `TEXT_QUALITY_THRESHOLD` (0.60), `INVOICE_MAX_AGE_DAYS` (365), `AMOUNT_TOLERANCE` (0.01) |
@@ -1126,8 +1021,7 @@ All settings come from the environment / `.env` (`config.py`).
 | A validation rule | `validation/rules/rNN_*.py` (`@rule`) | triage order if it should route (`agents/nodes/triage.py`), e2e expectations in `ebs_mock/scenarios.py` |
 | Mapping thresholds or order | `mapping/map.py` | e2e scenarios, eval `header.*` fields |
 | Matching / GL policy | settings (`MATCH_*`, `GL_*`) or `agents/nodes/matching.py`, `agents/nodes/gl.py` | e2e scenarios S1, S2, S5 |
-| Agent flow | `agents/graph.py` + a node; bump `GRAPH_VERSION` (stored on `agent_run`) | threads already waiting at an interrupt resume on the new graph from their checkpoint: keep interrupt node names (`await_approval`, `await_reply`) stable, and test the resume paths |
+| Agent flow | `agents/graph.py` + a node; bump `GRAPH_VERSION` (stored on `agent_run`) | e2e scenarios; the graph has no interrupts, so no waiting thread depends on node names |
 | Oracle target (real EBS / Fusion) | a new adapter implementing `ErpReadPort` / `ErpWritePort`; `ADAPTER` | integration tests against the target |
-| Mailbox provider | a new `MailboxConnector` (e.g. Microsoft Graph) | `tests/e2e/test_mailbox.py` against it |
 | The database schema | `db/models.py` + a new Alembic revision (`IF NOT EXISTS`, see §4.3) | `migrate` |
 | EBS mock tables | `ebs_mock/ddl/*.sql` + seeders (re-seed with `--force`); idempotent APIs go in `apps_api.sql` | integration tests |
