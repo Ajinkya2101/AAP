@@ -13,9 +13,9 @@ images written as files, and the answer in the production schema and key order a
   truth's printed values;
 - from `aap.finetune.export`: the pages as the model saw them; the target is the corrected or
   approved reading.
-Image-only (scanned) chunks are left out for now: their answer also carries evidence boxes, which
-neither source has (CLIENT-DATA P6.2). Invoices that need several requests are left out too: the
-truth is per invoice, not per chunk.
+Image-only (scanned) chunks need evidence boxes in the answer: the export keeps the model's own boxes
+on the fields the target keeps (CLIENT-DATA P6.2); a target without them (the synthetic sets) is left
+out. Invoices that need several requests are left out too: the truth is per invoice, not per chunk.
 
 `decide-smoke` (adapter B, plumbing only): the printed values of a synthetic invoice and a made-up
 context pack (its supplier and site among others) -> the supplier, site, OU and currency. The real
@@ -156,7 +156,7 @@ def _example(b: Builder, example_id: str, pages: list[Any], target: dict[str, An
         b.skipped["several requests"] += 1
         return
     r = reqs[0]
-    if r.schema_cls is ExtractedInvoiceGrounded:
+    if r.schema_cls is ExtractedInvoiceGrounded and "evidence" not in target:
         b.skipped["image-only pages (evidence boxes not labelled)"] += 1
         return
     try:
@@ -223,8 +223,9 @@ def extract_from_export(export: Path, out: Path, **kw: Any) -> dict[str, Any]:
                            text=p.get("text") or "", words=[],
                            image_png=(export / p["image"]).read_bytes() if p.get("image") else None)
                  for p in row["pages"]]
-        _example(b, row["sha256"], pages, row["target"], {"label": row["label"], "document_id": row["document_id"]},
-                 row.get("split"))
+        _example(b, row["sha256"], pages, row["target"],
+                 {"label": row["label"], "document_id": row["document_id"], "source": row.get("source"),
+                  "invoice_id": row.get("invoice_id")}, row.get("split"))
     return b.write()
 
 

@@ -1,4 +1,5 @@
 """python -m aap.finetune.export --out <dir> [--no-images] [--include-unlabelled]
+                                 [--source kk-train] [--goldset test-data-kk/<gold set>]
 
 Writes the training examples the application has collected so far:
 
@@ -14,6 +15,12 @@ Writes the training examples the application has collected so far:
 Only invoices the real model extracted; eval sets (synthetic, with their own truth files) and
 stub runs are left out. "approved" is a weaker label than "corrected": the clerk accepted the
 invoice, which does not prove that every field was checked.
+
+For the client's train split (IMPLEMENTATION-PLAN-CLIENT-DATA P6.2): `--source kk-train` keeps only the
+documents uploaded by `aap.clientdata.labels upload`; `--goldset` adds each invoice's `split` and
+`invoice_id` (by file hash), which `aap.finetune.chat extract --export` keeps. Image-only pages: the
+model's own evidence boxes are written into the target (`evidence`) for the header fields whose value
+the target keeps; a field corrected to another value loses its box (no box is drawn by hand).
 """
 
 from __future__ import annotations
@@ -49,16 +56,41 @@ def _flat(source_invoice: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-def _documents(session: Session) -> list[Document]:
-    return list(session.scalars(select(Document).where(Document.source != "eval",
-                                                       Document.file_type.not_in(["eml", "msg"]))
-                                .order_by(Document.created_at)))
+def _documents(session: Session, source: str | None = None) -> list[Document]:
+    q = select(Document).where(Document.source != "eval", Document.file_type.not_in(["eml", "msg"]))
+    if source:
+        q = q.where(Document.source == source)
+    return list(session.scalars(q.order_by(Document.created_at)))
 
 
-def extraction_examples(session: Session, out: Path | None, store: FileStore) -> list[dict[str, Any]]:
+def kept_evidence(raw_output: Any, model_output: dict[str, Any], target: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """The model's evidence boxes for the header fields whose value the target keeps; None when the
+    reading had no evidence (not an image-only request)."""
+    chunks = [c.get("output") or {} for c in raw_output or [] if isinstance(c, dict)]
+    boxes = [e for c in chunks for e in c.get("evidence") or []]
+    if not any("evidence" in c for c in chunks):
+        return None
+    return [e for e in boxes if e.get("field") in target and target.get(e["field"]) is not None
+            and target.get(e["field"]) == model_output.get(e["field"])]
+
+
+def gold_splits(goldset: Path | None) -> dict[str, dict[str, Any]]:
+    """sha256 -> {"split", "invoice_id"} of a gold set (aap.clientdata.goldset)."""
+    if goldset is None:
+        return {}
+    out = {}
+    for p in (goldset / "truth").glob("*.truth.json"):
+        t = json.loads(p.read_text(encoding="utf-8"))
+        out[p.name.split(".")[0]] = {"split": t.get("split"), "invoice_id": t.get("invoice_id")}
+    return out
+
+
+def extraction_examples(session: Session, out: Path | None, store: FileStore, *, source: str | None = None,
+                        goldset: Path | None = None) -> list[dict[str, Any]]:
     """`out`: where the page images are copied to (None: do not copy)."""
     examples = []
-    for doc in _documents(session):
+    gold = gold_splits(goldset)
+    for doc in _documents(session, source):
         runs = list(session.scalars(select(ExtractionRun).where(
             ExtractionRun.document_id == doc.id, ExtractionRun.status == "ok").order_by(ExtractionRun.created_at)))
         model_runs = [r for r in runs if r.backend == REAL_BACKEND]
@@ -82,11 +114,16 @@ def extraction_examples(session: Session, out: Path | None, store: FileStore) ->
                     target.write_bytes(store.read(p.image_path))
             pages.append({"page_no": p.page_no, "route": p.route, "image": image, "text": p.text})
         changes = [c for r in runs if r.backend == USER_BACKEND for c in (r.raw_output or [{}])[0].get("changes", [])]
+        model_output, target = _flat(model_run.source_invoice), _flat(last.source_invoice)
+        evidence = kept_evidence(model_run.raw_output, model_output, target)
+        if evidence is not None:
+            target["evidence"] = evidence
         examples.append({
             "document_id": str(doc.id), "filename": doc.filename, "sha256": doc.sha256, "label": label,
+            "source": doc.source, "split": gold.get(doc.sha256, {}).get("split"),
+            "invoice_id": gold.get(doc.sha256, {}).get("invoice_id"),
             "model": model_run.model, "prompt_version": model_run.prompt_version, "pages": pages,
-            "model_output": _flat(model_run.source_invoice), "target": _flat(last.source_invoice),
-            "changes": changes})
+            "model_output": model_output, "target": target, "changes": changes})
     return examples
 
 
@@ -135,10 +172,11 @@ def choice_examples(session: Session, include_unlabelled: bool = False) -> list[
     return examples
 
 
-def export(out: Path, *, images: bool = True, include_unlabelled: bool = False) -> dict[str, Any]:
+def export(out: Path, *, images: bool = True, include_unlabelled: bool = False, source: str | None = None,
+           goldset: Path | None = None) -> dict[str, Any]:
     out.mkdir(parents=True, exist_ok=True)
     with session_scope() as session:
-        extraction = extraction_examples(session, out if images else None, FileStore())
+        extraction = extraction_examples(session, out if images else None, FileStore(), source=source, goldset=goldset)
         choices = choice_examples(session, include_unlabelled)
     for name, rows in (("extraction.jsonl", extraction), ("choices.jsonl", choices)):
         with (out / name).open("w", encoding="utf-8", newline="\n") as f:
@@ -147,7 +185,9 @@ def export(out: Path, *, images: bool = True, include_unlabelled: bool = False) 
     summary = {"extraction": dict(Counter(e["label"] for e in extraction)), "extraction_total": len(extraction),
                "changed_values": sum(len(e["changes"]) for e in extraction),
                "choices": dict(Counter(f"{c['node']}:{c['label_source'] or 'unlabelled'}" for c in choices)),
-               "choices_total": len(choices)}
+               "choices_total": len(choices),
+               "splits": dict(Counter(str(e["split"]) for e in extraction)),
+               "with_evidence": sum(1 for e in extraction if "evidence" in e["target"])}
     (out / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
 
@@ -157,8 +197,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--no-images", action="store_true", help="do not copy the page images")
     p.add_argument("--include-unlabelled", action="store_true", help="also write choices nobody approved yet")
+    p.add_argument("--source", default=None, help="only documents of this intake source (kk-train: the train split)")
+    p.add_argument("--goldset", type=Path, default=None, help="add each invoice's split and invoice_id")
     a = p.parse_args(argv)
-    s = export(a.out, images=not a.no_images, include_unlabelled=a.include_unlabelled)
+    s = export(a.out, images=not a.no_images, include_unlabelled=a.include_unlabelled, source=a.source,
+               goldset=a.goldset)
     print(f"[export] extraction: {s['extraction_total']} invoices {s['extraction']}, "
           f"{s['changed_values']} corrected values")
     print(f"[export] choices: {s['choices_total']} {s['choices']}")

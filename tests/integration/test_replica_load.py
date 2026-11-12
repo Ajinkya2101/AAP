@@ -249,3 +249,43 @@ def test_systems_s0_and_s1_on_the_same_split(replica_env, cluster, tmp_path, mon
     assert [r["system"] for r in records] == ["s0", "s1"]
     assert records[1]["decide_mode"] == "apply" and records[0]["dataset_sha256"] == records[1]["dataset_sha256"]
     assert "70003" not in json.dumps(records)                # no supplier numbers in the run log
+
+
+def test_train_split_labels_upload_and_compare(replica_env, cluster, tmp_path, monkeypatch):
+    """CLIENT-DATA P6.1: the train split is uploaded with source kk-train, read (stub: the printed values),
+    and compared with the keyed record; a misread total is listed for review, the rest is accepted."""
+    from tests.conftest import _reset_caches
+
+    from aap.clientdata.labels import compare, upload
+    from aap.clientdata.replica import run
+
+    delivery = build(tmp_path / "2026-11-10")
+    gold = tmp_path / "gold"
+    build_goldset(delivery, gold, holdout={"70003"}, coa=KK, pdf_scan=False)
+    _printed_values(gold, delivery)
+    run([delivery], exclude=gold / "history_exclude.json", create=True,
+        admin_dsn=cluster.dsn("postgres", "postgres"), log=lambda *_: None)
+    truth_dir = tmp_path / "truth"
+    truth_dir.mkdir()
+    misread = None
+    for p in (gold / "truth").glob("*.truth.json"):          # what the stub "reads": one total misread
+        t = json.loads(p.read_text(encoding="utf-8"))
+        if misread is None and t["split"] == "train":
+            misread = t["invoice_id"]
+            t["source"]["total"] = str(Decimal(t["source"]["total"]) + 100)
+        (truth_dir / p.name).write_text(json.dumps(t), encoding="utf-8")
+    monkeypatch.setenv("TRUTH_DIR", str(truth_dir))
+    monkeypatch.setenv("FILESTORE_DIR", str(tmp_path / "filestore"))
+    _reset_caches()
+    try:
+        counts = upload(gold, split="train", inline=True, log=lambda *_: None)
+        assert upload(gold, split="train", inline=True, log=lambda *_: None) == {"already uploaded": counts["new"]}
+        results = compare(gold, split="train")
+    finally:
+        monkeypatch.undo()
+        _reset_caches()
+    assert len(results) == counts["new"] > 1
+    by_id = {r.invoice_id: r for r in results}
+    assert by_id[misread].status == "review" and [d["field"] for d in by_id[misread].differences] == ["total"]
+    assert all(r.status == "accepted" for i, r in by_id.items() if i != misread), [
+        (r.invoice_id, r.differences, r.lines_match) for r in results if r.status != "accepted"]
