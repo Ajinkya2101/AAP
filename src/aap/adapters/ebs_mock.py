@@ -63,7 +63,7 @@ SELECT vendor_site_id, vendor_id, vendor_site_code, org_id, address_line1, addre
        purchasing_site_flag, primary_pay_site_flag, terms_id, invoice_currency_code, tolerance_id,
        match_option, accts_pay_code_combination_id AS liability_ccid, inactive_date,
        payment_method_lookup_code AS payment_method, pay_group_lookup_code AS pay_group, payment_currency_code,
-       terms_date_basis
+       terms_date_basis, distribution_set_id
 FROM   ap_supplier_sites_all"""
 
 SQL_BANKS = """
@@ -112,6 +112,18 @@ WHERE  c.summary_flag = 'N'"""
 SQL_PAYMENT_METHODS = """
 SELECT payment_method_code, payment_method_name AS name, description, inactive_date
 FROM   iby_payment_methods_vl"""
+
+SQL_DISTRIBUTION_SETS = """
+SELECT s.distribution_set_id, s.distribution_set_name AS name, s.description, s.org_id, s.inactive_date,
+       coalesce(json_agg(json_build_object('account', c.concatenated_segments,
+                                           'percent', l.percent_distribution::text,
+                                           'description', l.description)
+                         ORDER BY l.distribution_set_line_number)
+                FILTER (WHERE l.distribution_set_id IS NOT NULL), '[]'::json) AS lines
+FROM   ap_distribution_sets_all s
+LEFT JOIN ap_distribution_set_lines_all l ON l.distribution_set_id = s.distribution_set_id
+LEFT JOIN gl_code_combinations_kfv c ON c.code_combination_id = l.dist_code_combination_id
+GROUP BY s.distribution_set_id, s.distribution_set_name, s.description, s.org_id, s.inactive_date"""
 
 SQL_LOOKUPS = """
 SELECT lookup_type, lookup_code, meaning, description, enabled_flag, end_date_active
@@ -229,7 +241,9 @@ WHERE  code_combination_id = %s"""
 SQL_GL_HISTORY = """
 SELECT d.invoice_distribution_id, i.vendor_id, i.org_id, coalesce(d.description, l.description) AS description,
        d.dist_code_combination_id AS ccid, c.concatenated_segments, c.@NATURAL@ AS natural_account,
-       d.amount, i.invoice_date,
+       d.amount, i.invoice_date, i.vendor_site_id, i.invoice_id, i.invoice_num,
+       i.invoice_type_lookup_code AS invoice_type, i.gl_date, d.invoice_line_number AS line_number,
+       l.line_type_lookup_code AS line_type, l.distribution_set_id,
        concat_ws('-', cat.segment1, cat.segment2, cat.segment3, cat.segment4) AS category_code
 FROM   ap_invoice_distributions_all d
 JOIN   ap_invoices_all i ON i.invoice_id = d.invoice_id
@@ -346,6 +360,8 @@ class MockEbsAdapter:
                            segments=[r[c] for c in coa.columns()]) for r in self._all(sql_ccids(coa))]
         data.payment_methods = [dict(r, inactive_date=_d(r["inactive_date"]))
                                 for r in self._all(SQL_PAYMENT_METHODS)]
+        data.distribution_sets = [dict(r, inactive_date=_d(r["inactive_date"]))
+                                  for r in self._all(SQL_DISTRIBUTION_SETS)]
         data.lookups = [dict(r, end_date_active=_d(r["end_date_active"]))
                         for r in self._all(SQL_LOOKUPS, (list(CHECKED_TYPES),))]
         data.categories = [dict(r, disable_date=_d(r["disable_date"])) for r in self._all(SQL_CATEGORIES)]
@@ -459,7 +475,11 @@ class MockEbsAdapter:
                                 org_id=r["org_id"], description=r["description"], ccid=r["ccid"],
                                 concatenated=r["concatenated_segments"], natural_account=r["natural_account"],
                                 amount=_dec(r["amount"]), invoice_date=_d(r["invoice_date"]),
-                                category_code=r["category_code"] or None)
+                                category_code=r["category_code"] or None, vendor_site_id=r["vendor_site_id"],
+                                invoice_id=r["invoice_id"], invoice_num=r["invoice_num"],
+                                invoice_type=r["invoice_type"], gl_date=_d(r["gl_date"]),
+                                line_number=r["line_number"], line_type=r["line_type"],
+                                distribution_set_id=r["distribution_set_id"])
 
     def get_exchange_rate(self, from_currency: str, to_currency: str, on_date: date,
                           rate_type: str = "Corporate") -> Decimal | None:

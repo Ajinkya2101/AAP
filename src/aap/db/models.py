@@ -383,6 +383,7 @@ class RefSupplierSite(Base):
     pay_group: Mapped[str | None] = mapped_column(String(25))
     payment_currency_code: Mapped[str | None] = mapped_column(String(15))
     terms_date_basis: Mapped[str | None] = mapped_column(String(25))      # Invoice | Invoice Received | ...
+    distribution_set_id: Mapped[int | None] = mapped_column(BigInteger)   # default distribution set (0006)
 
 
 class RefSupplierBank(Base):
@@ -417,6 +418,17 @@ class RefPaymentMethod(Base):
     name: Mapped[str | None] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(String(255))
     enabled: Mapped[bool] = mapped_column(Boolean)
+
+
+class RefDistributionSet(Base):
+    """AP_DISTRIBUTION_SETS_ALL with its lines (0006): the context pack shows a set by name."""
+    __tablename__ = "ref_distribution_set"
+    distribution_set_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    name: Mapped[str | None] = mapped_column(String(50))
+    description: Mapped[str | None] = mapped_column(String(240))
+    org_id: Mapped[int | None] = mapped_column(BigInteger)
+    enabled: Mapped[bool] = mapped_column(Boolean)
+    lines: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB)   # [{account, percent, description}]
 
 
 class RefLookup(Base):
@@ -523,6 +535,16 @@ class GlHistoryLine(Base):
     amount: Mapped[Decimal | None] = mapped_column(Numeric)
     invoice_date: Mapped[date | None] = mapped_column(Date)
     source: Mapped[str] = mapped_column(String(20), default="ebs")  # ebs | review
+    # 0006: what the context pack needs (site, invoice, GL date, distribution set); null on review rows
+    # where unknown, and on rows synced before 0006 until the next reference sync fills them
+    vendor_site_id: Mapped[int | None] = mapped_column(BigInteger)
+    invoice_id: Mapped[int | None] = mapped_column(BigInteger)
+    invoice_num: Mapped[str | None] = mapped_column(String(50))
+    invoice_type: Mapped[str | None] = mapped_column(String(25))
+    gl_date: Mapped[date | None] = mapped_column(Date)
+    line_number: Mapped[int | None] = mapped_column(Integer)
+    line_type: Mapped[str | None] = mapped_column(String(25))
+    distribution_set_id: Mapped[int | None] = mapped_column(BigInteger)
     embedding: Mapped[Any | None] = mapped_column(Vector(1024))
     created_at: Mapped[datetime] = _created()
 

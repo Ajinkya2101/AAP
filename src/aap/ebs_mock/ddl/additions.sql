@@ -59,6 +59,30 @@ ALTER TABLE ap.ap_invoices_interface ADD COLUMN IF NOT EXISTS payment_currency_c
 ALTER TABLE ap.ap_invoice_distributions_all ADD COLUMN IF NOT EXISTS reversal_flag varchar(1);
 ALTER TABLE ap.ap_invoice_distributions_all ADD COLUMN IF NOT EXISTS parent_reversal_id bigint;
 
+-- Distribution sets (2026-11-12): a non-PO line keyed through a set, and a site's default set. The
+-- context pack names them (PLAN-MODEL-JSON §4); the replica loads them from the delivery.
+CREATE TABLE IF NOT EXISTS ap.ap_distribution_sets_all (
+    distribution_set_id     bigint       PRIMARY KEY,
+    distribution_set_name   varchar(50)  NOT NULL,
+    description             varchar(240),
+    total_percent_distribution numeric   DEFAULT 100,
+    inactive_date           timestamp(0),
+    org_id                  bigint,
+    @WHO@
+);
+CREATE TABLE IF NOT EXISTS ap.ap_distribution_set_lines_all (
+    distribution_set_id     bigint       NOT NULL REFERENCES ap.ap_distribution_sets_all,
+    distribution_set_line_number integer NOT NULL,
+    dist_code_combination_id bigint      NOT NULL,
+    percent_distribution    numeric      NOT NULL,
+    description             varchar(240),
+    org_id                  bigint,
+    @WHO@,
+    PRIMARY KEY (distribution_set_id, distribution_set_line_number)
+);
+ALTER TABLE ap.ap_invoice_lines_all ADD COLUMN IF NOT EXISTS distribution_set_id bigint;
+ALTER TABLE ap.ap_supplier_sites_all ADD COLUMN IF NOT EXISTS distribution_set_id bigint;
+
 -- Unique combinations over 8 segments. The first index covered segment1-4 only, which an 8-segment
 -- chart breaks (the same company / cost center / account with different segments 5-8).
 DROP INDEX IF EXISTS gl.gl_code_combinations_u2;
@@ -76,6 +100,9 @@ CREATE OR REPLACE VIEW apps.ap_supplier_sites_all AS SELECT * FROM ap.ap_supplie
 CREATE OR REPLACE VIEW apps.po_vendor_sites_all AS SELECT * FROM ap.ap_supplier_sites_all;
 CREATE OR REPLACE VIEW apps.ap_invoices_interface AS SELECT * FROM ap.ap_invoices_interface;
 CREATE OR REPLACE VIEW apps.ap_invoice_distributions_all AS SELECT * FROM ap.ap_invoice_distributions_all;
+CREATE OR REPLACE VIEW apps.ap_invoice_lines_all AS SELECT * FROM ap.ap_invoice_lines_all;
+CREATE OR REPLACE VIEW apps.ap_distribution_sets_all AS SELECT * FROM ap.ap_distribution_sets_all;
+CREATE OR REPLACE VIEW apps.ap_distribution_set_lines_all AS SELECT * FROM ap.ap_distribution_set_lines_all;
 
 -- IBY_PAYMENT_METHODS_VL
 CREATE OR REPLACE VIEW apps.iby_payment_methods_vl AS
@@ -164,6 +191,7 @@ DELETE FROM fnd.fnd_lookup_values WHERE lookup_type = 'LINE TYPE';   -- the mock
 GRANT SELECT ON apps.fnd_id_flex_structures, apps.fnd_id_flex_segments, apps.iby_payment_methods_b,
                 apps.iby_payment_methods_tl, apps.iby_payment_methods_vl, apps.gl_code_combinations_kfv,
                 apps.ap_supplier_sites_all, apps.po_vendor_sites_all, apps.ap_invoices_interface,
-                apps.ap_invoice_distributions_all, apps.fnd_lookup_values_vl
+                apps.ap_invoice_distributions_all, apps.fnd_lookup_values_vl, apps.ap_invoice_lines_all,
+                apps.ap_distribution_sets_all, apps.ap_distribution_set_lines_all
       TO apps_ro, apps_intf;
 GRANT INSERT ON apps.ap_invoices_interface TO apps_intf;

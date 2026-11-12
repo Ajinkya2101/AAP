@@ -145,7 +145,10 @@ def learn_gl(session: Session, inv: CanonicalInvoice, gl: dict[int, Any]) -> int
                                    description=ln.description.value or "", ccid=ccid, concatenated=acct,
                                    natural_account=layout_from_settings().natural_account(acct),
                                    amount=ln.amount.value,
-                                   invoice_date=inv.invoice_date.value, source="review"))
+                                   invoice_date=inv.invoice_date.value, source="review",
+                                   vendor_site_id=inv.vendor_site_id.value, invoice_num=inv.invoice_num.value,
+                                   invoice_type=inv.invoice_type.value, gl_date=inv.gl_date.value,
+                                   line_number=ln.line_number, line_type=ln.line_type or "ITEM"))
     emb = get_embedder() if added else None
     if emb is not None:
         for row, vec in zip(added, emb.embed([r.description for r in added]), strict=True):

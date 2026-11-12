@@ -16,6 +16,7 @@ Everything else comes from the deliveries, when they have it:
 | IBY_PAYMENT_METHODS            | iby_payment_methods_b / _tl                                          |
 | AP_SUPPLIERS, _SITES_ALL       | hz_parties, ap_suppliers, ap_supplier_sites_all                      |
 | AP_INVOICES_ALL, _LINES, _DIST | ap_invoices_all, ap_invoice_lines_all, ap_invoice_distributions_all  |
+| AP_DISTRIBUTION_SETS_ALL, _LINES | ap_distribution_sets_all / _lines_all (sets used, by ID when not delivered) |
 
 GL periods are generated for every ledger, open from the earliest history month to three months
 ahead. Invoices listed in a gold set's history_exclude.json (test and dev split), every invoice of
@@ -63,7 +64,7 @@ SEQUENCES = {"ap.ap_invoices_s": ("ap.ap_invoices_all", "invoice_id"),
              "fnd.fnd_flex_value_sets_s": ("fnd.fnd_flex_value_sets", "flex_value_set_id"),
              "fnd.fnd_flex_values_s": ("fnd.fnd_flex_values", "flex_value_id")}
 EXTRA_TABLES = ["fnd.fnd_id_flex_structures", "fnd.fnd_id_flex_segments", "iby.iby_payment_methods_b",
-                "iby.iby_payment_methods_tl"]
+                "iby.iby_payment_methods_tl", "ap.ap_distribution_sets_all", "ap.ap_distribution_set_lines_all"]
 
 
 @dataclass
@@ -286,7 +287,35 @@ def _suppliers(r: Replica, d: Delivery) -> None:
               payment_method_lookup_code=s.get("PAYMENT_METHOD_LOOKUP_CODE"),
               terms_date_basis=s.get("TERMS_DATE_BASIS"),
               accts_pay_code_combination_id=num(s.get("ACCTS_PAY_CODE_COMBINATION_ID")),
+              distribution_set_id=num(s.get("DISTRIBUTION_SET_ID")),
               inactive_date=day(s.get("INACTIVE_DATE")))
+
+
+def _distribution_sets(r: Replica, d: Delivery) -> None:
+    """AP_DISTRIBUTION_SETS_ALL and their lines, when delivered. A set used by a line or a site but not
+    delivered is loaded by its ID alone ("set <id>", no lines), so the context pack can still show how
+    often it was used."""
+    delivered = {num(x.get("DISTRIBUTION_SET_ID")) for x in d.rows("AP_DISTRIBUTION_SETS_ALL")}
+    for x in d.rows("AP_DISTRIBUTION_SETS_ALL"):
+        r.add("ap.ap_distribution_sets_all", distribution_set_id=num(x["DISTRIBUTION_SET_ID"]),
+              distribution_set_name=str(x["DISTRIBUTION_SET_NAME"])[:50], description=x.get("DESCRIPTION"),
+              total_percent_distribution=dec(x.get("TOTAL_PERCENT_DISTRIBUTION")),
+              inactive_date=day(x.get("INACTIVE_DATE")), org_id=num(x.get("ORG_ID")))
+    for x in d.rows("AP_DISTRIBUTION_SET_LINES_ALL"):
+        if num(x.get("DISTRIBUTION_SET_ID")) in delivered:
+            r.add("ap.ap_distribution_set_lines_all", distribution_set_id=num(x["DISTRIBUTION_SET_ID"]),
+                  distribution_set_line_number=num(x["DISTRIBUTION_SET_LINE_NUMBER"]),
+                  dist_code_combination_id=num(x["DIST_CODE_COMBINATION_ID"]),
+                  percent_distribution=dec(x.get("PERCENT_DISTRIBUTION")), description=x.get("DESCRIPTION"),
+                  org_id=num(x.get("ORG_ID")))
+    used = {num(x.get("DISTRIBUTION_SET_ID")) for t in ("AP_INVOICE_LINES_ALL", "AP_SUPPLIER_SITES_ALL")
+            for x in d.rows(t)} - delivered - {None}
+    for sid in sorted(used):  # type: ignore[type-var]
+        r.add("ap.ap_distribution_sets_all", distribution_set_id=sid, distribution_set_name=f"set {sid}",
+              description="not delivered")
+    if used:
+        r.notes.append(f"{len(used)} distribution set(s) used but not delivered (AP_DISTRIBUTION_SETS_ALL): "
+                       "loaded by ID, without a name or lines")
 
 
 def unmatched_invoices(d: Delivery) -> set[int]:
@@ -353,7 +382,8 @@ def _history(r: Replica, d: Delivery, ledgers: dict[int, int],
               amount=dec(x.get("AMOUNT")), quantity_invoiced=dec(x.get("QUANTITY_INVOICED")),
               unit_price=dec(x.get("UNIT_PRICE")),
               accounting_date=day(x.get("ACCOUNTING_DATE")) or gl_dates[inv_id],  # type: ignore[index]
-              cancelled_flag=x.get("CANCELLED_FLAG") or "N", set_of_books_id=ledgers.get(org))  # type: ignore[arg-type]
+              cancelled_flag=x.get("CANCELLED_FLAG") or "N", set_of_books_id=ledgers.get(org),  # type: ignore[arg-type]
+              distribution_set_id=num(x.get("DISTRIBUTION_SET_ID")))
     seq: dict[tuple, int] = defaultdict(int)
     for x in sorted(d.rows("AP_INVOICE_DISTRIBUTIONS_ALL"), key=lambda y: num(y["INVOICE_DISTRIBUTION_ID"]) or 0):
         inv_id = num(x["INVOICE_ID"])
@@ -418,6 +448,7 @@ def build_replica(d: Delivery, coa: CoaLayout, *, exclude: Path | None = None,
         r.notes.append("IBY_PAYMENT_METHODS not delivered: no payment methods")
     ledgers = _org(r, d, coa_id)
     _suppliers(r, d)
+    _distribution_sets(r, d)
     first = _history(r, d, ledgers, read_exclusions(exclude), skip_unmatched=skip_unmatched)
     _periods(r, ledgers, first)
     if not d.has("AP_SUPPLIERS"):

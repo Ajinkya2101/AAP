@@ -176,3 +176,38 @@ def test_eval_with_agents_compares_the_json_with_the_keyed_record(replica_env, c
     assert m["holdout"]["suppliers"] == ["70003"] and held["gl"]["no_review_share"] == 0.0, text
     assert all(b["shadow"]["equal"] == 1.0 for v, b in m["by_supplier"].items() if v != "70003"), text
     assert "Per supplier" in text and "GL coding vs the keyed distributions" in text
+
+
+def test_context_pack_from_the_replica_matches_the_delivery(replica_env, cluster, tmp_path):
+    """PLAN-MODEL-JSON E2: a context pack built in production (aap_kk: reference copy and gl_history_line
+    with site, invoice and GL date) equals the one built from the delivery the replica came from, and a
+    distribution set used by the lines is shown by its ID."""
+    from aap.clientdata.fixtures import SET_SUPPLIER, build_list_format
+    from aap.clientdata.readers import read_delivery
+    from aap.clientdata.replica import run
+    from aap.db.session import session_scope
+    from aap.decide.context import build_context_pack, leaks
+    from aap.decide.history import from_db, from_delivery
+
+    delivery = build_list_format(tmp_path / "2026-11-09")
+    result = run([delivery], create=True, admin_dsn=cluster.dsn("postgres", "postgres"), log=lambda *_: None)
+    # the 2026-11-09 layout has no liability account on the sites (as the real extract)
+    assert set(result["invariant_failures"]) <= {"site liability CCIDs exist"}, result["invariant_failures"]
+    as_of = date(2025, 3, 1)
+    offline = from_delivery(read_delivery(delivery), KK)
+    with session_scope(replica_env["AAP_OWNER_DSN"]) as s:
+        assert s.scalar(select(func.count()).select_from(GlHistoryLine)
+                        .where(GlHistoryLine.gl_date.is_(None) | GlHistoryLine.vendor_site_id.is_(None))) == 0
+        for vendor, site in ((5001, 6001), (SET_SUPPLIER, 6002)):
+            online = build_context_pack(from_db(s, vendor, as_of=as_of), vendor_id=vendor, vendor_site_id=site,
+                                        as_of=as_of)
+            expected = build_context_pack(offline, vendor_id=vendor, vendor_site_id=site, as_of=as_of)
+            assert leaks(online, as_of=as_of) == []
+            for part in ("history_scope", "fallback", "accounts", "recent_invoices"):
+                assert online[part] == expected[part], part
+            assert [x["keyed_accounts"] for x in online["distribution_sets"]] == \
+                   [x["keyed_accounts"] for x in expected["distribution_sets"]]
+            assert online["site"]["terms"] == expected["site"]["terms"]
+        sets = build_context_pack(from_db(s, SET_SUPPLIER, as_of=as_of), vendor_id=SET_SUPPLIER,
+                                  vendor_site_id=6002, as_of=as_of)["distribution_sets"]
+        assert sets and sets[0]["name"].startswith("set ")

@@ -32,6 +32,7 @@ class ReferenceData(BaseModel):
     gl_periods: list[dict[str, Any]] = PydField(default_factory=list)
     payment_methods: list[dict[str, Any]] = PydField(default_factory=list)
     lookups: list[dict[str, Any]] = PydField(default_factory=list)   # common/lookups.CHECKED_TYPES
+    distribution_sets: list[dict[str, Any]] = PydField(default_factory=list)   # with their lines (JSON)
 
     def counts(self) -> dict[str, int]:
         return {k: len(v) for k, v in self.__dict__.items()}
@@ -201,6 +202,15 @@ class GlHistory(BaseModel):
     amount: Decimal
     invoice_date: date
     category_code: str | None = None
+    # the context pack's facts (decide/context.py)
+    vendor_site_id: int | None = None
+    invoice_id: int | None = None
+    invoice_num: str | None = None
+    invoice_type: str | None = None
+    gl_date: date | None = None
+    line_number: int | None = None
+    line_type: str | None = None
+    distribution_set_id: int | None = None
 
 
 class SupplierContacts(BaseModel):

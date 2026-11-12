@@ -124,6 +124,15 @@ def sync_aap(stores: list[tuple[str, str]]) -> dict[str, Any]:
     adapter = MockEbsAdapter(s.ebs_ro_dsn, coa=layout_from_settings())
     try:
         with session_scope(s.aap_owner_dsn) as session:
+            # ebs_kk was rebuilt from the deliveries (other exclusions, a new cut-off): the history copied
+            # from it is rebuilt too, or the incremental sync would keep the previous load's rows. Lines
+            # learnt from approvals in this application (source "review") stay.
+            from sqlalchemy import delete
+
+            from aap.db.models import GlHistoryLine
+
+            out["gl_history_removed"] = session.execute(
+                delete(GlHistoryLine).where(GlHistoryLine.source == "ebs")).rowcount
             out["refsync"] = run_sync(session, adapter, triggered_by="replica-load").counts
     finally:
         adapter.close()

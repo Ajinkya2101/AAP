@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import delete, func, insert, select
+from sqlalchemy import bindparam, delete, func, insert, select, update
 from sqlalchemy.orm import Session
 
 from aap.adapters.base import ErpReadPort
@@ -22,6 +22,7 @@ from aap.db.models import (
     RefCategory,
     RefCcid,
     RefCurrency,
+    RefDistributionSet,
     RefGlPeriod,
     RefLookup,
     RefOperatingUnit,
@@ -41,7 +42,7 @@ log = get_logger(__name__)
 
 REF_TABLES = [RefOperatingUnit, RefSupplier, RefSupplierSite, RefSupplierBank, RefTerms, RefCurrency, RefCcid,
               RefCategory, RefUom, RefTaxRate, RefTolerance, RefGlPeriod, RefPaymentMethod,
-              RefLookup]
+              RefLookup, RefDistributionSet]
 
 
 def _yn(v: Any) -> bool:
@@ -83,7 +84,8 @@ def _rows(data) -> dict[type, list[dict[str, Any]]]:  # noqa: ANN001
             invoice_currency_code=r["invoice_currency_code"], tolerance_id=r["tolerance_id"],
             match_option=r["match_option"], liability_ccid=r["liability_ccid"], inactive_date=r["inactive_date"],
             payment_method=r.get("payment_method"), pay_group=r.get("pay_group"),
-            payment_currency_code=r.get("payment_currency_code"), terms_date_basis=r.get("terms_date_basis")))
+            payment_currency_code=r.get("payment_currency_code"), terms_date_basis=r.get("terms_date_basis"),
+            distribution_set_id=r.get("distribution_set_id")))
     out[RefSupplierSite] = sites
     out[RefSupplierBank] = [dict(ext_bank_account_id=r["ext_bank_account_id"], vendor_id=r["vendor_id"],
                                  bank_account_num=r["bank_account_num"], iban=r["iban"],
@@ -124,9 +126,39 @@ def _rows(data) -> dict[type, list[dict[str, Any]]]:  # noqa: ANN001
             lookup_type=r["lookup_type"], lookup_code=r["lookup_code"], meaning=r["meaning"],
             description=r["description"], enabled=_yn(r["enabled_flag"]) and r["end_date_active"] is None))
     out[RefLookup] = list(lookups.values())
+    out[RefDistributionSet] = [dict(distribution_set_id=r["distribution_set_id"], name=r["name"],
+                                    description=r["description"], org_id=r["org_id"],
+                                    enabled=r["inactive_date"] is None, lines=r["lines"] or [])
+                               for r in data.distribution_sets]
     out[RefGlPeriod] = [dict(ledger_id=r["ledger_id"], period_name=r["period_name"], start_date=r["start_date"],
                              end_date=r["end_date"], closing_status=r["closing_status"]) for r in data.gl_periods]
     return out
+
+
+CONTEXT_COLUMNS = ("vendor_site_id", "invoice_id", "invoice_num", "invoice_type", "gl_date", "line_number",
+                   "line_type", "distribution_set_id")
+
+
+def _fill_history(session: Session, adapter: ErpReadPort) -> int:
+    """Rows synced before migration 0006 have no site, invoice or GL date: fill them from Oracle once
+    (the context pack needs them). Returns the number of rows filled."""
+    if not session.scalar(select(func.count()).select_from(GlHistoryLine).where(
+            GlHistoryLine.source == "ebs", GlHistoryLine.invoice_id.is_(None),
+            GlHistoryLine.invoice_distribution_id.is_not(None))):
+        return 0
+    stmt = (update(GlHistoryLine.__table__)
+            .where(GlHistoryLine.__table__.c.invoice_distribution_id == bindparam("b_id"),
+                   GlHistoryLine.__table__.c.invoice_id.is_(None))
+            .values(**{c: bindparam(f"b_{c}") for c in CONTEXT_COLUMNS}))
+    n, batch = 0, []
+    for h in adapter.get_gl_history():
+        batch.append({"b_id": h.invoice_distribution_id, **{f"b_{c}": getattr(h, c) for c in CONTEXT_COLUMNS}})
+        if len(batch) >= 2000:
+            n += session.connection().execute(stmt, batch).rowcount or 0
+            batch = []
+    if batch:
+        n += session.connection().execute(stmt, batch).rowcount or 0
+    return n
 
 
 def _sync_history(session: Session, adapter: ErpReadPort) -> int:
@@ -140,7 +172,7 @@ def _sync_history(session: Session, adapter: ErpReadPort) -> int:
                           org_id=h.org_id, description=h.description or "", ccid=h.ccid,
                           concatenated=h.concatenated, natural_account=h.natural_account,
                           category_code=h.category_code, amount=Decimal(h.amount), invoice_date=h.invoice_date,
-                          source="ebs"))
+                          source="ebs", **{c: getattr(h, c) for c in CONTEXT_COLUMNS}))
         if len(batch) >= 2000:
             session.execute(insert(GlHistoryLine), batch)
             n += len(batch)
@@ -166,6 +198,7 @@ def run_sync(session: Session, adapter: ErpReadPort, *, triggered_by: str = "sys
             if rows[model]:
                 session.execute(insert(model), rows[model])
             counts[model.__tablename__] = len(rows[model])
+        counts["gl_history_line_filled"] = _fill_history(session, adapter)
         counts["gl_history_line_new"] = _sync_history(session, adapter)
         run.status = "ok"
         run.counts = counts
