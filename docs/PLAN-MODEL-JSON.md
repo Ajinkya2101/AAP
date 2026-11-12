@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | Proposed 2026-11-09, not started |
+| Status | Proposed 2026-11-09. Everything that needs no invoice files is built (2026-11-12): E1-E5, T1-T3 and B's dataset from the keyed records; E6 and T4-T5 wait for the PDFs and the J-1 approval |
 | Why | Management expects a model that takes an invoice and returns the EBS-ready JSON, not a chain of lookups |
 | Constraint | Few examples: several hundred keyed invoices from about 18 suppliers, a few weeks of history (more requested) |
 | Target | Mid-December 2026, non-PO ([PLAN-MID-DECEMBER.md](PLAN-MID-DECEMBER.md)) |
@@ -138,12 +138,12 @@ the split is fixed before the first run and never changed.
 
 | # | Item | Needs PDFs | Status |
 |---|---|---|---|
-| E1 | Intake reads the 2026-11-09 delivery format (sheet names, joined supplier view) | No | ⬜ |
-| E2 | Context pack builder with the "as of" rule; unit tests on fixtures | No | ⬜ |
-| E3 | Per-invoice schema with candidate enums; `basis` field | No | ⬜ |
-| E4 | S0 and S1 runnable from the harness (`--system s0|s1|s2`) | No (smoke on synthetic) | ⬜ |
-| E5 | Learning-curve runner; run log with model, adapter, prompt, split and dataset hash | No | ⬜ |
-| E6 | Gold set from the real delivery; S0 and S1 on dev, then test | Yes | ⏸ |
+| E1 | Intake reads the 2026-11-09 delivery format (sheet names, joined supplier view) | No | ✅ `aap.clientdata.views` (f97c8c8) |
+| E2 | Context pack builder with the "as of" rule; unit tests on fixtures | No | ✅ `aap.decide.context` / `history`: from a delivery or from the application database (identical packs, integration test); `leaks()`; `gl_history_line` carries site, invoice, GL date and set (migration 0006). On the 11-09 delivery: 493 October packs, 0 leaks, 15 without history, about 1.6k-2.3k tokens |
+| E3 | Per-invoice schema with candidate enums; `basis` field | No | ✅ `aap.decide.schema` / `request` (prompt `decide/1`); node `agents/nodes/decide.py` after GL coding, `DECIDE_MODE` off / shadow / apply: in apply the model's line accounts are used and every difference from the code goes to review, header values stay the code's (difference = `MODEL_DIFFERS`) |
+| E4 | S0 and S1 runnable from the harness (`--system s0|s1|s2`) | No (smoke on synthetic) | ✅ `python -m aap.eval --system`; metrics and report show how B's answers compare with the code; smoke on the replica fixture (s0 and s1 on one split, nothing wrong without review) |
+| E5 | Learning-curve runner; run log with model, adapter, prompt, split and dataset hash | No | ✅ `runs/eval-runs.jsonl` (git-ignored, headline numbers only); `python -m aap.decide.evaluate` (B on a split, offline); `python -m aap.decide.curve` (stub and S1 rows, then train / package / serve / score per fraction; `--dry-run`) |
+| E6 | Gold set from the real delivery; S0 and S1 on dev, then test | Yes | ⏸ PDFs (D-1) |
 
 ## 7. Pipeline 2: fine-tuning
 
@@ -162,11 +162,15 @@ the split is fixed before the first run and never changed.
 
 | # | Item | Needs PDFs | Status |
 |---|---|---|---|
-| T1 | `train` container; `aap.finetune.train` with the method switch; smoke run on synthetic invoices (plumbing only, says nothing about accuracy) | No | ⬜ |
-| T2 | Dataset builder for B; smoke run on the keyed history alone, without pages (plumbing only) | No | ⬜ |
-| T3 | vLLM serving two adapters on one base; switch and rollback tested; confirm text-only requests to the VL base work with B | No | ⬜ |
-| T4 | Train B on the real train split; learning curve | Yes | ⏸ |
+| T1 | `train` container; `aap.finetune.train` with the method switch; smoke run on synthetic invoices (plumbing only, says nothing about accuracy) | No | ✅ `training/` (PLAN-TRAINING-PIPELINE T0-T3) |
+| T2 | Dataset builder for B; smoke run on the keyed history alone, without pages (plumbing only) | No | ✅ builder: `python -m aap.finetune.chat decide` (gold set's split, no test / dev invoice in any pack, nested learning-curve subsets). On the 11-09 delivery: 653 examples (490 / 66 / 97), 1.5k-3.5k tokens; `aap_train` dry run accepts it. The smoke run on it is training on client data: ⏸ J-1 |
+| T3 | vLLM serving two adapters on one base; switch and rollback tested; confirm text-only requests to the VL base work with B | No | ✅ PLAN-TRAINING-PIPELINE T5 (2026-11-09); `DECIDE_MODEL` / `DECIDE_ADAPTER_MODEL` (2026-11-12) |
+| T4 | Train B on the real train split; learning curve | Yes | ⏸ J-1 (the keyed records are enough for B; PDFs only for A's reading in its input) |
 | T5 | Train A, only if the reading errors miss the gate after prompt work (CLIENT-DATA P7 rule) | Yes + P6 labels | ⏸ |
+
+**Floor without training (2026-11-12).** `aap.decide.evaluate` with the stub (site defaults and the
+supplier's most used account, no model) on B's test split of the 11-09 delivery: 69 % of invoices exact,
+80 % of lines (89 % by amount), terms 99 %. S1 and S2 have to beat this.
 
 **Synthetic examples for B (optional).** `tools/invoicegen` can render invoices from the keyed records to
 give B more examples of "this content → this account". They may be used for B's training only, never for

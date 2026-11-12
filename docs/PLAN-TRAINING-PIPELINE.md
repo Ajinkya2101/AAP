@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | T0-T5 done (2026-11-09: 7B smoke runs for A and B, both adapters served by vLLM); T6 on the tiny model; T7 waits for data and J-1 |
+| Status | T0-T5 done (2026-11-09: 7B smoke runs for A and B, both adapters served by vLLM); T6 on the tiny model; T7: B's real dataset and the learning-curve runner are ready (2026-11-12), the runs wait for J-1 |
 | Scope | Everything needed to fine-tune, check and serve adapter A (reading) and adapter B (Oracle fields) of [PLAN-MODEL-JSON.md](PLAN-MODEL-JSON.md), ready before the real training data exists |
 | Where | `training/` at the repository root: its own Python project, its own container. The application (`src/aap`) writes the datasets; `training/` reads them and never imports `aap` |
 | Builds on | CLIENT-DATA P6-P7, [FINETUNING-SCOPE.md](FINETUNING-SCOPE.md), `aap.finetune.export` |
@@ -202,9 +202,9 @@ Defaults are starting points for the real runs; the smoke configs use a handful 
 | T2 | `aap_train`: config, contract reader, collator with target-only labels, methods (`qlora`, `lora`, `lora_projector`, `full` with the refusals), trainer, run directory, optional wandb; unit tests without GPU | ✅ 26 tests without GPU; found and guarded: the processor ignores `size=` from `from_pretrained` (4,819 instead of 1,240 image tokens), so `max_pixels` is passed as vLLM does and checked after loading; transformers 5's skip-list matching quantized the vision tower to 4-bit, now kept bf16 and checked after loading |
 | T3 | Smoke run A on synthetic invoices (QLoRA, 7B); measured memory and speed; `evaluate` picks the checkpoint; `package` writes the adapter | ✅ 10 steps, 12 min with dev scoring, 19.9 GB peak; dev loss 0.252 -> 0.073; checkpoint choice switched to the answer-token loss (§6); base weights in `training/models/` (copied from the `models` volume, git-ignored) |
 | T4 | Adapter B contract with a made-up context pack; smoke dataset and smoke run B | ✅ `aap.finetune.chat decide-smoke` (context pack `smoke/0`, 55 examples, about 500 tokens each); 7B: 10 steps in 28 s, 13.3 GB peak, dev loss 0.576 -> 0.0025 (an easy made-up task: plumbing only) |
-| T5 | vLLM: `--enable-lora` behind a compose setting, two adapters, `EXTRACT_MODEL` / `DECIDE_MODEL`, rollback; verify fp8 base + LoRA and text-only B | ✅ `docker-compose.lora.yml`, slots, verified (§7); `DECIDE_MODEL` comes with the adapter B node; vLLM back on the default setup afterwards |
+| T5 | vLLM: `--enable-lora` behind a compose setting, two adapters, `EXTRACT_MODEL` / `DECIDE_MODEL`, rollback; verify fp8 base + LoRA and text-only B | ✅ `docker-compose.lora.yml`, slots, verified (§7); `DECIDE_MODEL` / `DECIDE_ADAPTER_MODEL` came with the adapter B node (2026-11-12, `agents/nodes/decide.py`); vLLM back on the default setup afterwards |
 | T6 | `lora_projector` merge and `full` on 3B, smoke only | 🟠 both methods train and package (merged `model/`) on the tiny model; the 3B full run not tried yet |
-| T7 | Real runs: B on the train split (learning curve), A only if the decision rule says so | ⏸ data, J-1 |
+| T7 | Real runs: B on the train split (learning curve), A only if the decision rule says so | ⏸ J-1. Ready: B's dataset from the 11-09 keyed records (`aap.finetune.chat decide`: 490 / 66 / 97, max 3,513 tokens, `--dry-run` passes), `python -m aap.decide.curve` (25 / 50 / 100 %, `--dry-run` lists the steps), `python -m aap.decide.evaluate` for the served adapter |
 
 Order: T0 → T1 → T2 → T3 → T4 → T5 → T6. If T0 shows that 4-bit loading does not work on this GPU,
 `lora` on the 3B base becomes the default and §2 is updated before T2.

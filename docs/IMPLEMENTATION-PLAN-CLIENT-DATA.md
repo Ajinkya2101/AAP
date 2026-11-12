@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | Active; P1, P2.1-P2.2, P3.2, P4.1-P4.2, P9.1-P9.2 built on 2026-11-04 (PLAN-MID-DECEMBER §3.4) |
+| Status | Active; P1, P2.1-P2.2, P3.2, P4.1-P4.2, P9.1-P9.2 built on 2026-11-04 (PLAN-MID-DECEMBER §3.4); P6.1-P6.2, P7.1-P7.2 built by 2026-11-12 (PLAN-MID-DECEMBER §3.5). Everything still open waits for the invoice files (P4.3) or the J-1 approval |
 | Scope | How every file requested from Vikram and Dhivya (2026-11-03) is loaded, used and measured, without access to any EBS instance |
 | Target | Non-PO invoices, mid-December 2026 ([PLAN-MID-DECEMBER.md](PLAN-MID-DECEMBER.md)) |
 | Builds on | Mock EBS (`src/aap/ebs_mock`), eval harness (`src/aap/eval`), fine-tuning export (`src/aap/finetune`), [LLM-USAGE-BY-STAGE.md](LLM-USAGE-BY-STAGE.md), [FINETUNING-SCOPE.md](FINETUNING-SCOPE.md) |
@@ -157,7 +157,7 @@ every distribution a valid CCID, period open for every history date, …).
 |---|---|---|
 | P2.1 | Settings for the segment count, separator, natural-account and cost-center segment; 8-segment changes in the files above; tests with an 8-segment fixture | ✅ `common/coa.py`; delimiter in `FND_ID_FLEX_STRUCTURES` (`ebs_mock/ddl/additions.sql`); `ref_ccid.segments` / `natural_account` (migration 0004) |
 | P2.2 | Mock `IBY_PAYMENT_METHODS_B/_TL`; payment method on the site reference data | ✅ plus pay group, payment currency and terms date basis on the site |
-| P2.3 | `client_load`: foundation from the seed, the rest from the extracts; history without the test split | ✅ `aap.ebs_mock.client_load` + `aap.clientdata.replica`; tested on the fixtures (`tests/integration/test_replica_load.py`); loaded 2026-11-04 with Dhivya's terms and payment methods; reloaded 2026-11-09 with the invoice history and supplier list (`--skip-unmatched-invoices` leaves out the invoices of suppliers not delivered yet); CCIDs without GL_CODE_COMBINATIONS get placeholder accounts (natural-account segment = CCID) until B2 |
+| P2.3 | `client_load`: foundation from the seed, the rest from the extracts; history without the test split | ✅ `aap.ebs_mock.client_load` + `aap.clientdata.replica`; tested on the fixtures (`tests/integration/test_replica_load.py`); loaded 2026-11-04 with Dhivya's terms and payment methods; reloaded 2026-11-09 with the invoice history and supplier list (`--skip-unmatched-invoices` leaves out the invoices of suppliers not delivered yet); CCIDs without GL_CODE_COMBINATIONS get placeholder accounts (natural-account segment = CCID) until B2. 2026-11-12: distribution sets (by ID when not delivered), currencies the delivery uses, and a reload rebuilds `aap_kk`'s copied history (it kept the previous load's rows). **Reload needed** for migration 0006 (context-pack columns) |
 | P2.4 | `ebs_kk` / `aap_kk` databases, `.env.kk`, Makefile / script targets to load and switch | ✅ created by `python -m aap.clientdata.replica --create-databases`; switching the running stack to the replica (use `.env.kk`'s DSNs) not scripted yet |
 | P2.5 | Invariants on the replica | ✅ the seed's checks run after every load (the S1 fixture check skipped); after the 2026-11-09 load only the known gaps fail: site liability accounts (not delivered), invoices whose lines are missing or do not add up |
 
@@ -176,7 +176,7 @@ every distribution a valid CCID, period open for every history date, …).
 
 | # | Item | Status |
 |---|---|---|
-| P3.1 | Refsync and embedding backfill on `aap_kk`; timing noted | 🟠 refsync done 2026-11-09 (GL history lines in `aap_kk`, seconds); embedding backfill not run yet (most keyed line descriptions are empty, so it matters little until the invoice files arrive) |
+| P3.1 | Refsync and embedding backfill on `aap_kk`; timing noted | 🟠 refsync done 2026-11-09 (GL history lines in `aap_kk`, seconds); since 2026-11-12 the history lines carry site, invoice, GL date and distribution set (migration 0006; rows synced before are filled by the next sync); embedding backfill not run yet (most keyed line descriptions are empty, so it matters little until the invoice files arrive) |
 | P3.5 | What the keyed history says before the invoice files | ✅ `python -m aap.clientdata.history`: GL from history by rule (distribution set, the site's top account, review), amount-weighted, with the share coded without review and its accuracy, and candidate recall at 1/3/5/15 (sizes the context pack); site defaults vs keyed terms / pay group / payment method; invoice and line types, tax-engine lines, empty descriptions. Report written into the delivery (client data) |
 | P3.6 | Terms from the site default | ✅ `TERMS_SOURCE=site_default` (in `.env.kk.example`): AP keeps the site's terms, so the printed terms are only noted; default `printed` for the synthetic setup |
 | P3.2 | Terms fixes + tests | ✅ supplier family (NET / DIAS), CONTADO, end of month by day, KK discount wording; term lines from the names until B5 |
@@ -301,8 +301,8 @@ position; no boxes are drawn by hand (see the fine-tuning doc).
 
 | # | Item | Status |
 |---|---|---|
-| P6.1 | Comparison script (extraction vs keyed record → accept / review list) | ⬜ |
-| P6.2 | Export: include source `kk-train`, a split field, keep evidence boxes for image-only pages | ⬜ |
+| P6.1 | Comparison script (extraction vs keyed record → accept / review list) | ✅ (2026-11-12) `python -m aap.clientdata.labels upload` (train split, source `kk-train`) and `compare` (number, date, currency, total, tax, non-tax line amounts; accepted as a whole or listed with what differs and what to check) → `label-review.md` next to the gold set |
+| P6.2 | Export: include source `kk-train`, a split field, keep evidence boxes for image-only pages | ✅ (2026-11-12) `aap.finetune.export --source kk-train --goldset <dir>`: split and invoice_id per example; the model's boxes kept on the fields the target keeps; `aap.finetune.chat extract --export` keeps those image-only examples |
 | P6.3 | Review pass on the train split | ⏸ P4.3 |
 
 ### P7. Fine-tuning the extraction model (only if P5 shows reading errors)
@@ -329,9 +329,9 @@ worse on them, the adapter is not used for unknown suppliers.
 
 | # | Item | Status |
 |---|---|---|
-| P7.1 | `train` container and `aap.finetune.train` (reads `extraction.jsonl`, writes the adapter) — built and smoke-tested on synthetic examples in advance | ⬜ |
-| P7.2 | vLLM LoRA serving, `EXTRACT_MODEL` switch, rollback tested | ⬜ |
-| P7.3 | Training run and evaluation on the real split | ⬜ decide after P5 |
+| P7.1 | `train` container and `aap.finetune.train` (reads `extraction.jsonl`, writes the adapter) — built and smoke-tested on synthetic examples in advance | ✅ built as the separate `training/` project (PLAN-TRAINING-PIPELINE T0-T4): `aap.finetune.chat` writes the `aap-train-chat/1` datasets, `aap_train.train` trains; 7B smoke runs for A and B (2026-11-09) |
+| P7.2 | vLLM LoRA serving, `EXTRACT_MODEL` switch, rollback tested | ✅ `docker-compose.lora.yml`, slots `read` / `decide` (PLAN-TRAINING-PIPELINE T5); `DECIDE_MODEL` / `DECIDE_ADAPTER_MODEL` since 2026-11-12 |
+| P7.3 | Training run and evaluation on the real split | ⏸ decide after P5; J-1 approval. Adapter B's dataset from the keyed records is built (PLAN-MODEL-JSON T2) |
 
 ### P8. GL coding from the real history
 
@@ -394,7 +394,7 @@ Krispy Kreme instance and the internal one; whoever writes the push can use eith
 | P9.1 | Oracle-ready JSON from the interface payload; endpoint `GET /api/documents/{id}/oracle.json`; bulk export | ✅ `pipeline/oracle_json.py`; in every export ZIP |
 | P9.2 | JSON Schema document and samples | ✅ `docs/ORACLE-JSON.md`, `docs/oracle-invoice.schema.json`, `docs/oracle-invoice.sample.json` |
 | P9.3 | Shadow comparison report (test split) | ✅ built (`eval/shadow.py`, in every `--agents` run: equal / ready / ready-but-different, per field); run ⏸ P4.3 |
-| P9.4 | Mock import of the test split on the replica | ⏸ P2.3 |
+| P9.4 | Mock import of the test split on the replica | ⏸ P4.3 (the replica is loaded; needs the gold set) |
 
 ## 5. Code changes in one place
 
