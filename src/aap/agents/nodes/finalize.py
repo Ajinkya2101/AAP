@@ -19,6 +19,7 @@ ACTIONS = {
     Reason.QTY_VARIANCE: "hold_until_received_or_credit_note",
     Reason.PRICE_VARIANCE: "hold_and_resolve_price",
     Reason.GL_REVIEW: "confirm_gl_accounts",
+    Reason.MODEL_DIFFERS: "check_oracle_fields",
     Reason.PO_SUGGESTED: "confirm_suggested_po",
     Reason.DATE_AMBIGUOUS: "confirm_invoice_date",
     Reason.RELEASE_MISSING: "ask_vendor_for_release_number",
@@ -62,6 +63,7 @@ def finalize(state: AgentState) -> dict[str, Any]:
                            "po_number": state.get("po_number"), "po_source": state.get("po_source"),
                            "po_refs": state.get("po_refs"),
                            "pairs": state.get("pairs"),
-                           "gl_lines": state.get("gl_lines"), "variances": state.get("variances")}
+                           "gl_lines": state.get("gl_lines"), "variances": state.get("variances"),
+                           "decide": state.get("decide")}
         decide(w, state, "finalize", chosen=outcome.value, reason=", ".join(reasons) or "clean")
     return {"outcome": outcome.value, "reasons": reasons, "suggested_action": action}

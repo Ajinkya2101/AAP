@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-NOT_TIERS = {"gates", "by_supplier", "holdout"}
+NOT_TIERS = {"gates", "by_supplier", "holdout", "system"}
 
 
 def _pct(v: float | None) -> str:
@@ -67,6 +67,13 @@ def render(run_id: uuid.UUID, name: str, m: dict[str, Any]) -> str:
         out += _shadow(m["all"]["shadow"]) + [""]
     if m["all"].get("gl"):
         out += _gl(m["all"]["gl"]) + [""]
+    if m["all"].get("decide"):
+        d = m["all"]["decide"]
+        out += [f"Adapter B ({m.get('system') or 'decide'}): {d['invoices']} invoices, agrees with the code on "
+                f"{_pct(d['agree_invoices'])} of invoices and {_pct(d['agree_lines'])} of {d['lines']} lines; "
+                f"{d['no_account_lines']} line(s) without an account; {d['fallback_invoices']} invoice(s) without "
+                f"history" + (f"; header differences: {d['header_differences']}" if d["header_differences"] else ""),
+                ""]
     if m.get("holdout"):
         h = m["holdout"]
         out += [f"Held-out suppliers: {h['documents']} invoices, header {_pct(h['header_accuracy'])}, "

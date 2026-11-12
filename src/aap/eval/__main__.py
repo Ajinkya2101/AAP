@@ -2,6 +2,7 @@
    python -m aap.eval --rescore <eval run id>      # new metrics over stored results, no model calls
    python -m aap.eval --dir <set> --resume <run id>  # continue an interrupted run
    python -m aap.eval --dir <set> --agents           # also run the agents (for aap.eval.model_use)
+   python -m aap.eval --dir <gold set> --split dev --system s1   # who writes the Oracle fields (s0/s1/s2)
 
 Runs the set through stages 1-8 with the configured LLM_BACKEND and prints the report
 (per tier and field, plus the PLAN 4 decision gates). Exit code 0 = all gates pass.
@@ -29,13 +30,16 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--split", default=None, help="only the items of this split (client gold sets: test, dev, train)")
     p.add_argument("--agents", action="store_true", help="after scoring, run the agents on each invoice")
+    p.add_argument("--system", choices=["s0", "s1", "s2"], default=None,
+                   help="s0 today's pipeline, s1 base model + context pack, s2 adapter B (PLAN-MODEL-JSON §6); "
+                        "s1 / s2 run the agents")
     p.add_argument("--json", type=Path, default=None, help="also write the metrics here")
     a = p.parse_args(argv)
     if a.rescore:
         run_id, metrics = rescore(a.rescore)
     elif a.dir:
         run_id, metrics = run_eval(a.dir, name=a.name, only=set(a.only.split(",")) if a.only else None,
-                                   limit=a.limit, resume=a.resume, agents=a.agents, split=a.split)
+                                   limit=a.limit, resume=a.resume, agents=a.agents, split=a.split, system=a.system)
     else:
         p.error("--dir or --rescore is required")
     print(render(run_id, a.name, metrics))

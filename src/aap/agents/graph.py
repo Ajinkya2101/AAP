@@ -8,13 +8,14 @@ from __future__ import annotations
 
 from langgraph.graph import END, START, StateGraph
 
+from .nodes.decide import decide_fields
 from .nodes.finalize import finalize
 from .nodes.gl import gl_code
 from .nodes.matching import find_po, hold, pair_lines, three_way
 from .nodes.triage import triage
 from .state import AgentState
 
-GRAPH_VERSION = "3"   # 3: several POs per invoice, blanket releases (po_refs; pairs carry their PO)
+GRAPH_VERSION = "4"   # 4: decide (adapter B) after gl_code; 3: several POs per invoice, blanket releases
 
 
 def _after_triage(state: AgentState) -> str:
@@ -36,7 +37,7 @@ def _after_three_way(state: AgentState) -> str:
 def build(checkpointer=None):  # noqa: ANN001
     g = StateGraph(AgentState)
     for name, fn in [("triage", triage), ("find_po", find_po), ("pair_lines", pair_lines), ("three_way", three_way),
-                     ("hold", hold), ("gl_code", gl_code), ("finalize", finalize)]:
+                     ("hold", hold), ("gl_code", gl_code), ("decide", decide_fields), ("finalize", finalize)]:
         g.add_node(name, fn)
     g.add_edge(START, "triage")
     g.add_conditional_edges("triage", _after_triage, ["finalize", "find_po", "gl_code"])
@@ -44,6 +45,7 @@ def build(checkpointer=None):  # noqa: ANN001
     g.add_conditional_edges("pair_lines", _after_pair, ["three_way", "finalize"])
     g.add_conditional_edges("three_way", _after_three_way, ["hold", "gl_code"])
     g.add_edge("hold", "finalize")
-    g.add_edge("gl_code", "finalize")
+    g.add_edge("gl_code", "decide")
+    g.add_edge("decide", "finalize")
     g.add_edge("finalize", END)
     return g.compile(checkpointer=checkpointer)

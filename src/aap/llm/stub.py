@@ -5,6 +5,7 @@
                 small regex extractor over the page text (header fields only).
 - extract_taxes: the truth file's tax rows.
 - choose:       picks the first real candidate of the enum (plan section 7).
+- decide:       adapter B's answer from the context pack alone: site defaults, most used account.
 """
 
 from __future__ import annotations
@@ -76,6 +77,39 @@ class StubClient:
                 out[key] = "stub backend: first candidate"
             elif sub.get("type") == "number":
                 out[key] = 0.5
+        return out
+
+    # ------------------------------------------------------------ decide
+    def _decide(self, req: LlmRequest) -> dict[str, Any]:
+        """Adapter B without a model: the site's defaults, and on every line the supplier's most used
+        account (or its most used distribution set when it has no plain account), as a baseline that
+        is right whenever a supplier always codes the same way."""
+        props = req.schema["properties"]
+        pack = req.context.get("pack") or {}
+        site = pack.get("site") or {}
+
+        def allowed(key: str, value: Any, schema: dict[str, Any] | None = None) -> Any:
+            return value if value in (schema or props[key])["enum"] else None
+
+        item = props["lines"]["items"]["properties"]
+        accounts = [a["account"] for a in pack.get("accounts") or [] if a["account"] in item["account"]["enum"]]
+        sets = [s["name"] for s in pack.get("distribution_sets") or [] if s["name"] in item["distribution_set"]["enum"]]
+        header = {"invoice_type_lookup_code": "CREDIT" if (req.context.get("printed") or {}).get("document_type")
+                  in ("credit memo", "CREDIT") else "STANDARD",
+                  "terms_name": site.get("terms"), "payment_method_code": site.get("payment_method"),
+                  "pay_group_lookup_code": site.get("pay_group"), "liability_account": site.get("liability_account")}
+        out: dict[str, Any] = {k: allowed(k, v) for k, v in header.items()}
+        out["basis"] = {k: (("printed" if k == "invoice_type_lookup_code" else "site_default")
+                            if out[k] is not None else None) for k in header}
+        lines = []
+        for ln in (req.context.get("printed") or {}).get("lines") or []:
+            kind = allowed("line_type_lookup_code", ln.get("printed_as") or "ITEM", item["line_type_lookup_code"])
+            account = accounts[0] if accounts else None
+            dist_set = sets[0] if not account and sets else None
+            lines.append({"line_number": ln["line_number"], "line_type_lookup_code": kind or "ITEM",
+                          "account": account, "distribution_set": dist_set,
+                          "basis": "history" if account else "distribution_set" if dist_set else None})
+        out["lines"] = lines
         return out
 
     def _generic(self, req: LlmRequest) -> dict[str, Any]:

@@ -21,6 +21,7 @@ class AgentState(TypedDict, total=False):
     unmatched: list[int]
     variances: list[dict[str, Any]]
     gl_lines: list[dict[str, Any]]
+    decide: dict[str, Any] | None   # adapter B's answer and how it compares with the code (aap.decide.node)
     outcome: str | None
 
 
@@ -44,3 +45,4 @@ class Reason:
     QTY_VARIANCE = "QTY_VARIANCE"
     PRICE_VARIANCE = "PRICE_VARIANCE"
     GL_REVIEW = "GL_REVIEW"
+    MODEL_DIFFERS = "MODEL_DIFFERS"         # adapter B wrote a header value other than the code's (DECIDE_MODE)

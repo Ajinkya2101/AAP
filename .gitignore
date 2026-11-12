@@ -13,6 +13,8 @@ build/
 *.egg-info/
 /data/
 /out/
+# eval run log (aap.eval, aap.decide.evaluate): headline numbers per run, kept on the machine
+/runs/
 data_received/
 # Client data (IMPLEMENTATION-PLAN-CLIENT-DATA section 9): raw deliveries and gold sets are never committed
 client-data/*

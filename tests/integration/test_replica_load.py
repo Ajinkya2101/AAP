@@ -211,3 +211,41 @@ def test_context_pack_from_the_replica_matches_the_delivery(replica_env, cluster
         sets = build_context_pack(from_db(s, SET_SUPPLIER, as_of=as_of), vendor_id=SET_SUPPLIER,
                                   vendor_site_id=6002, as_of=as_of)["distribution_sets"]
         assert sets and sets[0]["name"].startswith("set ")
+
+
+def test_systems_s0_and_s1_on_the_same_split(replica_env, cluster, tmp_path, monkeypatch):
+    """PLAN-MODEL-JSON E4: the harness runs today's pipeline (s0) and the model with the context pack (s1,
+    stub backend: site defaults and the supplier's most used account) on the same split. s1's answers are
+    compared with the code; every line where they differ goes to review, so nothing is coded wrongly
+    without a person (the checks stay). Each run writes one run-log line."""
+    from tests.conftest import _reset_caches
+
+    from aap.clientdata.replica import run
+    from aap.eval.harness import run_eval
+
+    delivery = build(tmp_path / "2026-11-10")
+    gold = tmp_path / "gold"
+    build_goldset(delivery, gold, holdout={"70003"}, coa=KK, pdf_scan=False)
+    _printed_values(gold, delivery)
+    run([delivery], exclude=gold / "history_exclude.json", create=True,
+        admin_dsn=cluster.dsn("postgres", "postgres"), log=lambda *_: None)
+    monkeypatch.setenv("TRUTH_DIR", str(tmp_path / "truth"))
+    monkeypatch.setenv("FILESTORE_DIR", str(tmp_path / "filestore"))
+    _reset_caches()
+    log = tmp_path / "runs.jsonl"
+    try:
+        _, m0 = run_eval(gold, name="s0", split="test", system="s0", run_log=log, log=lambda *_: None)
+        _, m1 = run_eval(gold, name="s1", split="test", system="s1", run_log=log, log=lambda *_: None)
+    finally:
+        monkeypatch.undo()
+        _reset_caches()
+    assert m0["all"]["decide"] is None and m0["system"] == "s0"
+    d = m1["all"]["decide"]
+    # only invoices that reach GL coding are decided (the held-out MXN supplier fails validation first)
+    assert d and 0 < d["invoices"] <= m1["all"]["documents"] and d["lines"] > 0, d
+    assert d["agree_lines"] < 1.0                            # the stub's single account misses a store's lines
+    assert m1["all"]["gl"]["no_review_accuracy_full"] in (None, 1.0), m1["all"]["gl"]
+    records = [json.loads(x) for x in log.read_text(encoding="utf-8").splitlines()]
+    assert [r["system"] for r in records] == ["s0", "s1"]
+    assert records[1]["decide_mode"] == "apply" and records[0]["dataset_sha256"] == records[1]["dataset_sha256"]
+    assert "70003" not in json.dumps(records)                # no supplier numbers in the run log

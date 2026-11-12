@@ -94,6 +94,15 @@ class Settings(BaseSettings):
     # = the target instance uses the same values (supplier numbers, site codes, terms, accounts).
     instance_map_file: Path | None = None
 
+    # Adapter B (PLAN-MODEL-JSON, aap.decide): the model writes the Oracle fields of a non-PO invoice from
+    # its printed values and a context pack. off = today's pipeline (system S0); shadow = ask the model
+    # and record where it differs from the code, change nothing; apply = its line accounts are used,
+    # every disagreement with the code goes to review (S1 with the base model, S2 with the adapter).
+    decide_mode: Literal["off", "shadow", "apply"] = "off"
+    decide_model: str = "qwen2.5-vl-7b"              # S1: the base model; S2: DECIDE_ADAPTER_MODEL
+    decide_adapter_model: str = "qwen2.5-vl-7b-kk-decide"   # vLLM LoRA slot (docker-compose.lora.yml)
+    decide_max_tokens: int = 1500
+
     # worker
     # At start, jobs left `doing` by a crashed worker go back to `todo`. Only correct with one
     # worker process: switch off before running several worker replicas.

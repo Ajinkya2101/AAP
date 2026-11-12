@@ -61,6 +61,7 @@ class DocResult:
     split: str | None = None
     holdout: bool = False
     shadow: ShadowResult | None = None   # Oracle-ready JSON vs keyed record (needs the agents)
+    decide: dict[str, Any] | None = None  # adapter B's summary (agent_run.outcome["decide"], systems s1 / s2)
 
 
 def _alnum(v: Any) -> str | None:
@@ -220,6 +221,19 @@ def _ratio(ok: int, n: int) -> float | None:
     return round(ok / n, 4) if n else None
 
 
+def summarize_decide(items: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """How adapter B's answers compare with the code (systems s1 / s2): None when it was not asked."""
+    if not items:
+        return None
+    lines = [x for d in items for x in d.get("lines") or []]
+    fields = Counter(h["field"] for d in items for h in d.get("header_diffs") or [])
+    return {"invoices": len(items), "agree_invoices": _ratio(sum(bool(d.get("agrees")) for d in items), len(items)),
+            "lines": len(lines), "agree_lines": _ratio(sum(bool(x.get("agrees")) for x in lines), len(lines)),
+            "no_account_lines": sum(x.get("model") is None for x in lines),
+            "fallback_invoices": sum(bool(d.get("fallback")) for d in items),
+            "header_differences": dict(fields.most_common())}
+
+
 def summarize(docs: list[DocResult], coa: CoaLayout | None = None) -> dict[str, Any]:
     coa = coa or layout_from_settings()
 
@@ -244,6 +258,7 @@ def summarize(docs: list[DocResult], coa: CoaLayout | None = None) -> dict[str, 
             "extract_ms_median": durations[len(durations) // 2] if durations else None,
             "gl": summarize_gl([d.shadow.gl for d in sel if d.shadow and d.shadow.gl], coa),
             "shadow": summarize_shadow([(d.name, d.shadow) for d in sel if d.shadow]),
+            "decide": summarize_decide([d.decide for d in sel if d.decide]),
         }
 
     out: dict[str, Any] = {"all": block(docs)}

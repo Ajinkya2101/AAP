@@ -10,15 +10,24 @@ coding), so `python -m aap.eval.model_use --eval-run <id>` can report how often 
 decision point asked the model. The extraction scores are not affected. The Oracle-ready JSON
 built after the agents is then compared with the truth (eval/shadow.py: the shadow comparison,
 and eval/gl.py: the GL metrics), which on a client gold set means: with what AP keyed.
+
+`system` picks what writes the Oracle fields (PLAN-MODEL-JSON §6), on the same split:
+s0 = today's pipeline (DECIDE_MODE=off); s1 = the base model with the context pack; s2 = adapter B
+(DECIDE_ADAPTER_MODEL). s1 and s2 run the agents. Every run appends one line to runs/eval-runs.jsonl
+(git-ignored): system, models, prompt versions, split, dataset hash and the headline numbers.
 """
 
 from __future__ import annotations
 
+import contextlib
+import hashlib
 import json
+import os
 import re
 import shutil
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -45,6 +54,85 @@ from .shadow import ShadowResult, shadow_compare
 
 EVAL_SOURCE = "eval"
 CONTAINERS = {"eml", "msg"}
+SYSTEMS = ("s0", "s1", "s2")
+RUN_LOG = Path(__file__).resolve().parents[3] / "runs" / "eval-runs.jsonl"
+
+
+def system_env(system: str) -> dict[str, str]:
+    """The settings that make a run system s0 / s1 / s2."""
+    s = get_settings()
+    if system == "s0":
+        return {"DECIDE_MODE": "off"}
+    if system == "s1":
+        return {"DECIDE_MODE": "apply", "DECIDE_MODEL": s.extract_model}
+    if system == "s2":
+        return {"DECIDE_MODE": "apply", "DECIDE_MODEL": s.decide_adapter_model}
+    raise ValueError(f"system {system!r} is not one of {SYSTEMS}")
+
+
+@contextlib.contextmanager
+def system_settings(system: str | None) -> Iterator[None]:
+    if system is None:
+        yield
+        return
+    env = system_env(system)
+    old = {k: os.environ.get(k) for k in env}
+    os.environ.update(env)
+    get_settings.cache_clear()
+    try:
+        yield
+    finally:
+        for k, v in old.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        get_settings.cache_clear()
+
+
+def dataset_hash(dataset: Path) -> str:
+    """sha256 over the manifest and the truth files: the same hash means the same items and truth."""
+    h = hashlib.sha256((dataset / "manifest.json").read_bytes())
+    for f in sorted((dataset / "truth").glob("*.truth.json")):
+        h.update(f.name.encode())
+        h.update(f.read_bytes())
+    return h.hexdigest()
+
+
+def log_run(record: dict[str, Any], path: Path | None = None) -> None:
+    path = path or RUN_LOG
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(record, default=str) + "\n")
+
+
+def _flat(d: dict[str, Any] | None) -> dict[str, Any]:
+    return {k: v for k, v in (d or {}).items() if not isinstance(v, list | dict)}
+
+
+def run_record(run_id: uuid.UUID, *, name: str, dataset: Path, split: str | None, system: str | None,
+               metrics: dict[str, Any]) -> dict[str, Any]:
+    """One run-log line. Headline numbers only: no supplier numbers or names (client data)."""
+    from aap.decide.context import CONTEXT_PACK_VERSION
+    from aap.decide.request import PROMPT_VERSION as DECIDE_PROMPT
+
+    s = get_settings()
+    a = metrics.get("all") or {}
+    return {"run_id": str(run_id), "at": datetime.now(UTC).isoformat(timespec="seconds"), "name": name,
+            "system": system, "split": split, "dataset": dataset.name, "dataset_sha256": dataset_hash(dataset),
+            "backend": s.llm_backend, "extract_model": s.extract_model, "extract_prompt": PROMPT_VERSION,
+            "decide_mode": s.decide_mode, "decide_model": s.decide_model if s.decide_mode != "off" else None,
+            "decide_prompt": DECIDE_PROMPT, "context_pack_version": CONTEXT_PACK_VERSION,
+            "documents": a.get("documents"), "header_accuracy": a.get("header_accuracy"), "line_f1": a.get("line_f1"),
+            "shadow": _flat(a.get("shadow")), "gl": _flat(a.get("gl")), "decide": _flat(a.get("decide")),
+            "gates": {k: g["pass"] for k, g in (metrics.get("gates") or {}).items()}}
+
+
+def _decide_summary(doc_id: uuid.UUID) -> dict[str, Any] | None:
+    with session_scope() as s:
+        run = s.scalars(select(AgentRun).where(AgentRun.document_id == doc_id, AgentRun.status == "done")
+                        .order_by(AgentRun.created_at.desc()).limit(1)).first()
+        return (run.outcome or {}).get("decide") if run else None
 
 
 def _drive(doc_id: uuid.UUID) -> list[uuid.UUID]:
@@ -89,6 +177,7 @@ def _score(doc: Document, truth: dict[str, Any]) -> DocResult:
     result.supplier, result.split = truth.get("vendor_number"), truth.get("split")
     result.holdout = bool(truth.get("supplier_holdout"))
     result.shadow = _shadow(doc.id, truth)
+    result.decide = _decide_summary(doc.id)
     return result
 
 
@@ -159,7 +248,19 @@ def _prepare_resume(run_id: uuid.UUID) -> set[str]:
 
 def run_eval(dataset: Path, *, name: str, only: set[str] | None = None, limit: int | None = None,
              resume: uuid.UUID | None = None, agents: bool = False, split: str | None = None,
+             system: str | None = None, run_log: Path | None = None,
              log: Callable[[str], None] = print) -> tuple[uuid.UUID, dict[str, Any]]:
+    """`system` (s0 / s1 / s2) sets DECIDE_MODE / DECIDE_MODEL for the run; s1 and s2 imply agents."""
+    with system_settings(system):
+        run_id, metrics = _run_eval(dataset, name=name, only=only, limit=limit, resume=resume,
+                                    agents=agents or system in ("s1", "s2"), split=split, log=log)
+        metrics["system"] = system
+        log_run(run_record(run_id, name=name, dataset=dataset, split=split, system=system, metrics=metrics), run_log)
+    return run_id, metrics
+
+
+def _run_eval(dataset: Path, *, name: str, only: set[str] | None, limit: int | None, resume: uuid.UUID | None,
+              agents: bool, split: str | None, log: Callable[[str], None]) -> tuple[uuid.UUID, dict[str, Any]]:
     s = get_settings()
     manifest = json.loads((dataset / "manifest.json").read_text(encoding="utf-8"))
     truths = {p.name.split(".")[0]: json.loads(p.read_text(encoding="utf-8"))
@@ -216,6 +317,7 @@ def run_eval(dataset: Path, *, name: str, only: set[str] | None = None, limit: i
             if agents and r.status == "VALIDATED":
                 run_stage("agents", d)
                 r.shadow = _shadow(d, truths[doc.sha256])
+                r.decide = _decide_summary(d)
                 if r.shadow is not None:
                     with session_scope() as sess:
                         sess.add_all(_shadow_rows(run_id, d, r))

@@ -5,5 +5,7 @@
 - `context`: the context pack, "as of" the invoice's GL date (§4).
 - `schema`: the per-invoice answer schema whose Oracle values are restricted to the candidates (§2, §5).
 - `request`: the request production sends and the training dataset stores, built by one function.
-- `node`: the step after the agents that asks the model and compares its answer with the code's.
+
+The node that asks the model after GL coding and compares its answer with the code's is
+`aap.agents.nodes.decide` (DECIDE_MODE).
 """
