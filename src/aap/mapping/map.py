@@ -614,6 +614,11 @@ def _gl_date(ctx: MapContext, inv: CanonicalInvoice) -> None:
 
     from aap.config import get_settings
 
+    if Flag.two_date_formats in inv.invoice_date.flags:
+        # Day and month cannot be told apart: the clerk confirms the date first (C9, DATE_AMBIGUOUS).
+        # A GL date derived from one reading would fail V-GL on a closed period and hide that reason.
+        inv.gl_date = Field(note="invoice date can be read two ways: GL date set once the date is confirmed")
+        return
     ou = ctx.ref.operating_units.get(inv.org_id.value) if inv.org_id.value else None
     d = inv.invoice_date.value
     if ou is None or d is None:
@@ -632,6 +637,15 @@ def _gl_date(ctx: MapContext, inv: CanonicalInvoice) -> None:
         note = (f"period of invoice date {d} is not open: GL date set to today" if by_invoice_date
                 else "GL date policy: today")
         inv.gl_date = Field(value=today, method=Method.derived, note=note)
+        return
+    # Neither is open (a replica or mock whose periods stop before today): the first day of the next
+    # open period after the invoice date, as Oracle suggests for a closed period.
+    nxt = min((p for p in ctx.ref.periods if p.ledger_id == ou.ledger_id and p.closing_status in ("O", "F")
+               and p.end_date >= d), key=lambda p: p.start_date, default=None)
+    if nxt is not None:
+        inv.gl_date = Field(value=max(nxt.start_date, d), method=Method.derived,
+                            note=f"periods of invoice date {d} and of today are not open: first open period "
+                                 f"{nxt.period_name}")
 
 
 # ==================================================================== entry

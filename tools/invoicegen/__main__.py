@@ -52,7 +52,9 @@ def generate(out: Path, *, count: int, seed: int, scenarios: bool = True, instal
              email_rate: float = 0.15) -> dict[str, Any]:
     settings = get_settings()
     rnd = random.Random(seed)
-    today = today or date.today()
+    # The mock's business "today" (the seed anchor), not the calendar: generated invoices must fall in
+    # the mock's open AP periods however long after seeding they are generated.
+    today = today or settings.seed_anchor_date
     out.mkdir(parents=True, exist_ok=True)
     truth_dirs = [out / "truth"] + ([settings.truth_path] if install_truth else [])
     ebs = Ebs(dsn or settings.ebs_ro_dsn)
