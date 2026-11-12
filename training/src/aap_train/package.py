@@ -7,6 +7,9 @@
   --max-lora-rank), plus aap-adapter.json (base model and revision, method, dataset fingerprint).
 - lora_projector / full: `model/`, a merged bf16 model with its processor, served as its own vLLM model,
   because a vLLM LoRA adapter cannot carry fully trained (non-LoRA) weights.
+
+`--slot read|decide` also installs the adapter into training/adapters/<slot>/, the folders
+docker-compose.lora.yml serves (read = adapter A, decide = adapter B).
 """
 
 from __future__ import annotations
@@ -63,6 +66,21 @@ def package_adapter(run: Path, checkpoint: Path, *, max_rank: int = 16, meta: di
     return out
 
 
+SLOTS = {"read": "extract", "decide": "decide"}
+ADAPTERS_DIR = Path(__file__).resolve().parents[2] / "adapters"
+
+
+def install(adapter: Path, slot: str, task: str, root: Path = ADAPTERS_DIR) -> Path:
+    """The packaged adapter copied into a serving slot (replacing what was there)."""
+    if SLOTS.get(slot) != task:
+        raise SystemExit(f"slot {slot!r} serves the {SLOTS.get(slot)!r} adapter, this run is {task!r}")
+    target = root / slot
+    if target.exists():
+        shutil.rmtree(target)
+    shutil.copytree(adapter, target)
+    return target
+
+
 def package_merged(run: Path, checkpoint: Path, cfg: Any) -> Path:
     import torch
     import transformers
@@ -91,6 +109,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--run", type=Path, required=True)
     ap.add_argument("--checkpoint", type=Path, default=None, help="default: best.json, else the final checkpoint")
     ap.add_argument("--max-lora-rank", type=int, default=16)
+    ap.add_argument("--slot", choices=sorted(SLOTS), default=None,
+                    help="also install the adapter for docker-compose.lora.yml (read = A, decide = B)")
     a = ap.parse_args(argv)
     run = RunDir(a.run)
     cfg = load_config(a.run / "config.yaml")
@@ -103,6 +123,10 @@ def main(argv: list[str] | None = None) -> int:
     out = package_merged(a.run, ckpt, cfg) if cfg.merged_serving else \
         package_adapter(a.run, ckpt, max_rank=a.max_lora_rank, meta=meta)
     print(f"[package] {cfg.method.name}: {out}")
+    if a.slot:
+        if cfg.merged_serving:
+            raise SystemExit("a merged model is served as its own vLLM model, not in an adapter slot")
+        print(f"[package] installed in slot {a.slot}: {install(out, a.slot, cfg.task)}")
     return 0
 
 

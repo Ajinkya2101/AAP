@@ -14,7 +14,7 @@ never imports `aap`: the application writes datasets in the `aap-train-chat/1` c
 cd training
 uv sync                    :: PyTorch with CUDA 12.8 (Blackwell / RTX 5090); add --extra wandb for W&B
 uv run python -m aap_train.envcheck
-uv run python -m pytest    :: no GPU, no downloads
+uv run python -m pytest    :: no GPU, no downloads; AAP_TRAIN_GPU_TESTS=1 adds the tiny-model end-to-end runs
 ```
 
 `envcheck` reports the GPU and its compute capability, bf16, a 4-bit layer on the GPU, SDPA /
@@ -33,12 +33,38 @@ cd training
 uv run python -m aap_train.train --config configs/smoke-a-qlora.yaml --dry-run
 
 :: 3. train; overrides with --set; continue an interrupted run with --resume runs/<run>
-uv run python -m aap_train.train --config configs/smoke-a-qlora.yaml --set train.max_steps=20
+::    the 7B base without a download: copy the weights vLLM uses (24 GB, models/ is git-ignored), once
+docker cp aap-vllm-1:/models/Qwen2.5-VL-7B-Instruct models/
+uv run python -m aap_train.train --config configs/smoke-a-qlora.yaml --set model.base=models/Qwen2.5-VL-7B-Instruct
 
-:: 4. score a checkpoint on dev, package the best one for vLLM
-uv run python -m aap_train.evaluate --run runs/<run>
-uv run python -m aap_train.package --run runs/<run>
+:: 4. score a checkpoint on dev (--checkpoint base = no adapter, to compare), package the best one
+uv run python -m aap_train.evaluate --run runs/<run> [--checkpoint base] [--mode loss|generate]
+uv run python -m aap_train.package --run runs/<run> --slot read      :: adapter A; decide for adapter B
 ```
+
+## Serving the adapters
+
+```bat
+:: from the repository root: vLLM with the base and both slots (training/adapters/read and /decide)
+docker compose -f docker-compose.yml -f docker-compose.lora.yml --profile gpu up -d --no-deps vllm
+:: the api / worker use adapter A with EXTRACT_MODEL=qwen2.5-vl-7b-kk-read; back to qwen2.5-vl-7b = rollback
+:: the default vLLM again (no adapters)
+docker compose --profile gpu up -d --no-deps vllm
+```
+
+Both slots must hold an adapter for vLLM to start with the override. Verified with vLLM 0.10.1.1 on the
+fp8 base: page-image requests to adapter A and text-only requests to adapter B, schema enforced.
+
+## Measured on the RTX 5090 (QLoRA, 7B, 2026-11-09)
+
+| | Adapter A (pages) | Adapter B (text) |
+|---|---|---|
+| Tokens per example | 3.2k-7.3k (one page ≈ 1,240 image tokens) | about 500 |
+| Peak GPU memory | 19.9 GB | 13.3 GB |
+| Speed | about 10 s per invoice (350 invoices × 3 epochs ≈ 3 hours) | about 0.7 s per example |
+| Dev scoring (loss) | 3.5 s per invoice | 0.2 s per example |
+
+vLLM holds about 15 GB while it runs: stop it for training (`docker compose --profile gpu stop vllm`).
 
 | Config | What | Notes |
 |---|---|---|
@@ -65,8 +91,11 @@ environment, trainable parameters, examples left out as too long), `metrics.json
 peak GPU memory, dev scores), `checkpoints/`, `best/` + `best.json` (the checkpoint with the best dev
 score), `final/`, and after packaging `adapter/` or `model/`.
 
-The dev score (`aap_train.metrics`) only chooses the checkpoint. Whether an adapter is used is decided by
-the application's evaluation of the served model (`python -m aap.eval`, pipeline 1).
+The dev score only chooses the checkpoint. `eval.mode: loss` (default) is the loss on the answer tokens.
+`eval.mode: generate` decodes freely and scores field by field (`aap_train.metrics`); free decoding is not
+what vLLM serves (it enforces the JSON schema), so a model that invents keys scores 0 there and answers
+fine when served. Whether an adapter is used is decided by the application's evaluation of the served
+model (`python -m aap.eval`, pipeline 1).
 
 ## Rules
 

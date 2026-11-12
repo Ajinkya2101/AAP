@@ -7,3 +7,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 wandb/
+# base model weights copied for training (e.g. from the vLLM models volume)
+models/
+# installed adapters served by docker-compose.lora.yml
+adapters/

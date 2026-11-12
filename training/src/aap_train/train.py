@@ -8,8 +8,8 @@
    the git commit;
 3. leaves out the examples longer than data.max_seq_len (counted in run.json), never truncating;
 4. loads the base for the method (aap_train.methods) and trains with the Hugging Face Trainer;
-5. at every checkpoint, generates on the dev split and keeps the best checkpoint by that score
-   (best.json); the final adapter is saved under final/.
+5. at every checkpoint, scores the dev split (eval.mode: answer-token loss, or generation) and keeps
+   the best checkpoint by that score (best/, best.json); the final adapter is saved under final/.
 
 `--dry-run` stops after step 3 (no model weights loaded beyond the processor).
 """
@@ -62,11 +62,11 @@ def _callbacks(run: Any, cfg: RunCfg, processor: Any, dev: list[Any]) -> list[An
         def on_save(self, args, state, control, model=None, **kw):  # noqa: ANN001
             if not (cfg.eval.enabled and dev and model is not None):
                 return
-            from .evaluate import evaluate
+            from .evaluate import score_checkpoint
 
-            summary = evaluate(model, processor, dev, max_new_tokens=cfg.eval.max_new_tokens, limit=cfg.eval.limit)
+            summary = score_checkpoint(model, processor, dev, cfg)
             ckpt = f"checkpoints/checkpoint-{state.global_step}"
-            run.log(event="dev", step=state.global_step, checkpoint=ckpt, **summary)
+            run.log(event="dev", step=state.global_step, checkpoint=ckpt, mode=cfg.eval.mode, **summary)
             best = run.read_json("best.json")
             if best is None or summary["score"] > (best.get("score") or -1):
                 keep_best(run.path / ckpt, run.path / "best")

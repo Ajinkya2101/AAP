@@ -308,3 +308,15 @@ def test_tiny_model_end_to_end(tmp_path, method):
     assert (run / "best.json").exists() and (run / "final").exists()
     assert package(["--run", str(run)]) == 0
     assert (run / ("model" if c.merged_serving else "adapter")).is_dir()
+
+
+def test_install_into_a_slot(tmp_path):
+    from aap_train.package import install
+
+    adapter = tmp_path / "run" / "adapter"
+    adapter.mkdir(parents=True)
+    (adapter / "adapter_config.json").write_text("{}", encoding="utf-8")
+    target = install(adapter, "read", "extract", root=tmp_path / "adapters")
+    assert (target / "adapter_config.json").exists() and target.name == "read"
+    with pytest.raises(SystemExit, match="serves the 'decide' adapter"):
+        install(adapter, "decide", "extract", root=tmp_path / "adapters")

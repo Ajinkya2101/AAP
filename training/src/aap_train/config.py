@@ -73,8 +73,13 @@ class TrainCfg(_Strict):
 
 class EvalCfg(_Strict):
     enabled: bool = True
-    limit: int | None = 50                            # dev examples generated per checkpoint
-    max_new_tokens: int = 4096
+    # loss: the answer-token loss on dev (teacher forced), lower is better; cheap, and what training optimises.
+    # generate: free greedy generation scored field by field. Production decodes with the JSON schema
+    # enforced (vLLM), free generation does not: a model that invents keys scores 0 here and fine there
+    # (smoke run 2026-11-09). The served model is judged by pipeline 1 (aap.eval), not by either.
+    mode: Literal["loss", "generate"] = "loss"
+    limit: int | None = 50                            # dev examples per checkpoint
+    max_new_tokens: int = 4096                        # generate mode
 
 
 class LoggingCfg(_Strict):

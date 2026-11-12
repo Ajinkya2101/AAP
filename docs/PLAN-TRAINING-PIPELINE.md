@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | T0-T2 and T4 done, T3 / T6 on the tiny model (2026-11-09); the 7B smoke runs and T5 need vLLM stopped |
+| Status | T0-T5 done (2026-11-09: 7B smoke runs for A and B, both adapters served by vLLM); T6 on the tiny model; T7 waits for data and J-1 |
 | Scope | Everything needed to fine-tune, check and serve adapter A (reading) and adapter B (Oracle fields) of [PLAN-MODEL-JSON.md](PLAN-MODEL-JSON.md), ready before the real training data exists |
 | Where | `training/` at the repository root: its own Python project, its own container. The application (`src/aap`) writes the datasets; `training/` reads them and never imports `aap` |
 | Builds on | CLIENT-DATA P6-P7, [FINETUNING-SCOPE.md](FINETUNING-SCOPE.md), `aap.finetune.export` |
@@ -39,14 +39,16 @@ from what production sends.
 
 | Method | Base | Memory estimate (batch 1, gradient checkpointing, one page) | Served as |
 |---|---|---|---|
-| `qlora` (default) | Qwen2.5-VL-7B, 4-bit NF4 | about 10-14 GB | LoRA adapter on the vLLM base |
+| `qlora` (default) | Qwen2.5-VL-7B, 4-bit NF4 | measured: 19.9 GB peak for A (pages, up to 7.3k tokens), 13.3 GB for B (~500 tokens) | LoRA adapter on the vLLM base |
 | `lora` | 7B bf16 | about 20-24 GB: likely does not fit with page images (refused by the config) | LoRA adapter |
 | `lora` | Qwen2.5-VL-3B bf16 | about 10-12 GB | LoRA adapter on a 3B base |
 | `lora_projector` | 7B 4-bit + the vision-language merger trained in full | about 12-16 GB | **Merged model** (vLLM LoRA cannot carry non-LoRA weights) |
 | `full` | Qwen2.5-VL-3B only | about 20+ GB with 8-bit Adam; may not fit | Full checkpoint |
 | `full` | 7B | over 100 GB | Not supported here (refused by the config check) |
 
-The estimates are to be replaced by measured peaks from T0/T2 (written into the run directory).
+Measured on the RTX 5090 (2026-11-09, QLoRA, batch 1, gradient checkpointing): adapter A about 20 s per
+optimiser step of 2 invoices (about 10 s per invoice, so 350 invoices x 3 epochs is about 3 hours);
+adapter B about 3 s per step of 4 examples. The other rows are estimates (peaks go into metrics.jsonl).
 
 **Serving the result.** vLLM runs the base model fp8-quantized. A LoRA adapter trained on a 4-bit base and
 served on an fp8 base is normal practice, but the small difference is measured, not assumed: every
@@ -156,20 +158,28 @@ Defaults are starting points for the real runs; the smoke configs use a handful 
 
 ## 6. Evaluation inside training, and outside
 
-- **Inside (choosing the checkpoint):** `aap_train.evaluate` generates on the dev split with the checkpoint,
-  parses the JSON and scores it field by field: header fields, line F1 (adapter A), Oracle fields equal to
-  the target (adapter B). The best checkpoint by that score is kept, not the lowest loss.
+- **Inside (choosing the checkpoint):** at every checkpoint `aap_train.evaluate` scores the dev split
+  (`eval.mode`). Default `loss`: the loss on the answer tokens, teacher forced (3.5 s per invoice). The
+  alternative `generate` decodes freely and scores field by field, but free decoding is not the served
+  decoding: in the 7B smoke run the model invented keys and ran to the token limit, so no answer parsed
+  (115 s per invoice), while the same adapter served by vLLM with the schema enforced answered correctly.
+  Smoke result: dev loss 0.252 (base) -> 0.073 after 10 steps (A); 0.576 -> 0.0025 (B).
 - **Outside (deciding to use it):** the packaged adapter is served by vLLM and measured by pipeline 1
   (`aap.eval` on the test split, plus the synthetic `invoices-dev-55` regression). Only that result counts,
   because it is the served model with the production prompt, decoding and checks.
 
 ## 7. Serving
 
-- vLLM gets `--enable-lora`, `--max-lora-rank 16` and the adapters as named modules (for example
-  `qwen2.5-vl-7b-kk-read` and `qwen2.5-vl-7b-kk-decide`); the application picks them with `EXTRACT_MODEL`
-  and a new `DECIDE_MODEL`. Rollback: point the setting back to the base model's name.
-- Two things are verified before the real runs (T3), not assumed: LoRA on the fp8-quantized Qwen2.5-VL
-  in the vLLM version we use, and text-only requests with adapter B on the same served base.
+- `docker-compose.lora.yml` (opt-in; the default stack is unchanged) gives vLLM `--enable-lora`,
+  `--max-lora-rank 16` and two adapter slots: `training/adapters/read` served as `qwen2.5-vl-7b-kk-read`
+  and `training/adapters/decide` as `qwen2.5-vl-7b-kk-decide` (`aap_train.package --slot read|decide`
+  installs them). The base keeps its name. The application picks a model by name: `EXTRACT_MODEL` for
+  adapter A; a `DECIDE_MODEL` setting comes with the adapter B node (PLAN-MODEL-JSON). Rollback: the base's
+  name, or the stack without the override file.
+- Verified 2026-11-09 with vLLM 0.10.1.1: LoRA on the fp8-quantized Qwen2.5-VL loads (PEFT's regex
+  target_modules and the transformers 5 weight names are accepted); adapter A answers page-image requests
+  with the schema enforced; adapter B answers text-only requests on the vision base (the base alone
+  returned no supplier and made-up `basis` keys, the adapter the right supplier and keys).
 - A merged model (`lora_projector`, `full`) is served as its own vLLM model instead of an adapter.
 
 ## 8. Rules
@@ -190,9 +200,9 @@ Defaults are starting points for the real runs; the smoke configs use a handful 
 | T0 | `training/` project skeleton, `envcheck` (GPU, CUDA, bf16, 4-bit, SDPA, free memory); Dockerfile; run it on the RTX 5090 | ✅ torch 2.11 cu128 (native sm_120), transformers 5.22, peft 0.21, bitsandbytes 0.50: bf16, NF4 4-bit and SDPA work on the GPU; no flash-attention (SDPA). Runs natively on Windows; Windows Application Control blocked torch's DLLs on the first load, then allowed them; the Dockerfile is the fallback |
 | T1 | Dataset contract: application-side builder `aap.finetune.chat` for adapter A from a synthetic eval set and from the `aap.finetune.export` output; the extraction request factored out of `extract()` so both use one function | ✅ `extraction_requests()` in `aap.extraction.extract`; synthetic `invoices-dev-55`: 49 examples (6 image-only left out: no evidence-box labels); about 3,400 tokens per one-page invoice |
 | T2 | `aap_train`: config, contract reader, collator with target-only labels, methods (`qlora`, `lora`, `lora_projector`, `full` with the refusals), trainer, run directory, optional wandb; unit tests without GPU | ✅ 26 tests without GPU; found and guarded: the processor ignores `size=` from `from_pretrained` (4,819 instead of 1,240 image tokens), so `max_pixels` is passed as vLLM does and checked after loading; transformers 5's skip-list matching quantized the vision tower to 4-bit, now kept bf16 and checked after loading |
-| T3 | Smoke run A on synthetic invoices (QLoRA, 7B); measured memory and speed; `evaluate` picks the checkpoint; `package` writes the adapter | 🟠 every step done on the tiny random Qwen2.5-VL (`configs/smoke-tiny.yaml`, `AAP_TRAIN_GPU_TESTS=1` tests); the 7B run needs vLLM stopped (it holds about 15 GB) and the weights copied out of the `models` volume |
-| T4 | Adapter B contract with a made-up context pack; smoke dataset and smoke run B | ✅ `aap.finetune.chat decide-smoke` (context pack `smoke/0`, 55 examples, about 500 tokens each); text-only run on the tiny model; the 7B run with T3 |
-| T5 | vLLM: `--enable-lora` behind a compose setting, two adapters, `EXTRACT_MODEL` / `DECIDE_MODEL`, rollback; verify fp8 base + LoRA and text-only B | ⬜ |
+| T3 | Smoke run A on synthetic invoices (QLoRA, 7B); measured memory and speed; `evaluate` picks the checkpoint; `package` writes the adapter | ✅ 10 steps, 12 min with dev scoring, 19.9 GB peak; dev loss 0.252 -> 0.073; checkpoint choice switched to the answer-token loss (§6); base weights in `training/models/` (copied from the `models` volume, git-ignored) |
+| T4 | Adapter B contract with a made-up context pack; smoke dataset and smoke run B | ✅ `aap.finetune.chat decide-smoke` (context pack `smoke/0`, 55 examples, about 500 tokens each); 7B: 10 steps in 28 s, 13.3 GB peak, dev loss 0.576 -> 0.0025 (an easy made-up task: plumbing only) |
+| T5 | vLLM: `--enable-lora` behind a compose setting, two adapters, `EXTRACT_MODEL` / `DECIDE_MODEL`, rollback; verify fp8 base + LoRA and text-only B | ✅ `docker-compose.lora.yml`, slots, verified (§7); `DECIDE_MODEL` comes with the adapter B node; vLLM back on the default setup afterwards |
 | T6 | `lora_projector` merge and `full` on 3B, smoke only | 🟠 both methods train and package (merged `model/`) on the tiny model; the 3B full run not tried yet |
 | T7 | Real runs: B on the train split (learning curve), A only if the decision rule says so | ⏸ data, J-1 |
 

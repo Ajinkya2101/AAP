@@ -46,7 +46,7 @@ uv run python -m aap.clientdata.replica --local --create-databases ^
 :: --skip-unmatched-invoices: leave out the invoices whose supplier or site is not delivered yet, instead of refusing
 ```
 
-Deliveries so far: `kk/2026-11-02-dhivya/` (pay_terms.xlsx, pay_method.xlsx); `kk/20206-11-09-dhivya/`
+Deliveries so far: `kk/2026-11-02-dhivya/` (pay_terms.xlsx, pay_method.xlsx); `kk/2026-11-09-dhivya/`
 (ap_invoices_list.xlsx with Header / Line / Distribution sheets; ap_sup_list.xlsx, the supplier / site list).
 Extracts that are not one table per file are turned into tables by `aap.clientdata.views`.
 

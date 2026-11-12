@@ -1,0 +1,32 @@
+# vLLM serving the fine-tuned adapters next to the base model (docs/PLAN-TRAINING-PIPELINE.md §7, T5).
+# Opt-in; the default stack is unchanged without this file:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.lora.yml --profile gpu up -d --no-deps vllm
+#
+# Adapters are installed into the slots by:  cd training && uv run python -m aap_train.package --run runs/<run> --slot read|decide
+#   training/adapters/read    adapter A (reading)        served as ${VLLM_LORA_READ_NAME:-qwen2.5-vl-7b-kk-read}
+#   training/adapters/decide  adapter B (Oracle fields)  served as ${VLLM_LORA_DECIDE_NAME:-qwen2.5-vl-7b-kk-decide}
+# Both slots must hold an adapter. The base keeps its name (qwen2.5-vl-7b). The application picks a model by
+# name: EXTRACT_MODEL=qwen2.5-vl-7b-kk-read for the api / worker uses adapter A; back to qwen2.5-vl-7b = rollback.
+# EXTRACT_MODEL is not used for the base's served name here, so switching it does not rename the base.
+services:
+  vllm:
+    command:
+      - --model=/models/${EXTRACT_MODEL_DIR:-Qwen2.5-VL-7B-Instruct}
+      - --served-model-name=${VLLM_BASE_MODEL_NAME:-qwen2.5-vl-7b}
+      - --quantization=${VLLM_QUANTIZATION:-fp8}
+      - --gpu-memory-utilization=${VLLM_GPU_MEMORY_UTILIZATION:-0.85}
+      - --max-model-len=${VLLM_MAX_MODEL_LEN:-16384}
+      - --limit-mm-per-prompt={"image":${LLM_MAX_IMAGES_PER_REQUEST:-4}}
+      - --mm-processor-kwargs={"max_pixels":${VLLM_MAX_PIXELS:-1003520}}
+      - --enable-lora
+      - --max-lora-rank=${VLLM_MAX_LORA_RANK:-16}
+      - --max-loras=2
+      - --lora-modules
+      - ${VLLM_LORA_READ_NAME:-qwen2.5-vl-7b-kk-read}=/adapters/read
+      - ${VLLM_LORA_DECIDE_NAME:-qwen2.5-vl-7b-kk-decide}=/adapters/decide
+      - --host=0.0.0.0
+      - --port=8000
+    volumes:
+      - models:/models:ro
+      - ./training/adapters:/adapters:ro
