@@ -156,3 +156,12 @@ def test_history_shape_and_report(listed):
     text = markdown(gl, defaults_vs_keyed(d), shape, "2026-11-09")
     assert "## 1. GL coding from history" in text and "## 2. Site defaults" in text
     assert Decimal(0) <= gl.correct_amount <= gl.test_amount
+
+
+def test_replica_adds_the_delivered_currencies(tmp_path):
+    """Risk PLAN-MID-DECEMBER §9: the fixture's Mexican supplier invoices in MXN, which the seed lacks."""
+    from aap.clientdata.fixtures import build
+
+    r = build_replica(read_delivery(build(tmp_path / "d")), KK)
+    codes = {c["currency_code"] for c in r.rows["fnd.fnd_currencies"]}
+    assert "MXN" in codes and any("MXN" in n for n in r.notes)

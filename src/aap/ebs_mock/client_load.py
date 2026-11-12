@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import calendar
 import json
+import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
@@ -118,6 +119,26 @@ def _foundation(r: Replica) -> None:
                 unit_of_measure_tl=uom, description=uom, language="US", source_lang="US")
     for table in FOUNDATION_TABLES:
         r.rows[table] = list(ctx.rows.get(table) or [])
+
+
+def _currencies(r: Replica, d: Delivery) -> None:
+    """Currencies the delivery uses (invoices, suppliers, sites; FND_CURRENCIES when delivered) that the
+    seed's list lacks are added, so an MXN invoice is checked for its exchange rate (V-FX) instead of
+    failing as an unknown currency (V-05). No rates are made up: GL_DAILY_RATES stays the seed's."""
+    have = {row["currency_code"] for row in r.rows["fnd.fnd_currencies"]}
+    used = {str(x.get(col)).upper() for t, col in (("AP_INVOICES_ALL", "INVOICE_CURRENCY_CODE"),
+                                                   ("AP_INVOICES_ALL", "PAYMENT_CURRENCY_CODE"),
+                                                   ("AP_SUPPLIERS", "INVOICE_CURRENCY_CODE"),
+                                                   ("AP_SUPPLIER_SITES_ALL", "INVOICE_CURRENCY_CODE"),
+                                                   ("FND_CURRENCIES", "CURRENCY_CODE"))
+            for x in d.rows(t) if x.get(col)}
+    added = sorted(c for c in used - have if re.fullmatch(r"[A-Z]{3}", c))
+    for code in added:
+        r.add("fnd.fnd_currencies", currency_code=code, enabled_flag="Y", currency_flag="Y",
+              issuing_territory_code=None, precision=2, extended_precision=5, symbol=None, start_date_active=START)
+    if added:
+        r.notes.append(f"currencies added from the delivery: {added} (no exchange rates for them: V-FX sends "
+                       "those invoices to review until GL_DAILY_RATES are delivered)")
 
 
 def _coa_id(d: Delivery) -> int:
@@ -429,6 +450,7 @@ def build_replica(d: Delivery, coa: CoaLayout, *, exclude: Path | None = None,
     """Every row of the replica, in memory (no database)."""
     r = Replica()
     _foundation(r)
+    _currencies(r, d)
     coa_id = _coa_id(d)
     _chart(r, d, coa, coa_id)
     terms, notes = term_rows(d)
