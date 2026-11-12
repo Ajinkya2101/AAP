@@ -1,5 +1,7 @@
-# Adapter B on the real train split (keyed records + context packs); learning curve with
-# --set data.limit_train=<n>.
+# Adapter B on the real train split (keyed records + context packs), dataset from
+#   uv run python -m aap.finetune.chat decide --delivery client-data/kk/<delivery> --out test-data-kk/train-b
+# Learning curve: --set data.limit_train=<n> (train.jsonl is in a seeded random order: nested subsets);
+# python -m aap.decide.curve runs the whole curve.
 name: b-qlora
 task: decide
 model: {base: Qwen/Qwen2.5-VL-7B-Instruct, size_b: 8.3}

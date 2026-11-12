@@ -133,10 +133,9 @@ def store_key(text: str | None) -> str | None:
 
 
 # =================================================================== delivery
-def from_delivery(d: Any, coa: CoaLayout) -> HistoryStore:
-    """All suppliers, sites and keyed history of a delivery (aap.clientdata.readers.Delivery)."""
-    from aap.clientdata.readers import day, dec, num
-    from aap.ebs_mock.client_load import placeholder_account
+def delivered_accounts(d: Any, coa: CoaLayout) -> dict[int, str]:
+    """CCID -> account string for the combinations a delivery has (GL_CODE_COMBINATIONS)."""
+    from aap.clientdata.readers import num
 
     combos: dict[int, str] = {}
     for c in d.rows("GL_CODE_COMBINATIONS"):
@@ -144,6 +143,16 @@ def from_delivery(d: Any, coa: CoaLayout) -> HistoryStore:
         parts = [c.get(f"SEGMENT{i}") for i in range(1, coa.segment_count + 1)]
         if ccid is not None and all(p is not None for p in parts):
             combos[ccid] = coa.join([str(p) for p in parts])
+    return combos
+
+
+def account_resolver(d: Any, coa: CoaLayout) -> Any:
+    """ccid -> account string, as the replica loads it: the delivered combination, else the placeholder
+    account (aap.ebs_mock.client_load.placeholder_account) until the chart of accounts arrives."""
+    from aap.clientdata.readers import num
+    from aap.ebs_mock.client_load import placeholder_account
+
+    combos = delivered_accounts(d, coa)
 
     def account(ccid: Any) -> str | None:
         c = num(ccid)
@@ -151,6 +160,15 @@ def from_delivery(d: Any, coa: CoaLayout) -> HistoryStore:
             return None
         return combos.get(c) or coa.join(placeholder_account(c, coa))
 
+    return account
+
+
+def from_delivery(d: Any, coa: CoaLayout) -> HistoryStore:
+    """All suppliers, sites and keyed history of a delivery (aap.clientdata.readers.Delivery)."""
+    from aap.clientdata.readers import day, dec, num
+
+    combos = delivered_accounts(d, coa)
+    account = account_resolver(d, coa)
     store = HistoryStore()
     store.account_descriptions = _flex_descriptions(d, coa, combos)
     terms = {num(t.get("TERM_ID")): str(t.get("NAME")) for t in d.rows("AP_TERMS")}

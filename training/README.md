@@ -27,6 +27,8 @@ training (`docker compose stop vllm`) and start it again afterwards.
 :: 1. a dataset (from the repository root, with the application's environment)
 uv run python -m aap.finetune.chat extract --eval-set test-data/invoices-dev-55 --out training/chat-data/smoke-a
 uv run python -m aap.finetune.chat decide-smoke --eval-set test-data/invoices-dev-55 --out training/chat-data/smoke-b
+:: adapter B from a delivery's keyed records (client data: under test-data-kk/, never training/)
+uv run python -m aap.finetune.chat decide --from client-data\kk\<earlier> --delivery client-data\kk\<delivery> --out test-data-kk\decide-b
 
 :: 2. check config and data, count tokens (loads only the processor)
 cd training
@@ -105,3 +107,15 @@ model (`python -m aap.eval`, pipeline 1).
   unless `logging.wandb_mode: online`; no tables, predictions, images, code or model artifacts.
 - No training on client invoices before the written approval (J-1) and the decision rule (CLIENT-DATA P7).
 - A smoke run proves the pipeline works; its scores say nothing about client invoices.
+
+## Adapter B: offline score and learning curve
+
+```bat
+:: from the repository root; LLM_BACKEND=stub gives the floor (site defaults + most used account, no model)
+uv run python -m aap.decide.evaluate --dataset test-data-kk\decide-b --split dev --model qwen2.5-vl-7b-kk-decide
+:: 25 / 50 / 100 % of train: stop vLLM, train, package --slot decide, serve with LoRA, score; --dry-run lists the steps
+uv run python -m aap.decide.curve --dataset test-data-kk\decide-b --base-model models/Qwen2.5-VL-7B-Instruct
+```
+
+Both append a line to `runs/eval-runs.jsonl` (headline numbers only). Training on client data waits for the J-1
+approval (rule above).

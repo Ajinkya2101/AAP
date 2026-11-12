@@ -85,6 +85,11 @@ class StubClient:
         account (or its most used distribution set when it has no plain account), as a baseline that
         is right whenever a supplier always codes the same way."""
         props = req.schema["properties"]
+        if "pack" not in req.context:          # a stored request (dataset): the facts are in its text
+            from aap.decide.request import parse_user_text
+
+            printed, packed = parse_user_text(req.content[0]["text"])
+            req.context = {**req.context, "printed": printed, "pack": packed}
         pack = req.context.get("pack") or {}
         site = pack.get("site") or {}
 

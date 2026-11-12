@@ -87,9 +87,19 @@ def printed_from_keyed(header: dict[str, Any], lines: list[dict[str, Any]], vend
 
 
 # ------------------------------------------------------------------- request
+PRINTED_HEAD, PACK_HEAD = "Printed values:\n", "\n\nContext pack:\n"
+
+
 def user_text(printed: dict[str, Any], pack: dict[str, Any]) -> str:
-    return ("Printed values:\n" + json.dumps(printed, ensure_ascii=False) + "\n\nContext pack:\n"
-            + json.dumps(pack, ensure_ascii=False))
+    return PRINTED_HEAD + json.dumps(printed, ensure_ascii=False) + PACK_HEAD + json.dumps(pack, ensure_ascii=False)
+
+
+def parse_user_text(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    """(printed, pack) back from a stored request (datasets, offline evaluation)."""
+    if not text.startswith(PRINTED_HEAD) or PACK_HEAD not in text:
+        raise ValueError("not an adapter B request")
+    printed, pack = text[len(PRINTED_HEAD):].split(PACK_HEAD, 1)
+    return json.loads(printed), json.loads(pack)
 
 
 def decide_request(printed: dict[str, Any], pack: dict[str, Any], *, coa: CoaLayout, model: str | None = None,
