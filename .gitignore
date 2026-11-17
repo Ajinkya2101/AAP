@@ -20,6 +20,7 @@ data_received/
 client-data/*
 !client-data/README.md
 test-data-kk/
+attachments/
 
 # Local machine config (docker/wslconfig.example is the tracked template)
 docker/.wslconfig
