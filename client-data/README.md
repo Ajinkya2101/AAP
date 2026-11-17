@@ -47,7 +47,11 @@ uv run python -m aap.clientdata.replica --local --create-databases ^
 ```
 
 Deliveries so far: `kk/2026-11-02-dhivya/` (pay_terms.xlsx, pay_method.xlsx); `kk/2026-11-09-dhivya/`
-(ap_invoices_list.xlsx with Header / Line / Distribution sheets; ap_sup_list.xlsx, the supplier / site list).
+(ap_invoices_list.xlsx with Header / Line / Distribution sheets; ap_sup_list.xlsx, the supplier / site list);
+`kk/2026-11-17-dhivya/` (AP_DIST1.xlsx, the org-81 distributions with their eight segment values and the
+descriptions of segments 1-5; one supplier statement workbook; `attachments-received/`, ten sample PDFs as received,
+holding 20 keyed invoices, some files with several invoices; `attachments-index.csv` pairs each file and page with
+its INVOICE_ID. The files are not yet split into `attachments/<INVOICE_ID>.pdf`).
 Extracts that are not one table per file are turned into tables by `aap.clientdata.views`.
 
 ## Handling
