@@ -340,6 +340,7 @@ to S0, measured on the keyed records with `aap.decide.evaluate` and on the PDFs 
 | 2026-11-12 | A replica reload rebuilds `aap_kk`'s copied GL history (lines learnt from approvals stay) | Team |
 | 2026-11-20 | Proceed with the data in hand, no more data requests; synthetic invoices where real ones are too few; goal: the model outputs EBS-ready JSON. Results on real and on synthetic invoices are reported separately; dev numbers are not production accuracy | Siva |
 | 2026-11-23 | Adapter B: 10 suppliers (9 with a sample file + 1), 200 train examples each, real first then synthetic copies of real train invoices; one supplier held out; synthetic rows never in history, dev or test. Adapter A not trained before December | Team |
+| 2026-11-23 | Invoice files for every real and synthetic example, in each supplier's sample layout (invoice page only); the printed ship-to / consignee / client comes from the keyed cost center, as on all 20 sample invoices. Scores on generated files are reported apart from the real files | Team |
 
 ## 11. Out of scope until after December
 

@@ -54,6 +54,22 @@ holding 20 keyed invoices, some files with several invoices; `attachments-index.
 its INVOICE_ID. The files are not yet split into `attachments/<INVOICE_ID>.pdf`).
 Extracts that are not one table per file are turned into tables by `aap.clientdata.views`.
 
+`kk/invoice-templates/` (2026-11-23) holds the supplier layouts that `tools.invoicegen.keyed` uses to render
+invoice files for keyed and synthetic invoices: `profiles.json` (template, scanned, printed terms, item catalogue,
+the parties printed for cost centers that are not stores) and one Jinja template per supplier with a sample
+file, modelled on that sample; suppliers without a sample use `generic.html.j2`. Client data like the rest:
+the samples' personal names, emails and bank account numbers are replaced by generic or made-up ones.
+
+```bat
+:: in the app image (WeasyPrint); src and tools mounted so no rebuild is needed
+docker run --rm -v %CD%\src:/app/src:ro -v %CD%\tools:/app/tools:ro -v %CD%\client-data:/app/client-data:ro ^
+    -v %CD%\test-data-kk:/app/test-data-kk -w /app -e PYTHONPATH=/app/src:/app aap-app:dev ^
+    python -m tools.invoicegen.keyed --dataset test-data-kk/<adapter B dataset> ^
+    --from client-data/kk/2026-11-02-dhivya --from client-data/kk/2026-11-09-dhivya ^
+    --delivery client-data/kk/2026-11-17-dhivya --templates client-data/kk/invoice-templates ^
+    --out test-data-kk/<invoice set>
+```
+
 ## Handling
 
 - Only on the project machine: not on shared drives, not in chat tools, not in commits, docs or screenshots.

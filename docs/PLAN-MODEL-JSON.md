@@ -166,6 +166,7 @@ the split is fixed before the first run and never changed.
 | T2 | Dataset builder for B; smoke run on the keyed history alone, without pages (plumbing only) | No | ✅ builder: `python -m aap.finetune.chat decide` (gold set's split, no test / dev invoice in any pack, nested learning-curve subsets). On the 11-09 delivery: 653 examples (490 / 66 / 97), 1.5k-3.5k tokens; `aap_train` dry run accepts it. The smoke run on it is training on client data: ⏸ J-1 |
 | T3 | vLLM serving two adapters on one base; switch and rollback tested; confirm text-only requests to the VL base work with B | No | ✅ PLAN-TRAINING-PIPELINE T5 (2026-11-09); `DECIDE_MODEL` / `DECIDE_ADAPTER_MODEL` (2026-11-12) |
 | T2b | B's December dataset: 10 suppliers × 200 train examples (real + synthetic copies), a held-out supplier, the sample-file invoices in test, the real-only control (see below) | No | ✅ 2026-11-23: `--suppliers`, `--file-invoices`, `--per-supplier`, `--synthetic`; `aap.decide.synth`; the 11-17 chart of accounts read from the account segment view (`aap.clientdata.views`) |
+| T2c | An invoice file for every real and synthetic example of T2b (not the 17 with a real file), in the supplier's own layout modelled on its sample (`tools.invoicegen.keyed`; layouts and profiles in the git-ignored `client-data/kk/invoice-templates/`) | No | ✅ 2026-11-23 (see below) |
 | T4 | Train B on the train split (with and without synthetic copies); learning curve | No | ⏸ J-1; the training venv's torch is blocked by Windows Application Control on this machine (2026-11-23), so train in the `train` container |
 | T5 | Train A, only if the reading errors miss the gate after prompt work (CLIENT-DATA P7 rule) | Yes + P6 labels | ❌ dropped for December (2026-11-23, see below) |
 
@@ -202,6 +203,17 @@ Built 2026-11-23 (`python -m aap.finetune.chat decide ... --suppliers ... --hold
 the extracts; Oracle defaults it), and 15 % of real train lines have no candidate account (the supplier
 had not used it before), 80 % for the supplier with the most accounts: those lines are review, and no
 amount of copying changes it.
+
+**Invoice files for the dataset (T2c, 2026-11-23).** On every sample invoice AP keyed one item line for the
+whole invoice (plus a zero tax line) and coded it to the place the page names as ship-to, consignee or client
+(the consignee store's number is the cost center; the mix supplier, the franchise group and the corporate
+client have their own cost centers). So each generated file prints the invoice number, date and total as keyed, the line
+amount broken into the supplier's usual items, the supplier's own terms text (not the keyed site default),
+and **the location taken from the cost center of the keyed account** (decided 2026-11-23). Decorations (BOL,
+order numbers, weights, routes) are seeded noise. The suppliers whose samples are scans get scan noise.
+Because the location comes from the answer, scores on generated files (dev and test included) are higher
+than on real ones and are always reported apart from the 17 real-file test invoices, which are the only test
+of the rule itself. Each file has a truth file (printed values and keyed values) in the eval format.
 
 **Adapter A is not trained before December (2026-11-23).** The only real pages are the 20 sample
 invoices, which are also the only measure of the reading; training A on rendered pages would teach it
