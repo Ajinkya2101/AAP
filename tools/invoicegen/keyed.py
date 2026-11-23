@@ -77,8 +77,8 @@ def fake_zip(state: str, rnd: random.Random) -> str:
 
 
 def parse_place(desc: str) -> tuple[str | None, str, str] | None:
-    """(street, city, state) from a cost-center description: "NEW CASTLE DE 00373", "LOGAN UT - 1295",
-    "MURFREESBORO, TN", "WILSHIRE AVE SW, CONCORD, NC, USA"; None when it names no US place."""
+    """(street, city, state) from a cost-center description: "SPRINGFIELD IL 00110", "RIVERTON WY - 1201",
+    "LAKEWOOD, CO", "MAPLE AVE NE, FAIRVIEW, OH, USA"; None when it names no US place."""
     text = " ".join(desc.upper().split())
     if "," in text:
         parts = [p.strip() for p in text.split(",") if p.strip() and p.strip() != "USA"]

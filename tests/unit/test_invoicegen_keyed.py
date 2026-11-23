@@ -10,11 +10,11 @@ from tools.invoicegen import keyed
 
 
 @pytest.mark.parametrize("desc,place", [
-    ("NEW CASTLE DE 00373", (None, "NEW CASTLE", "DE")),
-    ("LOGAN UT - 1295", (None, "LOGAN", "UT")),
-    ("MURFREESBORO, TN", (None, "MURFREESBORO", "TN")),
-    ("WILSHIRE AVE SW, CONCORD, NC, USA", ("WILSHIRE AVE SW", "CONCORD", "NC")),
-    ("BATON ROUGE LA 70805", (None, "BATON ROUGE", "LA")),
+    ("SPRINGFIELD IL 00110", (None, "SPRINGFIELD", "IL")),
+    ("RIVERTON WY - 1201", (None, "RIVERTON", "WY")),
+    ("LAKEWOOD, CO", (None, "LAKEWOOD", "CO")),
+    ("MAPLE AVE NE, FAIRVIEW, OH, USA", ("MAPLE AVE NE", "FAIRVIEW", "OH")),
+    ("PORT ALLEN LA 70767", (None, "PORT ALLEN", "LA")),
     ("MIX SUPPLIER", None),
     ("COMPANY SHOP GENERAL", None),
 ])
@@ -39,8 +39,8 @@ def _sources():
     s.combos = {1: {"CODE_COMBINATION_ID": 1, **{f"SEGMENT{i}": v for i, v in enumerate(
                     ["10", "20", "00110", "61210", "00000", "000", "00", "000"], start=1)}},
                 2: {"CODE_COMBINATION_ID": 2, **{f"SEGMENT{i}": v for i, v in enumerate(
-                    ["10", "20", "90002", "65020", "PJ001", "000", "00", "000"], start=1)}}}
-    s.flex = {(3, "00110"): "SPRINGFIELD IL 00110", (3, "90002"): "MIX SUPPLIER", (5, "PJ001"): "PJ_EXAMPLE"}
+                    ["10", "20", "95000", "65020", "PJ001", "000", "00", "000"], start=1)}}}
+    s.flex = {(3, "00110"): "SPRINGFIELD IL 00110", (3, "95000"): "MIX SUPPLIER", (5, "PJ001"): "PJ_EXAMPLE"}
     return s
 
 
@@ -65,7 +65,7 @@ def test_a_store_cost_center_prints_as_the_store():
 
 def test_another_cost_center_prints_as_the_profile_party_and_the_project_as_po():
     profile = {"items": [{"desc": "Freight", "rest": True}], "po": "project",
-               "parties": {"90002": {"name": "Mix Supplier Inc", "street": "1 Mill Rd", "city": "Greensboro",
+               "parties": {"95000": {"name": "Mix Supplier Inc", "street": "1 Mill Rd", "city": "Greensboro",
                                      "state": "NC", "zip": "27409"}}}
     p = keyed.printed_values(_sources(), _invoice(2), profile, keyed.Fake("x"))
     assert p["location"]["kind"] == "party" and p["location"]["name"] == "Mix Supplier Inc"
