@@ -235,8 +235,9 @@ S2 adapter B.
 | F4 | `--system s0|s1|s2` in the harness (E4) | ✅ |
 | F5 | B's dataset from the keyed records, offline score, learning-curve runner, run log (T2, E5) | ✅ built; stub floor measured |
 | F6 | S0 / S1 on dev, then test (E6) | ⏸ D-1 (gold set) |
-| F7 | Train B, learning curve (T4) | ⏸ J-1 (the keyed records are enough) |
-| F8 | Train A, if the decision rule says so (T5) | ⏸ D-1, P6 review pass, J-1 |
+| F6b | B's December dataset: 10 suppliers × 200 train examples (real + synthetic copies), held-out supplier, sample-file invoices in test, real-only control (PLAN-MODEL-JSON T2b) | ✅ 2026-11-23: train 2,000 / control 382, dev 52, test 109 (17 with a file) |
+| F7 | Train B, learning curve (T4), with and without the synthetic copies | ⏸ J-1 (the keyed records are enough) |
+| F8 | Train A, if the decision rule says so (T5) | ❌ dropped for December (2026-11-23): no real pages to train on that are not also the only test |
 
 ## 6. Inputs awaited
 
@@ -337,6 +338,8 @@ to S0, measured on the keyed records with `aap.decide.evaluate` and on the PDFs 
 | 2026-11-09 | One model writes the Oracle JSON: adapter B chooses among the facts of a context pack built per invoice; Oracle values are never memorised; the code's checks stay (PLAN-MODEL-JSON) | Team |
 | 2026-11-12 | With the model writing the fields (`DECIDE_MODE=apply`), header values (invoice type, terms, payment method, pay group, liability account) stay the code's; a model value that differs sends the invoice to review (`MODEL_DIFFERS`). Line accounts are the model's; a difference from the code goes to review | Team |
 | 2026-11-12 | A replica reload rebuilds `aap_kk`'s copied GL history (lines learnt from approvals stay) | Team |
+| 2026-11-20 | Proceed with the data in hand, no more data requests; synthetic invoices where real ones are too few; goal: the model outputs EBS-ready JSON. Results on real and on synthetic invoices are reported separately; dev numbers are not production accuracy | Siva |
+| 2026-11-23 | Adapter B: 10 suppliers (9 with a sample file + 1), 200 train examples each, real first then synthetic copies of real train invoices; one supplier held out; synthetic rows never in history, dev or test. Adapter A not trained before December | Team |
 
 ## 11. Out of scope until after December
 

@@ -70,6 +70,17 @@ TABLES: dict[str, TableSpec] = {t.name: t for t in [
                   "CHART_OF_ACCOUNTS_ID", "ENABLED_FLAG", "DETAIL_POSTING_ALLOWED_FLAG", "ACCOUNT_TYPE",
                   "START_DATE_ACTIVE", "END_DATE_ACTIVE", "CONCATENATED_SEGMENTS"),
               aliases=("code_combinations", "ccids", "accounts")),
+    TableSpec("ACCOUNT_SEGMENT_VIEW", key=("INVOICE_DISTRIBUTION_ID",),
+              required=("DIST_CODE_COMBINATION_ID", "SEGMENT1"),
+              optional=tuple(f"SEGMENT{i}" for i in range(2, 9)) + tuple(f"SEGMENT{i}_DESCRIPTION" for i in range(1, 9)),
+              aliases=("ap_dist1", "dist_segments", "account_segments", "distribution_accounts"),
+              columns_alt={"COMPANY": "SEGMENT1", "BUSINESS_UNIT": "SEGMENT2", "COST_CENTER": "SEGMENT3",
+                           "NATURAL_ACCOUNT": "SEGMENT4", "PROJECT": "SEGMENT5", "LOB": "SEGMENT6",
+                           "INTERCOMPANY": "SEGMENT7", "FUTURE": "SEGMENT8",
+                           **{f"SEG{i}": f"SEGMENT{i}_DESCRIPTION" for i in range(1, 9)}},
+              description="Distributions joined to GL_CODE_COMBINATIONS_KFV: the segment values by name "
+                          "(COMPANY ... FUTURE) and the descriptions of the segments (SEG1 ...); split into "
+                          "GL_CODE_COMBINATIONS, FND_ID_FLEX_SEGMENTS and FND_FLEX_VALUES by aap.clientdata.views"),
     TableSpec("FND_ID_FLEX_SEGMENTS", key=("APPLICATION_COLUMN_NAME",),
               required=("APPLICATION_COLUMN_NAME", "SEGMENT_NAME"),
               optional=("SEGMENT_NUM", "FLEX_VALUE_SET_NAME", "FLEX_VALUE_SET_ID", "ID_FLEX_NUM"),

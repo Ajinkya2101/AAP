@@ -12,6 +12,10 @@ see the same result. Each step reports what it did as a finding on the delivery 
   the payee's default payment method, else the primary one. When the view has no VENDOR_ID, it is
   taken from the invoices that use the supplier's sites.
 - **Invoice header without ORG_ID**: taken from the invoice's lines, else from its site.
+- **Account segment view** (`ACCOUNT_SEGMENT_VIEW`, the distributions joined to GL_CODE_COMBINATIONS_KFV,
+  one row per distribution): split into GL_CODE_COMBINATIONS (one row per CCID), FND_ID_FLEX_SEGMENTS
+  (the segments, named after the view's columns) and FND_FLEX_VALUES (each segment value with its
+  description). Tables the delivery has itself are not replaced.
 """
 
 from __future__ import annotations
@@ -179,7 +183,60 @@ def invoice_org(d: Delivery) -> None:
         _note(d, "warning", "invoices whose ORG_ID could not be derived (no line, site not delivered)", unknown)
 
 
+# ------------------------------------------------------------ account view
+ACCOUNT_VIEW = "ACCOUNT_SEGMENT_VIEW"
+
+
+def _value_set(n: int) -> str:
+    return f"DELIVERED SEGMENT{n}"
+
+
+def split_account_view(d: Delivery) -> None:
+    t = d.tables.pop(ACCOUNT_VIEW, None)
+    if t is None:
+        return
+    segments = [n for n in range(1, 31) if f"SEGMENT{n}" in t.columns]
+    combos: dict[int, Row] = {}
+    conflicts: set[int] = set()
+    values: dict[tuple[int, str], str] = {}
+    for r in t.rows:
+        ccid = num(r.get("DIST_CODE_COMBINATION_ID"))
+        if ccid is None:
+            continue
+        row: Row = {"CODE_COMBINATION_ID": ccid}
+        for n in segments:
+            v = r.get(f"SEGMENT{n}")
+            row[f"SEGMENT{n}"] = str(v) if v is not None else None
+            desc = r.get(f"SEGMENT{n}_DESCRIPTION")
+            if v is not None and desc:
+                values.setdefault((n, str(v)), str(desc))
+        if ccid in combos and combos[ccid] != row:
+            conflicts.add(ccid)
+        combos.setdefault(ccid, row)
+    if conflicts:
+        _note(d, "error", "account segment view: CCIDs with different segment values on different rows",
+              sorted(conflicts))
+    names = {v: k for k, v in TABLES[ACCOUNT_VIEW].columns_alt.items() if not v.endswith("_DESCRIPTION")}
+    derived = {
+        "GL_CODE_COMBINATIONS": list(combos.values()),
+        "FND_ID_FLEX_SEGMENTS": [{"APPLICATION_COLUMN_NAME": f"SEGMENT{n}", "SEGMENT_NUM": n,
+                                  "SEGMENT_NAME": names.get(f"SEGMENT{n}", f"SEGMENT{n}").replace("_", " ").title(),
+                                  "FLEX_VALUE_SET_NAME": _value_set(n)} for n in segments],
+        "FND_FLEX_VALUES": [{"FLEX_VALUE_SET_NAME": _value_set(n), "FLEX_VALUE": v, "DESCRIPTION": desc}
+                            for (n, v), desc in sorted(values.items())],
+    }
+    added = []
+    for name, rows in derived.items():
+        if name in d.tables or not rows:
+            continue
+        d.tables[name] = TableData(spec=TABLES[name], rows=rows, files=list(t.files),
+                                   columns=list(dict.fromkeys(k for r in rows for k in r)))
+        added.append(f"{name} ({len(rows)})")
+    _note(d, "info", f"account segment view ({', '.join(t.files)}) split into {', '.join(added) or 'nothing new'}")
+
+
 def derive(d: Delivery) -> None:
     drop_exact_duplicates(d)
     split_supplier_view(d)
+    split_account_view(d)
     invoice_org(d)

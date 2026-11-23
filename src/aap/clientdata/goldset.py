@@ -67,8 +67,10 @@ def _seeded(seed: int, key: str) -> int:
     return int(hashlib.sha256(f"{seed}:{key}".encode()).hexdigest()[:8], 16)
 
 
-def split_items(items: list[GoldItem], *, holdout: set[str], seed: int) -> None:
-    """Assign test / dev / train in place (see the module docstring)."""
+def split_items(items: list[GoldItem], *, holdout: set[str], seed: int,
+                force_test: set[int] | frozenset[int] = frozenset()) -> None:
+    """Assign test / dev / train in place (see the module docstring). `force_test`: invoice IDs that go to
+    test whatever the rule says (the invoices with a real file, when they are few and must be measured)."""
     by_vendor: dict[str | None, list[GoldItem]] = defaultdict(list)
     for it in items:
         by_vendor[it.vendor_number].append(it)
@@ -85,6 +87,8 @@ def split_items(items: list[GoldItem], *, holdout: set[str], seed: int) -> None:
         rest += its[:len(its) - n_test]
     for it in rest:
         it.split = "dev" if _seeded(seed, str(it.invoice_id)) % 100 < DEV_SHARE else "train"
+        if it.invoice_id in force_test:
+            it.split = "test"
 
 
 def pick_holdout(d: Delivery, count: int, seed: int) -> set[str]:

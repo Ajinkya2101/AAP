@@ -4,7 +4,9 @@
     python -m aap.finetune.chat extract --export <aap.finetune.export output> --out <dir>
     python -m aap.finetune.chat decide-smoke --eval-set test-data/invoices-dev-55 --out <dir>
     python -m aap.finetune.chat decide --delivery client-data/kk/<delivery> [--from <earlier>] \
-                                      [--goldset test-data-kk/<gold set>] [--holdout 70003] --out <dir>
+                                      [--goldset test-data-kk/<gold set>] [--holdout 70003] --out <dir> \
+                                      [--suppliers 70001,70002] [--file-invoices <attachments-index.csv>] \
+                                      [--per-supplier 200 [--synthetic]]
 
 `extract` (adapter A): every example is the extraction request production sends
 (aap.extraction.extract.extraction_requests: system prompt, page images, text layer), with the page
@@ -30,7 +32,15 @@ keyed, with the basis of each value. Rules (PLAN-MODEL-JSON §7):
 - no context pack ever holds a test or dev invoice (nor the invoice itself, nor anything keyed on or
   after its GL date); a pack that breaks the rule stops the build;
 - the train examples are written in a seeded random order, so `data.limit_train=<n>` (training/) takes
-  a random subset and the learning curve's subsets are nested (`learning_curve` in dataset.json).
+  a random subset and the learning curve's subsets are nested (`learning_curve` in dataset.json);
+- invoices without distributions are left out (nothing keyed to learn);
+- scope (2026-11-23): `--suppliers` limits the set, `--file-invoices` sends the invoices with a real
+  file to test, `--per-supplier N` gives every supplier exactly N train examples: real ones above N are
+  left out of training (seeded; they stay in the history), and with `--synthetic` the rest are copies of
+  the supplier's real train invoices (aap.decide.synth: label `synthetic`, parent in meta, never in dev
+  or test, never in any history; a copy's pack leaves its parent out). The made-up rows are written
+  to `synthetic/*.csv` with the SYNTHETIC / PARENT_INVOICE_ID / GEN_VERSION markers. Without
+  `--synthetic`, the same command gives the real-only control set with the same dev and test.
 Client data: write the dataset under test-data-kk/ (git-ignored), never under training/.
 
 The training side (`training/`, aap_train.data) reads only this contract.
@@ -248,17 +258,55 @@ def _goldset_splits(goldset: Path) -> tuple[dict[int, str], set[str]]:
     return splits, set(manifest.get("holdout_suppliers") or [])
 
 
+def file_invoice_ids(spec: str | Path | None) -> set[int]:
+    """Invoice IDs with a real file: a CSV with an INVOICE_ID column (attachments-index.csv of a
+    delivery), or IDs separated by commas."""
+    import csv
+
+    if not spec:
+        return set()
+    path = Path(spec)
+    if path.suffix.lower() == ".csv" and path.exists():
+        with path.open(encoding="utf-8-sig", newline="") as f:
+            return {int(r["INVOICE_ID"]) for r in csv.DictReader(f) if (r.get("INVOICE_ID") or "").strip()}
+    return {int(x) for x in str(spec).split(",") if x.strip()}
+
+
+def _write_table(path: Path, rows: list[dict[str, Any]]) -> str:
+    import csv
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    columns = list(dict.fromkeys(k for r in rows for k in r))
+    with path.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=columns)
+        w.writeheader()
+        for r in rows:
+            w.writerow({k: ("" if v is None else v) for k, v in r.items()})
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def decide_from_delivery(deliveries: list[Path], out: Path, *, goldset: Path | None = None,
                          holdout: set[str] | None = None, coa: Any = None, seed: int = 7, limit: int | None = None,
+                         suppliers: set[str] | None = None, file_invoices: set[int] | None = None,
+                         per_supplier: int | None = None, synthetic: bool = False,
                          **kw: Any) -> dict[str, Any]:
+    """`suppliers`: the supplier numbers in scope (train, dev and test); held-out suppliers are added
+    to the scope as test only. `file_invoices`: invoices with a real file, always test. `per_supplier`:
+    exactly this many train examples per supplier in scope: real train invoices above it are left out
+    of training (they stay in the history), and with `synthetic` the rest is made up by copies of the
+    supplier's real train invoices (aap.decide.synth)."""
     from aap.clientdata.goldset import GoldItem, split_items
     from aap.clientdata.readers import day, num, read_delivery
     from aap.common.coa import layout_from_settings
+    from aap.decide import synth
     from aap.decide.context import CONTEXT_PACK_VERSION, build_context_pack, leaks
     from aap.decide.history import TAX_TYPES, account_resolver, from_delivery
     from aap.decide.request import PROMPT_VERSION, SYSTEM, printed_from_keyed, target_from_keyed, user_text
     from aap.decide.schema import SCHEMA_VERSION, check_answer, decide_schema
 
+    if synthetic and not per_supplier:
+        raise ValueError("synthetic examples need per_supplier (how many train examples per supplier)")
+    file_invoices = set(file_invoices or ())
     coa = coa or layout_from_settings()
     if len(deliveries) == 1:
         d = read_delivery(deliveries[0])
@@ -267,6 +315,12 @@ def decide_from_delivery(deliveries: list[Path], out: Path, *, goldset: Path | N
 
         d = merge_deliveries(deliveries)
     store = from_delivery(d, coa)
+    # history only from suppliers the delivery has a supplier row for: the others (another OU, a supplier
+    # the list missed) have no site and often no chart of accounts, and would reach the cross-supplier
+    # fallback accounts as placeholders
+    orphan = len(store.lines)
+    store.lines = [ln for ln in store.lines if ln.vendor_id in store.suppliers]
+    orphan -= len(store.lines)
     account_of = account_resolver(d, coa)
     terms = {num(x.get("TERM_ID")): str(x.get("NAME")) for x in d.rows("AP_TERMS")}
     lines: dict[int | None, list[dict[str, Any]]] = {}
@@ -278,6 +332,11 @@ def decide_from_delivery(deliveries: list[Path], out: Path, *, goldset: Path | N
         dists.setdefault(num(x.get("INVOICE_ID")), []).append(x)
 
     b = Builder(out=out, task="decide", source=f"keyed:{'+'.join(p.name for p in deliveries)}", seed=seed, **kw)
+    if goldset is not None:
+        known, held = _goldset_splits(goldset)
+        holdout = held if holdout is None else holdout
+    holdout = set(holdout or ())
+    scope = (set(suppliers) | holdout) if suppliers else None
     candidates: list[tuple[GoldItem, dict[str, Any]]] = []
     for h in d.rows("AP_INVOICES_ALL"):
         inv_id, vendor = num(h.get("INVOICE_ID")), num(h.get("VENDOR_ID"))
@@ -285,75 +344,181 @@ def decide_from_delivery(deliveries: list[Path], out: Path, *, goldset: Path | N
         if h.get("CANCELLED_DATE") or inv_id is None or vendor not in store.suppliers:
             b.skipped["cancelled or supplier not delivered"] += 1
             continue
+        if scope is not None and store.suppliers[vendor].vendor_number not in scope:
+            b.skipped["supplier not in scope"] += 1
+            continue
         if any(x.get("PO_HEADER_ID") for x in own) or h.get("PO_HEADER_ID"):
             b.skipped["PO-matched (non-PO scope)"] += 1
             continue
         if not [x for x in own if str(x.get("LINE_TYPE_LOOKUP_CODE") or "ITEM").upper() not in TAX_TYPES]:
             b.skipped["no non-tax line"] += 1
             continue
+        if not synth._live(dists.get(inv_id) or []):
+            b.skipped["no distributions (nothing keyed to learn)"] += 1
+            continue
         candidates.append((GoldItem(invoice_id=inv_id, vendor_id=vendor,
                                     vendor_number=store.suppliers[vendor].vendor_number,
                                     invoice_date=str(day(h.get("INVOICE_DATE")) or ""), pdf=Path()), h))
     if goldset is not None:
-        known, held = _goldset_splits(goldset)
-        holdout = held if holdout is None else holdout
-        split_items([it for it, _ in candidates if it.invoice_id not in known], holdout=holdout, seed=seed)
+        split_items([it for it, _ in candidates if it.invoice_id not in known], holdout=holdout, seed=seed,
+                    force_test=file_invoices)
         for it, _ in candidates:
             if it.invoice_id in known:
                 it.split = known[it.invoice_id]
     else:
-        split_items([it for it, _ in candidates], holdout=holdout or set(), seed=seed)
+        split_items([it for it, _ in candidates], holdout=holdout, seed=seed, force_test=file_invoices)
     held_out = {it.invoice_id for it, _ in candidates if it.split in ("test", "dev")}
 
-    rows: dict[str, list[dict[str, Any]]] = {"train": [], "dev": [], "test": []}
-    nulls = Counter()
-    for it, h in candidates[:limit]:
-        as_of = day(h.get("GL_DATE")) or day(h.get("INVOICE_DATE"))
+    # the per-supplier cap: a seeded choice of the real train invoices; the others stay in the history
+    rnd = random.Random(seed)
+    if per_supplier:
+        by_vendor: dict[str | None, list[GoldItem]] = {}
+        for it, _ in candidates:
+            if it.split == "train":
+                by_vendor.setdefault(it.vendor_number, []).append(it)
+        for its in by_vendor.values():
+            if len(its) > per_supplier:
+                keep = {i.invoice_id for i in random.Random(f"{seed}:cap:{its[0].vendor_number}").sample(
+                    sorted(its, key=lambda i: i.invoice_id), per_supplier)}
+                for i in its:
+                    if i.invoice_id not in keep:
+                        i.split = "unused"
+                        b.skipped["real train invoices over the per-supplier cap (kept in the history)"] += 1
+
+    def set_name(sid: int) -> str:
+        ds = store.distribution_sets.get(sid)
+        return ds.name if ds is not None and ds.name else f"set {sid}"
+
+    nulls: Counter = Counter()
+
+    def example(h: dict[str, Any], own: list[dict[str, Any]], own_dists: list[dict[str, Any]], vendor_id: int,
+                exclude: set[int], pack_as_of: Any = None
+                ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], Any] | None:
+        """(messages, target, schema, pack) for one invoice, real or synthetic; None without a date.
+        `pack_as_of`: the date the pack is built as of, when not the invoice's own (a synthetic copy
+        gets its parent's pack; its own date is never earlier)."""
+        as_of = pack_as_of or day(h.get("GL_DATE")) or day(h.get("INVOICE_DATE"))
         if as_of is None:
-            b.skipped["no GL or invoice date"] += 1
-            continue
+            return None
         site = num(h.get("VENDOR_SITE_ID"))
-        pack = build_context_pack(store, vendor_id=it.vendor_id, vendor_site_id=site, as_of=as_of,
-                                  exclude_invoice_ids=held_out | {it.invoice_id})
+        pack = build_context_pack(store, vendor_id=vendor_id, vendor_site_id=site, as_of=as_of,
+                                  exclude_invoice_ids=exclude)
         problems = leaks(pack, as_of=as_of, invoice_num=str(h.get("INVOICE_NUM")))
         if problems:
-            raise LeakError(f"invoice {it.invoice_id}: {problems}")
-        own = lines[it.invoice_id]
-        printed = printed_from_keyed(h, own, store.suppliers[it.vendor_id].vendor_name)
+            raise LeakError(f"invoice {h.get('INVOICE_ID')}: {problems}")
+        printed = printed_from_keyed(h, own, store.suppliers[vendor_id].vendor_name)
         site_facts = store.sites.get(site) if site is not None else None
         liability = account_of(h.get("ACCTS_PAY_CODE_COMBINATION_ID")) or (site_facts.liability_account
                                                                             if site_facts else None)
-        target = target_from_keyed(h, own, dists.get(it.invoice_id) or [], pack, account_of=account_of,
-                                   set_name=lambda sid: (store.distribution_sets[sid].name
-                                                         if sid in store.distribution_sets
-                                                         and store.distribution_sets[sid].name else f"set {sid}"),
+        target = target_from_keyed(h, own, own_dists, pack, account_of=account_of, set_name=set_name,
                                    terms_name=terms.get(num(h.get("TERMS_ID"))), liability=liability, coa=coa)
         schema = decide_schema(pack, line_numbers=[ln["line_number"] for ln in printed["lines"]], coa=coa)
         bad = check_answer(target, schema)
         if bad:
-            raise ValueError(f"invoice {it.invoice_id}: the target leaves the schema: {bad}")
+            raise ValueError(f"invoice {h.get('INVOICE_ID')}: the target leaves the schema: {bad}")
         nulls["lines"] += len(target["lines"])
         nulls["lines without account or set"] += sum(1 for ln in target["lines"]
                                                      if ln["account"] is None and ln["distribution_set"] is None)
         nulls["header values null"] += sum(1 for k, v in target.items() if k not in ("lines", "basis") and v is None)
+        messages = [{"role": "system", "content": [{"type": "text", "text": SYSTEM}]},
+                    {"role": "user", "content": [{"type": "text", "text": user_text(printed, pack)}]}]
+        meta = {"printed_from": "keyed", "as_of": as_of.isoformat(), "history_scope": pack["history_scope"],
+                "fallback": pack["fallback"], "lines": len(target["lines"])}
+        return {"messages": messages, "meta": meta}, target, schema, pack
+
+    rows: dict[str, list[dict[str, Any]]] = {"train": [], "dev": [], "test": []}
+    per: dict[str, Counter] = {}
+    real_train: dict[str | None, list[synth.Invoice]] = {}
+    for it, h in candidates[:limit]:
+        if it.split == "unused":
+            continue
+        own, own_dists = lines[it.invoice_id], dists.get(it.invoice_id) or []
+        built = example(h, own, own_dists, it.vendor_id, held_out | {it.invoice_id})  # type: ignore[arg-type]
+        if built is None:
+            b.skipped["no GL or invoice date"] += 1
+            continue
+        body, target, schema, _ = built
+        has_file = it.invoice_id in file_invoices
         rows[it.split].append({
-            "id": str(it.invoice_id), "task": "decide",
-            "messages": [{"role": "system", "content": [{"type": "text", "text": SYSTEM}]},
-                         {"role": "user", "content": [{"type": "text", "text": user_text(printed, pack)}]}],
+            "id": str(it.invoice_id), "task": "decide", "messages": body["messages"],
             "target": json.dumps(target, ensure_ascii=False), "schema": schema,
-            "meta": {"label": "keyed", "printed_from": "keyed", "supplier": it.vendor_number,
-                     "holdout": bool(holdout and it.vendor_number in holdout), "as_of": as_of.isoformat(),
-                     "history_scope": pack["history_scope"], "fallback": pack["fallback"],
-                     "lines": len(target["lines"])}})
-    random.Random(seed).shuffle(rows["train"])          # limit_train = a random, nested subset
+            "meta": {"label": "keyed", "supplier": it.vendor_number, "holdout": it.vendor_number in holdout,
+                     "has_file": has_file, **body["meta"]}})
+        c = per.setdefault(str(it.vendor_number), Counter())
+        c["train_real" if it.split == "train" else it.split] += 1
+        c["test_with_file"] += int(has_file and it.split == "test")
+        if it.split == "train":
+            real_train.setdefault(it.vendor_number, []).append(synth.Invoice(h, own, own_dists))
+
+    synthetic_rows: dict[str, list[dict[str, Any]]] = {"AP_INVOICES_ALL": [], "AP_INVOICE_LINES_ALL": [],
+                                                       "AP_INVOICE_DISTRIBUTIONS_ALL": []}
+    window = None
+    if synthetic:
+        gl_dates = [day(h.get("GL_DATE")) or day(h.get("INVOICE_DATE")) for _, h in candidates]
+        window = (min(x for x in gl_dates if x), max(x for x in gl_dates if x))
+        taken: dict[Any, set[str]] = {}
+        for _, h in candidates:
+            taken.setdefault(num(h.get("VENDOR_ID")), set()).add(str(h.get("INVOICE_NUM")))
+        next_id, next_dist = synth.SYNTHETIC_ID_BASE, synth.SYNTHETIC_ID_BASE
+        for vendor_number in sorted(real_train, key=str):
+            parents_all = real_train[vendor_number]
+            need = per_supplier - len(parents_all)  # type: ignore[operator]
+            pool = synth.description_pool(parents_all)
+            vrnd = random.Random(f"{seed}:synth:{vendor_number}")
+            made, attempts = 0, 0
+            for parent in synth.parents_for(parents_all, need * 3, vrnd):
+                if made >= need:
+                    break
+                attempts += 1
+                vendor_id = num(parent.header.get("VENDOR_ID"))
+                inv = synth.clone(parent, invoice_id=next_id, first_dist_id=next_dist, rnd=vrnd, window=window,
+                                  descriptions=pool, taken_numbers=taken.setdefault(vendor_id, set()))
+                next_id += 1
+                next_dist += len(inv.dists)
+                parent_id = num(parent.header.get("INVOICE_ID"))
+                parent_as_of = day(parent.header.get("GL_DATE")) or day(parent.header.get("INVOICE_DATE"))
+                built = example(inv.header, inv.lines, inv.dists, vendor_id,  # type: ignore[arg-type]
+                                held_out | {parent_id}, pack_as_of=parent_as_of)  # type: ignore[operator]
+                if built is None:
+                    b.skipped["synthetic: no date"] += 1
+                    continue
+                body, target, schema, _ = built
+                rows["train"].append({
+                    "id": f"syn-{inv.header['INVOICE_ID']}", "task": "decide", "messages": body["messages"],
+                    "target": json.dumps(target, ensure_ascii=False), "schema": schema,
+                    "meta": {"label": "synthetic", "supplier": vendor_number, "holdout": False, "has_file": False,
+                             "parent_invoice_id": parent_id, "gen_version": synth.GEN_VERSION, **body["meta"]}})
+                synthetic_rows["AP_INVOICES_ALL"].append(inv.header)
+                synthetic_rows["AP_INVOICE_LINES_ALL"] += inv.lines
+                synthetic_rows["AP_INVOICE_DISTRIBUTIONS_ALL"] += inv.dists
+                made += 1
+            per.setdefault(str(vendor_number), Counter())["train_synthetic"] += made
+            if made < need:
+                b.skipped[f"synthetic short of the per-supplier count ({vendor_number})"] += need - made
+
+    rnd.shuffle(rows["train"])          # limit_train = a random, nested subset
     for split, examples in rows.items():
         for ex in examples:
             b.add(ex, split)
     n_train = len(rows["train"])
+    tables = {}
+    if any(synthetic_rows.values()):
+        tables = {f"synthetic/{name}.csv": _write_table(out / "synthetic" / f"{name}.csv", r)
+                  for name, r in synthetic_rows.items()}
+    names = {str(s.vendor_number): s.vendor_name for s in store.suppliers.values()}
     b.extra.update({"context_pack_version": CONTEXT_PACK_VERSION, "prompt_version": PROMPT_VERSION,
                     "schema_version": SCHEMA_VERSION, "printed_from": "keyed",
                     "split_rule": f"goldset:{goldset.name}" if goldset else "goldset rule (aap.clientdata.goldset)",
-                    "holdout_suppliers": len(holdout or ()), "targets": dict(nulls),
+                    "holdout_suppliers": len(holdout), "targets": dict(nulls),
+                    "history_lines_without_supplier_row": orphan,
+                    "scope": {"suppliers": sorted(suppliers or [], key=str), "holdout": sorted(holdout, key=str),
+                              "file_invoices": len(file_invoices), "per_supplier": per_supplier,
+                              "synthetic": synthetic, "gen_version": synth.GEN_VERSION if synthetic else None,
+                              "synthetic_window": [x.isoformat() for x in window] if window else None},
+                    "per_supplier": {k: {"name": names.get(k), "holdout": k in holdout, **dict(v)}
+                                     for k, v in sorted(per.items())},
+                    "labels": dict(Counter(r["meta"]["label"] for s in rows.values() for r in s)),
+                    "synthetic_tables": tables,
                     "learning_curve": {f"{p}%": max(1, round(n_train * p / 100)) for p in LEARNING_CURVE} if n_train else {}})
     return b.write()
 
@@ -419,6 +584,14 @@ def main(argv: list[str] | None = None) -> int:
                    help="an earlier delivery read together with this one (master data, terms)")
     k.add_argument("--goldset", type=Path, default=None, help="take the split and held-out suppliers from it")
     k.add_argument("--holdout", default=None, help="supplier numbers to hold out, comma-separated")
+    k.add_argument("--suppliers", default=None, help="supplier numbers in scope, comma-separated (default: all)")
+    k.add_argument("--file-invoices", default=None,
+                   help="invoices with a real file, always test: a CSV with INVOICE_ID (attachments-index.csv) "
+                        "or IDs separated by commas")
+    k.add_argument("--per-supplier", type=int, default=None,
+                   help="train examples per supplier: real ones above it are left out of training")
+    k.add_argument("--synthetic", action="store_true",
+                   help="make up the rest to --per-supplier with copies of real train invoices (aap.decide.synth)")
     for p in (e, s, k):
         p.add_argument("--out", type=Path, required=True)
         p.add_argument("--dev-share", type=int, default=10, help="percent")
@@ -436,8 +609,10 @@ def main(argv: list[str] | None = None) -> int:
         meta = extract_from_export(a.export, a.out, **kw)
     elif a.cmd == "decide":
         holdout = {v.strip() for v in a.holdout.split(",") if v.strip()} if a.holdout else None
+        scope = {v.strip() for v in a.suppliers.split(",") if v.strip()} if a.suppliers else None
         meta = decide_from_delivery([*a.earlier, a.delivery], a.out, goldset=a.goldset, holdout=holdout,
-                                    limit=a.limit, **kw)
+                                    limit=a.limit, suppliers=scope, file_invoices=file_invoice_ids(a.file_invoices),
+                                    per_supplier=a.per_supplier, synthetic=a.synthetic, **kw)
     else:
         meta = decide_smoke(a.eval_set, a.out, limit=a.limit, **kw)
     print(f"[chat] {meta['task']} dataset in {a.out}: {meta['counts']}; skipped {meta['skipped'] or 'none'}")

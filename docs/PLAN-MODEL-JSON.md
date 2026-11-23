@@ -2,7 +2,7 @@
 
 | Item | Value |
 |---|---|
-| Status | Proposed 2026-11-09. Everything that needs no invoice files is built (2026-11-12): E1-E5, T1-T3 and B's dataset from the keyed records; E6 and T4-T5 wait for the PDFs and the J-1 approval |
+| Status | Proposed 2026-11-09. Everything that needs no invoice files is built (2026-11-12): E1-E5, T1-T3 and B's dataset from the keyed records. 2026-11-23: B's December dataset (10 suppliers × 200, synthetic copies, control) built; A not trained (T5 dropped); T4 waits for J-1 |
 | Why | Management expects a model that takes an invoice and returns the EBS-ready JSON, not a chain of lookups |
 | Constraint | Few examples: several hundred keyed invoices from about 18 suppliers, a few weeks of history (more requested) |
 | Target | Mid-December 2026, non-PO ([PLAN-MID-DECEMBER.md](PLAN-MID-DECEMBER.md)) |
@@ -165,17 +165,48 @@ the split is fixed before the first run and never changed.
 | T1 | `train` container; `aap.finetune.train` with the method switch; smoke run on synthetic invoices (plumbing only, says nothing about accuracy) | No | ✅ `training/` (PLAN-TRAINING-PIPELINE T0-T3) |
 | T2 | Dataset builder for B; smoke run on the keyed history alone, without pages (plumbing only) | No | ✅ builder: `python -m aap.finetune.chat decide` (gold set's split, no test / dev invoice in any pack, nested learning-curve subsets). On the 11-09 delivery: 653 examples (490 / 66 / 97), 1.5k-3.5k tokens; `aap_train` dry run accepts it. The smoke run on it is training on client data: ⏸ J-1 |
 | T3 | vLLM serving two adapters on one base; switch and rollback tested; confirm text-only requests to the VL base work with B | No | ✅ PLAN-TRAINING-PIPELINE T5 (2026-11-09); `DECIDE_MODEL` / `DECIDE_ADAPTER_MODEL` (2026-11-12) |
-| T4 | Train B on the real train split; learning curve | Yes | ⏸ J-1 (the keyed records are enough for B; PDFs only for A's reading in its input) |
-| T5 | Train A, only if the reading errors miss the gate after prompt work (CLIENT-DATA P7 rule) | Yes + P6 labels | ⏸ |
+| T2b | B's December dataset: 10 suppliers × 200 train examples (real + synthetic copies), a held-out supplier, the sample-file invoices in test, the real-only control (see below) | No | ✅ 2026-11-23: `--suppliers`, `--file-invoices`, `--per-supplier`, `--synthetic`; `aap.decide.synth`; the 11-17 chart of accounts read from the account segment view (`aap.clientdata.views`) |
+| T4 | Train B on the train split (with and without synthetic copies); learning curve | No | ⏸ J-1; the training venv's torch is blocked by Windows Application Control on this machine (2026-11-23), so train in the `train` container |
+| T5 | Train A, only if the reading errors miss the gate after prompt work (CLIENT-DATA P7 rule) | Yes + P6 labels | ❌ dropped for December (2026-11-23, see below) |
 
 **Floor without training (2026-11-12).** `aap.decide.evaluate` with the stub (site defaults and the
 supplier's most used account, no model) on B's test split of the 11-09 delivery: 69 % of invoices exact,
 80 % of lines (89 % by amount), terms 99 %. S1 and S2 have to beat this.
 
-**Synthetic examples for B (optional).** `tools/invoicegen` can render invoices from the keyed records to
-give B more examples of "this content → this account". They may be used for B's training only, never for
-A, the gold set or any evaluation, and they are marked in the dataset so that a run with and without them
-can be compared.
+**Synthetic examples for B (decided 2026-11-20 / 11-23).** Siva accepted synthetic invoices to make up
+volume (2026-11-20). The rules:
+
+- **Scope:** 10 suppliers, the ones with a real sample file (9) plus one with many keyed invoices and no
+  file; one more supplier with no file held out (test only, never trained, no synthetic rows).
+- **200 train examples per supplier:** real train invoices first (above 200, a seeded choice; the others
+  stay in the history), the rest synthetic. 10 × 200 = 2,000.
+- **A synthetic invoice is a copy of one real train invoice of the same supplier** (`aap.decide.synth`):
+  every Oracle value (supplier, site, terms, pay group, payment method, line type, account, distribution
+  set) unchanged; new invoice ID and number, dates moved forward 0-14 days, amounts × 0.6-1.4,
+  descriptions from the supplier's real train lines with the same account. Parents are used in turn.
+- **A copy's context pack is its parent's** (as of the parent's date, the parent left out), so it has
+  exactly the candidates AP had; per supplier, the copies' share of lines without a candidate follows
+  the real one.
+- **Synthetic rows are never in a history, a context pack, dev or test,** and carry `SYNTHETIC`,
+  `PARENT_INVOICE_ID`, `GEN_VERSION` (written to `synthetic/*.csv` next to the dataset). Dev, test and
+  checkpoint choice are real only. Synthetic invoices are scored for validity (schema, checks, import),
+  never for accuracy.
+- **Control:** the same command without `--synthetic` gives the real-only set with byte-identical dev and
+  test; S2 is trained on both to see whether the copies help.
+- **The sample-file invoices are always test,** so the real pages are measured end to end.
+
+Built 2026-11-23 (`python -m aap.finetune.chat decide ... --suppliers ... --holdout ... --file-invoices
+<attachments-index.csv> --per-supplier 200 [--synthetic]`, under `test-data-kk/`): train 2,000 (382 real,
+1,618 synthetic) or 382 (control), dev 52, test 109 (17 with a real file, 11 of the held-out supplier).
+0 leaks; longest example about 3.2k tokens. In the targets, the liability account is always null (not in
+the extracts; Oracle defaults it), and 15 % of real train lines have no candidate account (the supplier
+had not used it before), 80 % for the supplier with the most accounts: those lines are review, and no
+amount of copying changes it.
+
+**Adapter A is not trained before December (2026-11-23).** The only real pages are the 20 sample
+invoices, which are also the only measure of the reading; training A on rendered pages would teach it
+our own templates, with nothing real left to show whether it helped. A stays the base model with
+prompt work (C4); T5 is dropped until the full extract with the real files.
 
 ## 8. Schedule
 
