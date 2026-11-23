@@ -1,0 +1,20 @@
+# Stage 1 of adapter B's HPO: a cheap screen of the two settings that matter most for LoRA, learning rate
+# and rank, on a 600-example subset of the train split (train.jsonl is in a seeded random order, so the
+# subset mixes real and synthetic like the whole), one epoch. Measured speed (probe 2026-11-23, RTX 5090,
+# batch 1): about 4 s per example, so a trial is about 45 min with its dev scoring; 9 trials about 7 h,
+# one night. Ranked by dev loss on the 52 real dev invoices (small differences are noise).
+#   train.bat sweep configs/sweeps/b-screen.yaml --dry-run
+#   train.bat sweep configs/sweeps/b-screen.yaml
+name: b-screen
+base: ../b-qlora.yaml
+strategy: grid
+fixed:
+  data.limit_train: 600
+  train.epochs: 1
+  train.save_steps: 25
+space:
+  train.learning_rate: [1.0e-4, 2.0e-4, 4.0e-4]
+  lora:
+    - {method.rank: 8, method.alpha: 16}
+    - {method.rank: 16, method.alpha: 32}
+    - {method.rank: 32, method.alpha: 64}

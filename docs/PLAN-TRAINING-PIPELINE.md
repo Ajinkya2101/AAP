@@ -135,6 +135,22 @@ training/
   runs/                     git-ignored: one folder per run
 ```
 
+**Where it runs (decided 2026-11-23): its own container, not the application stack.** Image `aap-train:dev`
+from `training/Dockerfile`, compose service `train` under the profile `train` (never started by
+`start_container.bat`), driven by `train.bat` at the repository root. Why not reuse an existing container:
+the app image has no torch and vLLM pins its own, so the training stack (torch 2.11 / CUDA 12.8 / peft /
+bitsandbytes) would break either; training is a job that ends, not a service; on one 24 GB GPU vLLM
+(about 15 GB) must be stopped for a 7B run, which `train.bat` does and undoes; and the host's torch is blocked
+by Windows Application Control. The service mounts the repository at `/repo` (runs, `test-data-kk/`
+datasets, the git commit), runs the live source (`PYTHONPATH`, no rebuild after a code change) and reads
+the base weights from the stack's `models` volume (`AAP_TRAIN_MODEL_DIR=/models`: a hub name such as
+`Qwen/Qwen2.5-VL-7B-Instruct` resolves to `/models/Qwen2.5-VL-7B-Instruct`, the weights vLLM serves).
+
+**HPO** (`aap_train.sweep`, `configs/sweeps/`): grid or random sweeps over any config key; each trial
+an ordinary run in its own process, the leaderboard by dev loss; resumable, failures recorded. It
+ranks trials only: the adapter used is chosen by serving the best trials and scoring them with the
+application on dev, and test is scored once at the end (README, "HPO").
+
 **Run directory** `training/runs/<name>-<UTC time>/`: the resolved config, dataset hash, git commit,
 environment report (envcheck), `metrics.jsonl` (loss, learning rate, dev scores, peak GPU memory),
 checkpoints, the chosen checkpoint and the packaged adapter. Runs on client data are client data.

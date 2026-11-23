@@ -1,0 +1,17 @@
+# Stage 3, the comparison that decides: the chosen settings on the full set (2,000: real + synthetic copies)
+# and on the real-only control (382), two seeds each (the seed spread shows how much of a difference is
+# noise). Set the winners of stages 1-2 under `fixed` first. Times at 2 epochs: a full-set trial about
+# 4.5 h, a control trial about 50 min; about 11 h in all: run it over two nights with --max-trials 2
+# and resume-sweep. Its runs go on to the application's evaluation (package, serve, score on dev).
+#   train.bat sweep configs/sweeps/b-data.yaml --dry-run
+name: b-data
+base: ../b-qlora.yaml
+strategy: grid
+fixed:
+  method.rank: 16          # <- stage 1-2 winners
+  method.alpha: 32
+  train.learning_rate: 2.0e-4
+  train.epochs: 2
+space:
+  data.dataset: [../test-data-kk/decide-b-2026-11-23, ../test-data-kk/decide-b-2026-11-23-real]
+  train.seed: [7, 11]

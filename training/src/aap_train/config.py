@@ -129,16 +129,36 @@ class RunCfg(_Strict):
         return self.train.optim or ("paged_adamw_8bit" if self.quantized else "adamw_torch")
 
 
-def load_config(path: Path, overrides: dict | None = None) -> RunCfg:
-    data = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+MODEL_DIR_ENV = "AAP_TRAIN_MODEL_DIR"
+
+
+def local_base(base: str, model_dir: str | None = None) -> str:
+    """A hub name ("Qwen/Qwen2.5-VL-7B-Instruct") as a local folder when $AAP_TRAIN_MODEL_DIR holds it
+    (the training container mounts the weights vLLM serves at /models); else unchanged."""
+    import os
+
+    root = model_dir if model_dir is not None else os.environ.get(MODEL_DIR_ENV)
+    if not root or Path(base).exists() or "/" not in base:
+        return base
+    candidate = Path(root) / base.split("/")[-1]
+    return str(candidate) if (candidate / "config.json").exists() else base
+
+
+def apply_overrides(data: dict, overrides: dict | None) -> dict:
     for dotted, value in (overrides or {}).items():
         node = data
         *parents, leaf = dotted.split(".")
         for p in parents:
             node = node.setdefault(p, {})
         node[leaf] = value
+    return data
+
+
+def load_config(path: Path, overrides: dict | None = None) -> RunCfg:
+    data = apply_overrides(yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}, overrides)
     cfg = RunCfg.model_validate(data)
     if not cfg.data.dataset.is_absolute():
         cfg.data.dataset = (Path(path).parent / cfg.data.dataset).resolve() \
             if not cfg.data.dataset.exists() else cfg.data.dataset.resolve()
+    cfg.model.base = local_base(cfg.model.base)
     return cfg

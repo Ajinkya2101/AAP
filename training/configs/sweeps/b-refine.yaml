@@ -1,0 +1,18 @@
+# Stage 2: a random search around the best screen trial, on 1,000 train examples. Before running, set
+# method.rank / method.alpha under `fixed` to the screen winner and narrow the learning-rate range around
+# its value. A trial is 1-2 epochs, about 70-140 min; 4 trials about 7 h, one night.
+#   train.bat sweep configs/sweeps/b-refine.yaml --dry-run
+name: b-refine
+base: ../b-qlora.yaml
+strategy: random
+trials: 4
+seed: 11
+fixed:
+  data.limit_train: 1000
+  method.rank: 16          # <- the screen winner
+  method.alpha: 32
+space:
+  train.learning_rate: {loguniform: [1.0e-4, 3.0e-4]}   # <- around the screen winner
+  train.epochs: [1, 2]
+  method.dropout: [0.0, 0.05, 0.1]
+  train.warmup_ratio: {uniform: [0.0, 0.1]}

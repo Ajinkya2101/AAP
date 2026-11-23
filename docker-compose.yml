@@ -184,6 +184,36 @@ services:
       model-fetch: { condition: service_completed_successfully }
     restart: unless-stopped
 
+  # Fine-tuning jobs (training/, docs/PLAN-TRAINING-PIPELINE.md). Its own image: torch / CUDA 12.8 /
+  # peft / bitsandbytes must not enter the app or vLLM images. Never started by start_container.bat:
+  # run it through train.bat, which stops vLLM for the GPU and starts it again afterwards.
+  train:
+    image: aap-train:dev
+    build:
+      context: training
+      dockerfile: Dockerfile
+    profiles: ["train"]
+    working_dir: /repo/training
+    environment:
+      PYTHONPATH: /repo/training/src          # the live source: no rebuild after a code change
+      AAP_TRAIN_MODEL_DIR: /models            # a base named like Qwen/<name> is read from /models/<name>
+      HF_HUB_OFFLINE: "1"
+    volumes:
+      - .:/repo                               # training/runs, test-data-kk datasets, git commit for run.json
+      - models:/models:ro                     # the same base weights vLLM serves
+      - hf-cache:/root/.cache/huggingface
+    shm_size: 8g
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: "no"
+    networks: [default]
+
 networks:
   default: {}
   llm:

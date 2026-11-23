@@ -6,6 +6,6 @@ name: b-qlora
 task: decide
 model: {base: Qwen/Qwen2.5-VL-7B-Instruct, size_b: 8.3}
 method: {name: qlora, rank: 16, alpha: 32}
-data: {dataset: ../test-data-kk/decide-b-2026-11-23, max_seq_len: 4096}   # control: ../test-data-kk/decide-b-2026-11-23-real
-train: {epochs: 3, learning_rate: 2.0e-4, batch_size: 2, grad_accum: 4, save_steps: 50}
-eval: {limit: 50, max_new_tokens: 1024}
+data: {dataset: ../test-data-kk/decide-b-2026-11-23, max_seq_len: 5120}   # control: ../test-data-kk/decide-b-2026-11-23-real
+train: {epochs: 2, learning_rate: 2.0e-4, batch_size: 1, grad_accum: 8, save_steps: 50}   # batch 2 spills past 24 GB at these lengths (probe 2026-11-23)
+eval: {limit: null, max_new_tokens: 1024}   # all dev examples: the HPO ranks on this
